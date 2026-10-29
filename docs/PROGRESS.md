@@ -12,14 +12,14 @@ Every step and "Done when" line from `docs/ROADMAP.md`. Tick each one as it is f
       MySQL). Initialise Git and make the first commit.
 - [x] 3. `php artisan install:api`; install the SPEC section 2 packages and publish their
       config/migrations; Larastan with `phpstan.neon` at level 5.
-- [ ] 4. Configure `.env` and `.env.example` (`APP_BASE_DOMAIN=localhost`, database queue/session/
+- [x] 4. Configure `.env` and `.env.example` (`APP_BASE_DOMAIN=localhost`, database queue/session/
       cache, Mailpit, SMS `log` driver); create `orange_sms` and `orange_sms_test`; point
       `phpunit.xml` at the test database.
 - [ ] 5. Folder structure from SPEC section 15, `docs/PROGRESS.md`, `docs/DECISIONS.md`,
       `.github/workflows/tests.yml`.
 
 Done when:
-- [ ] the app runs at `localhost:8000`
+- [x] the app runs at `localhost:8000`
 - [ ] tests pass locally and in CI
 - [ ] first push is on GitHub
 

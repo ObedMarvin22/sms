@@ -75,3 +75,23 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   `school_id` to `roles`, `model_has_roles` and `model_has_permissions` from the very first
   `migrate`. Turning teams on later would need an extra migration that alters those tables.
 - **Alternatives:** Wait for Sprint 1 and write an alter migration.
+
+## 2026-10-29 — Dedicated local MySQL user
+
+- **Decision:** The app connects as `orange_sms`, which has full rights on `orange_sms` and
+  `orange_sms_test` only, not as `root`. The password is random and lives only in `.env`.
+  `.env.example` keeps `DB_PASSWORD` empty, and a test checks that it stays empty.
+- **Reason:** Least privilege, and the root password never has to be shared or stored in the
+  project. It also matches the server, where cPanel gives each app its own user.
+- **Alternatives:** Use `root` locally (simpler, but a test or migration bug could touch other
+  databases).
+
+## 2026-10-29 — Tests override queue, session, cache and mail
+
+- **Decision:** `phpunit.xml` keeps the starter kit's test overrides: `QUEUE_CONNECTION=sync`,
+  `SESSION_DRIVER=array`, `CACHE_STORE=array`, `MAIL_MAILER=array`. Only the database moves
+  to MySQL (`orange_sms_test`).
+- **Reason:** Tests stay fast and isolated, and `Queue::fake()` / `Mail::fake()` still work. The
+  `database` drivers used in production are checked through `.env.example` by
+  `tests/Feature/EnvironmentTest.php`.
+- **Alternatives:** Run tests on the database drivers too (slower, with no real gain).
