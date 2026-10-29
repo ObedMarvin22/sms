@@ -8,7 +8,7 @@ Every step and "Done when" line from `docs/ROADMAP.md`. Tick each one as it is f
 
 - [x] 1. Check the local environment, report versions and anything missing, ask Obed for the
       server's PHP and MySQL/MariaDB versions, confirm the latest Laravel supports that PHP version.
-- [ ] 2. Create the project with the Laravel installer (Livewire starter kit, built-in auth, Pest,
+- [x] 2. Create the project with the Laravel installer (Livewire starter kit, built-in auth, Pest,
       MySQL). Initialise Git and make the first commit.
 - [ ] 3. `php artisan install:api`; install the SPEC section 2 packages and publish their
       config/migrations; Larastan with `phpstan.neon` at level 5.
