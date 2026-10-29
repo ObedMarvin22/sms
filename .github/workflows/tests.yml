@@ -2,16 +2,40 @@ name: tests
 
 on:
   push:
-    branches:
-      - main
   pull_request:
 
 permissions:
   contents: read
 
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ci:
     runs-on: ubuntu-latest
+
+    # Match the server: MySQL 8.0 (SPEC section 16).
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: orange_sms_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -ppassword"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    # Real environment variables win over .env, so tests reach the CI MySQL service.
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_USERNAME: root
+      DB_PASSWORD: password
 
     steps:
       - name: Checkout code
@@ -19,20 +43,39 @@ jobs:
         with:
           persist-credentials: false
 
+      # Match the server: PHP 8.4. Local development may run 8.5, so this catches 8.5-only syntax.
       - name: Setup PHP
         uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
         with:
-          php-version: '8.5'
+          php-version: '8.4'
+          extensions: mbstring, intl, gd, zip, bcmath, exif, sodium, pdo_mysql
           tools: composer:v2
           coverage: none
 
       - name: Setup Node
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: '22'
+          node-version: '24'
+          cache: npm
 
-      - name: Setup Application
-        run: composer setup
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
 
-      - name: Run CI Checks
-        run: composer ci:check
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Build front-end assets
+        run: |
+          npm ci
+          npm run build
+
+      - name: Pint
+        run: vendor/bin/pint --test
+
+      - name: PHPStan
+        run: vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+
+      - name: Tests
+        run: php artisan test
