@@ -10,7 +10,7 @@ Every step and "Done when" line from `docs/ROADMAP.md`. Tick each one as it is f
       server's PHP and MySQL/MariaDB versions, confirm the latest Laravel supports that PHP version.
 - [x] 2. Create the project with the Laravel installer (Livewire starter kit, built-in auth, Pest,
       MySQL). Initialise Git and make the first commit.
-- [ ] 3. `php artisan install:api`; install the SPEC section 2 packages and publish their
+- [x] 3. `php artisan install:api`; install the SPEC section 2 packages and publish their
       config/migrations; Larastan with `phpstan.neon` at level 5.
 - [ ] 4. Configure `.env` and `.env.example` (`APP_BASE_DOMAIN=localhost`, database queue/session/
       cache, Mailpit, SMS `log` driver); create `orange_sms` and `orange_sms_test`; point

@@ -56,6 +56,22 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   `larastan/larastan` with a `phpstan.neon` at **level 7**, and `.github/workflows/tests.yml`.
 - **Reason:** They are part of the official starter kit, not packages we chose. Larastan is
   listed in SPEC section 2 anyway.
-- **Open:** SPEC says to start Larastan at level 5, but the kit ships level 7 and passes with
-  0 errors. Decide in step 3. The workflow (PHP 8.5, SQLite) is replaced in step 5 by the SPEC
-  section 16 CI (PHP 8.4, MySQL 8.0).
+- **Note:** The workflow (PHP 8.5, SQLite) is replaced in step 5 by the SPEC section 16 CI
+  (PHP 8.4, MySQL 8.0).
+
+## 2026-10-29 — Larastan at level 7, not 5
+
+- **Decision:** Keep the starter kit's `phpstan.neon` at level 7 (Obed's choice).
+- **Reason:** The code passes at level 7 already. Staying strict from the start is cheaper than
+  raising the level later and fixing a backlog. Level 7 also catches union-type mistakes (it
+  found the `env()` bool/string issue in `config/sanctum.php`).
+- **Alternatives:** Level 5 as SPEC section 2 suggests.
+
+## 2026-10-29 — Permission teams enabled before the first migration
+
+- **Decision:** `config/permission.php` sets `teams => true` and `team_foreign_key => school_id`
+  now (Sprint 0), although the roles work is Sprint 1 step 6.
+- **Reason:** The published permission migration reads these settings when it runs, so it adds
+  `school_id` to `roles`, `model_has_roles` and `model_has_permissions` from the very first
+  `migrate`. Turning teams on later would need an extra migration that alters those tables.
+- **Alternatives:** Wait for Sprint 1 and write an alter migration.
