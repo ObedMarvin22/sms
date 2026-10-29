@@ -15,13 +15,15 @@ Every step and "Done when" line from `docs/ROADMAP.md`. Tick each one as it is f
 - [x] 4. Configure `.env` and `.env.example` (`APP_BASE_DOMAIN=localhost`, database queue/session/
       cache, Mailpit, SMS `log` driver); create `orange_sms` and `orange_sms_test`; point
       `phpunit.xml` at the test database.
-- [ ] 5. Folder structure from SPEC section 15, `docs/PROGRESS.md`, `docs/DECISIONS.md`,
+- [x] 5. Folder structure from SPEC section 15, `docs/PROGRESS.md`, `docs/DECISIONS.md`,
       `.github/workflows/tests.yml`.
 
 Done when:
 - [x] the app runs at `localhost:8000`
-- [ ] tests pass locally and in CI
-- [ ] first push is on GitHub
+- [ ] tests pass locally and in CI — **local: yes** (also on a fresh clone of the repo).
+      **CI: blocked.** GitHub did not start the job: "your account is locked due to a billing
+      issue". Re-run once the GitHub billing is fixed.
+- [x] first push is on GitHub (`ObedMarvin22/sms`: `main` + `s0/*` branches)
 
 **STOP for review.**
 

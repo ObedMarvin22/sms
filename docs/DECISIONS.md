@@ -95,3 +95,24 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   `database` drivers used in production are checked through `.env.example` by
   `tests/Feature/EnvironmentTest.php`.
 - **Alternatives:** Run tests on the database drivers too (slower, with no real gain).
+
+## 2026-10-29 — CI shape
+
+- **Decision:** One `tests` job on every push and pull request, with a `mysql:8.0` service and
+  PHP 8.4, and Pint, PHPStan and Pest as separate steps. Database credentials come from
+  job-level environment variables, which override `.env` (copied from `.env.example`). Action
+  versions stay pinned to commit SHAs (from the starter kit), and the kit's
+  `.github/dependabot.yml` keeps them up to date weekly.
+- **Reason:** Matches SPEC section 16 and the server. Separate steps show at a glance which
+  check failed. SHA pinning protects against a tampered action tag.
+- **Alternatives:** The starter kit's `composer ci:check` single step (less clear failures).
+
+## 2026-10-29 — Arch tests in their own suite
+
+- **Decision:** `tests/Arch` is a separate `Arch` suite in `phpunit.xml`, so it is not covered by
+  `RefreshDatabase` and runs in under a second (`php artisan test --testsuite=Arch`). It starts
+  with "no debug calls" and Pest's PHP preset. The `BelongsToSchool` and backed-enum rules
+  arrive in Sprint 1 with the code they check.
+- **Note:** Pest arch rules only inspect namespaced classes (checked with a probe class).
+- **Note:** The starter kit's Fortify classes in `app/Actions/Fortify` use `create()`/`reset()`
+  as Fortify requires, not `handle()`. The Sprint 1 Actions rule must exempt them.
