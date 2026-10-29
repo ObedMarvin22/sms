@@ -56,6 +56,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Base Domain
+    |--------------------------------------------------------------------------
+    |
+    | Schools live on "{school}.base_domain" and the Orange Tree console on
+    | "admin.base_domain". Locally this is "localhost".
+    |
+    */
+
+    'base_domain' => env('APP_BASE_DOMAIN', 'localhost'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |
