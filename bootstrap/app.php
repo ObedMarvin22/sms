@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureSchoolReadyForStudents;
 use App\Http\Middleware\EnsureTwoFactorEnabled;
 use App\Http\Middleware\EnsureUserBelongsToSchool;
 use App\Http\Middleware\IdentifySchool;
@@ -21,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'school' => IdentifySchool::class,
             'school.member' => EnsureUserBelongsToSchool::class,
             'two-factor.required' => EnsureTwoFactorEnabled::class,
+            'school.ready' => EnsureSchoolReadyForStudents::class,
         ]);
 
         // Resolve the school before authentication, and check membership after it

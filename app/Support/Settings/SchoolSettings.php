@@ -17,6 +17,8 @@ final class SchoolSettings
     public const DEFAULTS = [
         // Terms (3 per year) or semesters (2). Fixed once the school has an academic year.
         'academic_period' => 'term',
+        // ISO date-time when the setup wizard was first completed (null until then).
+        'setup_completed_at' => null,
     ];
 
     /**
