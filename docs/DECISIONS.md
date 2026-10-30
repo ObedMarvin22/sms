@@ -448,3 +448,18 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
 - **Isolation tests:** `tests/Feature/Tenancy/IsolationTest.php` holds a dataset of school-owned
   models. Each new model must be added there (invisible, not updatable/deletable from another
   school, stamped with its school).
+
+## 2026-10-30 — Classes and streams; no levels table
+
+- **Decision:** No `levels` table (SPEC section 13 lists one). Levels are the fixed `SchoolLevel`
+  enum; a school's offered levels are on `schools.levels_offered`; each class stores its `level`.
+  `school_classes` (model `SchoolClass`; `class` is reserved in PHP) and `streams` are school-owned.
+  Class names are unique per school (case-insensitive check in the Action, unique index on
+  `(school_id, name)`); stream names unique per class and stored upper-case. Every class keeps at
+  least one stream, because students are enrolled into a stream. `GenerateDefaultClasses` creates
+  the usual Ghanaian classes for the offered levels (Creche; Nursery 1–2; KG 1–2; Primary 1–6;
+  JHS 1–3; SHS 1–3), each with stream "A"; re-running only adds missing names. Sequence is
+  level × 100 + position, so later classes still sort within their level.
+- **Reason:** One source of truth for levels instead of a table that duplicates an enum. Obed
+  approved the "Primary 1–6" naming.
+- **Later:** from Sprint 3, enrolments will block deleting classes and streams that are in use.
