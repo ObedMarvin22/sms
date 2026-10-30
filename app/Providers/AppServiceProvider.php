@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Enums\PermissionKey;
 use App\Http\Middleware\EnsureTwoFactorEnabled;
 use App\Http\Middleware\EnsureUserBelongsToSchool;
 use App\Http\Middleware\IdentifySchool;
@@ -65,6 +66,11 @@ class AppServiceProvider extends ServiceProvider
 
         // Console: only super admins create schools.
         Gate::define('create-schools', fn (User $user): bool => $user->platform_role?->canCreateSchools() ?? false);
+
+        // The register screen: class teachers (attendance.take) and heads/administrators
+        // (attendance.edit_locked). Which streams each may open is decided by AttendanceRules.
+        Gate::define('take-attendance', fn (User $user): bool => $user->can(PermissionKey::AttendanceTake->value)
+            || $user->can(PermissionKey::AttendanceEditLocked->value));
 
         // config/auth.php: users are only ever found within the current school.
         Auth::provider('school_eloquent', fn (Application $app, array $config) => new SchoolUserProvider(

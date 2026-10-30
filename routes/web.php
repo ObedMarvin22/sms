@@ -87,10 +87,10 @@ Route::domain('{school}.'.config('app.base_domain'))
                 Route::livewire('guardians', GuardiansIndex::class)->name('guardians.index');
             });
 
-            // Registers need a current term and classes. Register checks attendance.take or
-            // attendance.edit_locked itself (the "can" middleware takes one permission).
+            // Registers need a current term and classes. take-attendance: attendance.take or
+            // attendance.edit_locked (Gate defined in AppServiceProvider).
             Route::middleware('school.ready')->group(function () {
-                Route::livewire('attendance', AttendanceRegister::class)->name('attendance.register');
+                Route::livewire('attendance', AttendanceRegister::class)->middleware('can:take-attendance')->name('attendance.register');
                 Route::livewire('attendance/today', AttendanceToday::class)
                     ->middleware('can:'.PermissionKey::AttendanceEditLocked->value)
                     ->name('attendance.today');

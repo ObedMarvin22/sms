@@ -43,8 +43,7 @@ class Register extends Component
 
     public function mount(): void
     {
-        $user = $this->user();
-        abort_unless($user->can(PermissionKey::AttendanceTake->value) || $user->can(PermissionKey::AttendanceEditLocked->value), 403);
+        $this->authorize('take-attendance');
 
         $streams = $this->streams();
         if ($this->streamId === '' || ! $streams->contains('id', (int) $this->streamId)) {
