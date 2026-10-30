@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 | Fortify's auth routes join this group through config/fortify.php (domain + middleware).
 */
 Route::domain('{school}.'.config('app.base_domain'))
-    ->middleware('school')
+    ->middleware(['school', 'school.member'])
     ->group(function () {
         Route::redirect('/', '/login')->name('school.home');
 
