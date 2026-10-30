@@ -46,6 +46,21 @@ it('returns the same holder throughout one request', function () {
         ->and(app(CurrentSchool::class)->id())->toBe($school->id);
 });
 
+it('runs code as another school and restores the previous one, even on failure', function () {
+    $a = School::factory()->create();
+    $b = School::factory()->create();
+    $current = app(CurrentSchool::class);
+    $current->set($a);
+
+    expect($current->runFor($b, fn (School $school) => $school->id))->toBe($b->id)
+        ->and($current->id())->toBe($a->id);
+
+    expect(fn () => $current->runFor($b, fn () => throw new RuntimeException('boom')))
+        ->toThrow(RuntimeException::class);
+
+    expect($current->id())->toBe($a->id);
+});
+
 it('starts empty again for the next queued job', function () {
     app(CurrentSchool::class)->set(School::factory()->create());
 

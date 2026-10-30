@@ -14,6 +14,7 @@ beforeEach(function () {
             'school_id' => app(CurrentSchool::class)->id(),
             'route_parameters' => request()->route()->parameters(),
             'dashboard_url' => route('dashboard'),
+            'permission_team_id' => getPermissionsTeamId(),
         ]);
 
     $this->greenhill = School::factory()->active()->create(['name' => 'Greenhill Academy', 'subdomain' => 'greenhill']);
@@ -27,6 +28,7 @@ it('resolves the school from the subdomain', function () {
             'school_id' => $this->greenhill->id,
             'route_parameters' => [],
             'dashboard_url' => 'http://greenhill.localhost/dashboard',
+            'permission_team_id' => $this->greenhill->id,
         ]);
 });
 
