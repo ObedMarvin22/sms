@@ -32,7 +32,7 @@ class SecurityTest extends TestCase
 
     public function test_security_settings_page_can_be_rendered(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->for($this->school)->create();
 
         $response = $this->actingAs($user)
             ->withSession(['auth.password_confirmed_at' => time()])
@@ -40,15 +40,17 @@ class SecurityTest extends TestCase
 
         $response->assertOk();
 
-        $response->assertSee('Passkeys');
-        $response->assertSee('No passkeys yet');
+        // Passkeys are off for now (config/fortify.php), so their section is hidden.
+        // ("Passkeys" alone also matches the Livewire snapshot's canManagePasskeys property.)
+        $response->assertDontSee('Manage your passkeys for passwordless sign-in');
+        $response->assertDontSee('No passkeys yet');
         $response->assertSee('Two-factor authentication');
         $response->assertSee('Enable 2FA');
     }
 
     public function test_security_settings_page_requires_password_confirmation_when_enabled(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->for($this->school)->create();
 
         $response = $this->actingAs($user)
             ->get(route('security.edit'));
@@ -60,7 +62,7 @@ class SecurityTest extends TestCase
     {
         config(['fortify.features' => []]);
 
-        $user = User::factory()->create();
+        $user = User::factory()->for($this->school)->create();
 
         $this->actingAs($user)
             ->withSession(['auth.password_confirmed_at' => time()])
@@ -74,7 +76,7 @@ class SecurityTest extends TestCase
 
     public function test_two_factor_authentication_disabled_when_confirmation_abandoned_between_requests(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->for($this->school)->create();
 
         $user->forceFill([
             'two_factor_secret' => encrypt('test-secret'),
@@ -97,7 +99,7 @@ class SecurityTest extends TestCase
 
     public function test_password_can_be_updated(): void
     {
-        $user = User::factory()->create([
+        $user = User::factory()->for($this->school)->create([
             'password' => Hash::make('password'),
         ]);
 
@@ -116,7 +118,7 @@ class SecurityTest extends TestCase
 
     public function test_correct_password_must_be_provided_to_update_password(): void
     {
-        $user = User::factory()->create([
+        $user = User::factory()->for($this->school)->create([
             'password' => Hash::make('password'),
         ]);
 

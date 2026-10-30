@@ -32,7 +32,7 @@ class PasswordResetTest extends TestCase
     {
         Notification::fake();
 
-        $user = User::factory()->create();
+        $user = User::factory()->for($this->school)->create();
 
         $this->post(route('password.request'), ['email' => $user->email]);
 
@@ -43,7 +43,7 @@ class PasswordResetTest extends TestCase
     {
         Notification::fake();
 
-        $user = User::factory()->create();
+        $user = User::factory()->for($this->school)->create();
 
         $this->post(route('password.request'), ['email' => $user->email]);
 
@@ -60,7 +60,7 @@ class PasswordResetTest extends TestCase
     {
         Notification::fake();
 
-        $user = User::factory()->create();
+        $user = User::factory()->for($this->school)->create();
 
         $this->post(route('password.request'), ['email' => $user->email]);
 
