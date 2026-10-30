@@ -41,6 +41,9 @@ class Register extends Component
 
     public string $reason = '';
 
+    /** @var array<int, string> student id => time guardians were told of the absence */
+    public array $notifiedAt = [];
+
     public function mount(): void
     {
         $this->authorize('take-attendance');
@@ -153,6 +156,7 @@ class Register extends Component
         }
 
         $this->reason = '';
+        $this->loadMarks();
         Flux::toast(variant: 'success', text: __('Register saved for :stream.', ['stream' => $stream->full_name]));
     }
 
@@ -179,8 +183,12 @@ class Register extends Component
         $saved = $session === null ? collect() : AttendanceRecord::where('attendance_session_id', $session->id)->get()->keyBy('student_id');
 
         $this->marks = [];
+        $this->notifiedAt = [];
         foreach ($this->enrolments() as $enrolment) {
             $record = $saved->get($enrolment->student_id);
+            if ($record?->absence_notified_at !== null) {
+                $this->notifiedAt[$enrolment->student_id] = $record->absence_notified_at->format('H:i');
+            }
             $this->marks[$enrolment->student_id] = [
                 'status' => $record->status->value ?? AttendanceStatus::Present->value,
                 'note' => (string) $record?->note,

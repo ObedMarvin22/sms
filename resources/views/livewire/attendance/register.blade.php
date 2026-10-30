@@ -59,6 +59,11 @@
                             <div>
                                 {{ $enrolment->student->full_name }}
                                 <flux:text size="sm" class="inline font-mono">{{ $enrolment->student->admission_number }}</flux:text>
+                                @isset ($notifiedAt[$enrolment->student_id])
+                                    <flux:badge size="sm" color="amber" icon="bell" data-test="absence-notified">
+                                        {{ __('Guardians notified :time', ['time' => $notifiedAt[$enrolment->student_id]]) }}
+                                    </flux:badge>
+                                @endisset
                             </div>
                             <flux:radio.group wire:model="marks.{{ $enrolment->student_id }}.status" variant="segmented" size="sm" :disabled="$readOnly">
                                 @foreach ($this->statuses() as $status)
