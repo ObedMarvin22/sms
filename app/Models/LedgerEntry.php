@@ -23,12 +23,13 @@ use LogicException;
  * @property LedgerEntryType $type
  * @property Money $amount
  * @property int|null $bill_id
+ * @property int|null $payment_id
  * @property string $description
  * @property CarbonImmutable $entry_date
  * @property int|null $created_by
  * @property CarbonImmutable $created_at
  */
-#[Fillable(['student_id', 'type', 'amount', 'bill_id', 'description', 'entry_date', 'created_by'])]
+#[Fillable(['student_id', 'type', 'amount', 'bill_id', 'payment_id', 'description', 'entry_date', 'created_by'])]
 class LedgerEntry extends Model
 {
     use BelongsToSchool;
@@ -58,6 +59,14 @@ class LedgerEntry extends Model
     public function bill(): BelongsTo
     {
         return $this->belongsTo(Bill::class);
+    }
+
+    /**
+     * @return BelongsTo<Payment, $this>
+     */
+    public function payment(): BelongsTo
+    {
+        return $this->belongsTo(Payment::class);
     }
 
     /**
