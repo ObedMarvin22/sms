@@ -4,12 +4,12 @@ namespace App\Models;
 
 use App\Enums\SchoolLevel;
 use App\Enums\SchoolStatus;
+use Carbon\CarbonImmutable;
 use Database\Factories\SchoolFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\AsEnumCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 /**
@@ -27,8 +27,8 @@ use Illuminate\Support\Collection;
  * @property string|null $paystack_subaccount_code
  * @property string|null $sms_sender_id
  * @property array<string, mixed>|null $settings
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
+ * @property CarbonImmutable|null $created_at
+ * @property CarbonImmutable|null $updated_at
  */
 #[Fillable([
     'name',

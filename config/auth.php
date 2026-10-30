@@ -42,6 +42,13 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        // Orange Tree console (admin.APP_BASE_DOMAIN). Same provider: with no current school
+        // it only finds platform users (school_id null).
+        'platform' => [
+            'driver' => 'session',
+            'provider' => 'users',
+        ],
     ],
 
     /*

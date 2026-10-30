@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\PlatformRoleKey;
 use App\Models\School;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -41,10 +42,11 @@ class UserFactory extends Factory
     /**
      * An Orange Tree platform user (no school).
      */
-    public function platform(): static
+    public function platform(PlatformRoleKey $role = PlatformRoleKey::SuperAdmin): static
     {
         return $this->state(fn (array $attributes) => [
             'school_id' => null,
+            'platform_role' => $role,
         ]);
     }
 
