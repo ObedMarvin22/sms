@@ -7,6 +7,9 @@ use App\Models\AttendanceSession;
 use App\Models\ClassSubject;
 use App\Models\ClassTeacherAssignment;
 use App\Models\Enrolment;
+use App\Models\FeeItem;
+use App\Models\FeeStructure;
+use App\Models\FeeStructureItem;
 use App\Models\Guardian;
 use App\Models\GuardianStudent;
 use App\Models\Notification;
@@ -17,6 +20,7 @@ use App\Models\SchoolClass;
 use App\Models\Staff;
 use App\Models\Stream;
 use App\Models\Student;
+use App\Models\StudentFeeOption;
 use App\Models\StudentImport;
 use App\Models\StudentImportRow;
 use App\Models\Subject;
@@ -45,6 +49,10 @@ dataset('school-owned models', [
     'StudentImportRow' => [fn (School $school): Model => StudentImportRow::factory()->create(['school_id' => $school->id])],
     'AttendanceSession' => [fn (School $school): Model => AttendanceSession::factory()->create(['school_id' => $school->id])],
     'AttendanceRecord' => [fn (School $school): Model => AttendanceRecord::factory()->create(['school_id' => $school->id])],
+    'FeeItem' => [fn (School $school): Model => FeeItem::factory()->for($school)->create()],
+    'FeeStructure' => [fn (School $school): Model => FeeStructure::factory()->create(['school_id' => $school->id])],
+    'FeeStructureItem' => [fn (School $school): Model => FeeStructureItem::factory()->create(['school_id' => $school->id])],
+    'StudentFeeOption' => [fn (School $school): Model => StudentFeeOption::factory()->create(['school_id' => $school->id])],
     'Notification' => [fn (School $school): Model => Notification::create([
         'id' => (string) Str::uuid(),
         'school_id' => $school->id,
