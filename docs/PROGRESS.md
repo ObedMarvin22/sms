@@ -40,16 +40,16 @@ Done when:
       current school, `EnsureUserBelongsToSchool` middleware for sessions and tokens.
 - [x] 6. spatie/laravel-permission with teams (`school_id`); `SeedDefaultRoles` Action with the
       eleven roles and their permissions; team id set in `IdentifySchool`.
-- [ ] 7. Orange Tree console on `admin.localhost`: platform-user guard, `CreateSchool` Action
+- [x] 7. Orange Tree console on `admin.localhost`: platform-user guard, `CreateSchool` Action
       (school, roles, invitation for first administrator), list of schools.
 - [ ] 8. Activity log on users and roles.
 - [ ] 9. Staff 2FA (starter kit's feature if present; otherwise note it for Sprint 4).
 - [ ] 10. Seeder: two demo schools (`greenhill`, `hillview`) with an admin each.
 
 Done when:
-- [ ] each subdomain shows its own school's login; unknown subdomain 404s; suspended shows the page
-- [ ] a Greenhill user cannot log in on Hillview; a Greenhill session/token is rejected on Hillview
-- [ ] creating a school in the console seeds roles and invites the admin
+- [x] each subdomain shows its own school's login; unknown subdomain 404s; suspended shows the page
+- [x] a Greenhill user cannot log in on Hillview; a Greenhill session/token is rejected on Hillview
+- [x] creating a school in the console seeds roles and invites the admin
 - [ ] isolation and architecture tests pass; CI green
 
 **STOP for review.**

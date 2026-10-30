@@ -288,3 +288,50 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
 - **Reason:** SPEC section 5. Re-running the Action must be safe after a school customises roles.
 - **Note:** Adding a new default permission later needs a separate, deliberate step to grant it
   to existing schools' roles (re-running SeedDefaultRoles will not).
+
+## 2026-10-30 — Platform users and the console
+
+- **Decision:** Orange Tree staff are `users` rows with `school_id` null and a `platform_role`
+  column (`PlatformRoleKey`: `super_admin`, `support`). They sign in on `admin.APP_BASE_DOMAIN`
+  with a separate `platform` session guard that reuses the scoped user provider (no current
+  school there, so it only finds platform users). Only `super_admin` may create schools
+  (`create-schools` gate). The first super admin is created with `php artisan
+  platform:create-admin`, which prompts in the terminal so no password passes through chat.
+- **Reason:** Spatie role assignments include the team id in their primary key, so a platform
+  user (no school) cannot hold a Spatie role. Two fixed roles do not need a role system.
+- **Deferred:** support's time-limited, logged "view as" (SPEC section 5) is not in the roadmap
+  yet; raise it when the console grows.
+
+## 2026-10-30 — `{school}` never matches a reserved subdomain
+
+- **Decision:** A global route pattern for `{school}` excludes `ReservedSubdomains::ALL`
+  (`admin`, `www`, `api`, `mail`, `app`, `staging`, `test`), set in `AppServiceProvider::register()`.
+  `CreateSchool` also rejects them.
+- **Reason:** Fortify registers its `{school}.domain/login` route before `routes/web.php` loads, so
+  `admin.localhost/login` was caught by the school group and returned 404. The pattern must be in
+  `register()`: route patterns apply when a route is created, and Fortify creates its routes
+  while booting.
+
+## 2026-10-30 — Invitations: signed URL + password fingerprint
+
+- **Decision:** `SchoolInvitation` emails a `URL::temporarySignedRoute` link (7 days) to
+  `{school}.domain/invitation/{user}/{fingerprint}`. The fingerprint is an HMAC (app key) of the
+  user's current password hash, so the link stops working once a password is set; no table is
+  needed. The page checks the user belongs to the current school (route model binding is not
+  school-scoped). Accepting sets the password, marks the email verified and signs the user in.
+  `CreateSchool` sends the invitation only after its transaction commits.
+- **Reason:** Laravel password-reset tokens expire in 60 minutes and share the email-keyed table
+  (step 5 limit). Signed URLs also bind the host, so a link cannot be used on another school.
+- **Alternatives:** An `invitations` table with tokens (more moving parts for the same result).
+
+## 2026-10-30 — Spatie roles always use the "web" guard
+
+- **Decision:** `User::$guard_name = 'web'`.
+- **Reason:** Spatie otherwise uses the active guard. When a console super admin (platform guard)
+  created a school, assigning the "administrator" role looked for it on the platform guard and failed.
+
+## 2026-10-30 — Model date types are CarbonImmutable
+
+- **Decision:** `User` and `School` docblocks type dates as `CarbonImmutable`.
+- **Reason:** The starter kit calls `Date::use(CarbonImmutable::class)`, so Eloquent returns
+  immutable dates; its docblocks said `Illuminate\Support\Carbon`. PHPStan caught the mismatch.
