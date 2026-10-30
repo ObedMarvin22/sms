@@ -20,6 +20,7 @@ use App\Models\GuardianStudent;
 use App\Models\InstalmentPlan;
 use App\Models\InstalmentPlanStep;
 use App\Models\LedgerEntry;
+use App\Models\MessageCreditEntry;
 use App\Models\Notification;
 use App\Models\Payment;
 use App\Models\PaystackTransaction;
@@ -28,6 +29,7 @@ use App\Models\ProgrammeSubject;
 use App\Models\ReceiptSequence;
 use App\Models\School;
 use App\Models\SchoolClass;
+use App\Models\SmsMessage;
 use App\Models\Staff;
 use App\Models\Stream;
 use App\Models\Student;
@@ -65,6 +67,8 @@ dataset('school-owned models', [
     'FeeItem' => [fn (School $school): Model => FeeItem::factory()->for($school)->create()],
     'Discount' => [fn (School $school): Model => Discount::factory()->for($school)->create()],
     'Payment' => [fn (School $school): Model => Payment::factory()->create(['school_id' => $school->id])],
+    'SmsMessage' => [fn (School $school): Model => SmsMessage::factory()->for($school)->create()],
+    'MessageCreditEntry' => [fn (School $school): Model => MessageCreditEntry::factory()->for($school)->create()],
     'PaystackTransaction' => [fn (School $school): Model => PaystackTransaction::factory()->create(['school_id' => $school->id])],
     'ReceiptSequence' => [fn (School $school): Model => ReceiptSequence::factory()->for($school)->create()],
     'Bill' => [fn (School $school): Model => Bill::factory()->create(['school_id' => $school->id])],

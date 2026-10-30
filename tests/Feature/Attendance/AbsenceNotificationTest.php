@@ -5,15 +5,19 @@ use App\Actions\Attendance\SetAttendanceLockTime;
 use App\Actions\Classes\GenerateDefaultClasses;
 use App\Actions\Guardians\AddGuardian;
 use App\Actions\Roles\SeedDefaultRoles;
+use App\Actions\Sms\SetSmsSettings;
 use App\Enums\AcademicPeriodType;
 use App\Enums\RoleKey;
 use App\Enums\SchoolLevel;
+use App\Enums\SmsStatus;
 use App\Livewire\Attendance\Register;
 use App\Models\AttendanceRecord;
 use App\Models\Guardian;
+use App\Models\MessageCreditEntry;
 use App\Models\Notification as NotificationModel;
 use App\Models\School;
 use App\Models\SchoolClass;
+use App\Models\SmsMessage;
 use App\Models\Stream;
 use App\Models\Student;
 use App\Models\User;
@@ -22,7 +26,6 @@ use App\Support\Academic\DefaultCalendar;
 use App\Support\Tenancy\CurrentSchool;
 use Illuminate\Console\Scheduling\Event;
 use Illuminate\Console\Scheduling\Schedule;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 
@@ -140,11 +143,7 @@ it('never notifies about an earlier day', function () {
     Notification::assertNothingSent();
 });
 
-it('stores the in-app notice on the guardian in the right school and logs the SMS text', function () {
-    Log::shouldReceive('channel')->with('notifications')->andReturnSelf();
-    Log::shouldReceive('info')->twice()->withArgs(fn (string $message, array $context) => str_contains($message, 'Ama was marked absent at')
-        && in_array($context['to'], ['+233244000001', '+233244000002'], true));
-
+it('stores the in-app notice on the guardian in the right school, with no SMS until the school turns it on', function () {
     register($this->teacher, $this->p1, [$this->ama->id => 'absent']);
     $this->travelTo('2026-10-28 10:00:00');
     $this->artisan('attendance:notify-absences');
@@ -155,7 +154,21 @@ it('stores the in-app notice on the guardian in the right school and logs the SM
         ->and($notice->data['student_id'])->toBe($this->ama->id)
         ->and($notice->data['date'])->toBe('2026-10-28')
         ->and($notice->data['message'])->toContain('Ama was marked absent')
-        ->and($this->kofiMother->notifications()->count())->toBe(0);
+        ->and($this->kofiMother->notifications()->count())->toBe(0)
+        ->and(SmsMessage::count())->toBe(0);
+});
+
+it('also sends the notice by SMS when the school turned absence SMS on', function () {
+    app(SetSmsSettings::class)->handle($this->school, ['absence'], '100');
+    MessageCreditEntry::create(['type' => 'top_up', 'units' => 50, 'note' => 'Test']);
+    register($this->teacher, $this->p1, [$this->ama->id => 'absent']);
+    $this->travelTo('2026-10-28 10:00:00');
+
+    $this->artisan('attendance:notify-absences');
+
+    expect(SmsMessage::orderBy('to')->pluck('to')->all())->toBe(['+233244000001', '+233244000002'])
+        ->and(SmsMessage::pluck('status')->unique()->all())->toBe([SmsStatus::Sent])
+        ->and(SmsMessage::first()?->message)->toContain('Ama was marked absent at');
 });
 
 it('follows each school\'s own lock time and never crosses schools', function () {

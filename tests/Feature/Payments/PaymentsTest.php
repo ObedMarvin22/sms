@@ -153,8 +153,8 @@ describe('recording', function () {
 
         pay($this->ama);
 
-        Notification::assertSentTo($mother, PaymentReceived::class, fn (PaymentReceived $n) => str_contains($n->toLog($mother), 'GH₵500.00 for Ama')
-            && str_contains($n->toLog($mother), 'Balance: GH₵600.00'));
+        Notification::assertSentTo($mother, PaymentReceived::class, fn (PaymentReceived $n) => str_contains($n->toSms($mother), 'GHS500.00 for Ama')
+            && str_contains($n->toSms($mother), 'Balance: GHS600.00'));
         Notification::assertNotSentTo($contactOnly, PaymentReceived::class);
     });
 });
