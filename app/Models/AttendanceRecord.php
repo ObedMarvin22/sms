@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\AttendanceStatus;
 use App\Models\Concerns\BelongsToSchool;
+use Carbon\CarbonImmutable;
 use Database\Factories\AttendanceRecordFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -20,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $student_id
  * @property AttendanceStatus $status
  * @property string|null $note
+ * @property CarbonImmutable|null $absence_notified_at
  * @property-read Student $student
  * @property-read AttendanceSession $session
  */
@@ -52,6 +54,6 @@ class AttendanceRecord extends Model
      */
     protected function casts(): array
     {
-        return ['status' => AttendanceStatus::class];
+        return ['status' => AttendanceStatus::class, 'absence_notified_at' => 'immutable_datetime'];
     }
 }

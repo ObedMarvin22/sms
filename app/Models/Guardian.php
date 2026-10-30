@@ -9,7 +9,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Notifications\Notifiable;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
@@ -34,6 +36,7 @@ class Guardian extends Model
     use HasFactory;
 
     use LogsActivity;
+    use Notifiable;
     use SoftDeletes;
 
     /**
@@ -54,6 +57,25 @@ class Guardian extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * In-app notifications, kept on the guardian so the parent app (Sprint 4) can show them
+     * whether or not the guardian has a login yet. Uses the school-owned Notification model.
+     *
+     * @return MorphMany<Notification, $this>
+     */
+    public function notifications(): MorphMany
+    {
+        return $this->morphMany(Notification::class, 'notifiable')->latest();
+    }
+
+    /**
+     * The number paid channels (SMS, from Sprint 4) send to; LogChannel records it for now.
+     */
+    public function routeNotificationForSms(): string
+    {
+        return $this->phone;
     }
 
     public function getActivitylogOptions(): LogOptions
