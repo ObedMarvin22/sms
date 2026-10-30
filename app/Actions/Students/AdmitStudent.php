@@ -2,9 +2,12 @@
 
 namespace App\Actions\Students;
 
+use App\Enums\Gender;
 use App\Models\AcademicYear;
+use App\Models\Programme;
 use App\Models\Stream;
 use App\Models\Student;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -23,6 +26,28 @@ class AdmitStudent
      */
     public function handle(array $input): Student
     {
+        ['data' => $data, 'year' => $year, 'stream' => $stream, 'programme' => $programme] = $this->prepare($input);
+
+        return DB::transaction(function () use ($data, $year, $stream, $programme): Student {
+            $data['admission_number'] ??= $this->generateAdmissionNumber->handle($data['admitted_on']);
+            $student = Student::create($data);
+
+            Enrolments::start($student, $year, $stream, $programme, $data['admitted_on'], 'Admitted');
+
+            return $student;
+        }, attempts: 5); // retried if MySQL reports a deadlock (see GenerateAdmissionNumber)
+    }
+
+    /**
+     * Every check, without saving: also used by the import dry run.
+     *
+     * @param  array<string, mixed>  $input
+     * @return array{data: array{admission_number: ?string, first_name: string, last_name: string, other_names: ?string, gender: ?Gender, date_of_birth: ?CarbonImmutable, admitted_on: CarbonImmutable}, year: AcademicYear, stream: Stream, programme: ?Programme}
+     *
+     * @throws ValidationException
+     */
+    public function prepare(array $input): array
+    {
         $data = StudentRules::details($input);
 
         $year = AcademicYear::current()->first()
@@ -35,13 +60,6 @@ class AdmitStudent
             throw ValidationException::withMessages(['admitted_on' => "The admission date must fall within {$year->name}."]);
         }
 
-        return DB::transaction(function () use ($data, $year, $stream, $programme): Student {
-            $data['admission_number'] ??= $this->generateAdmissionNumber->handle($data['admitted_on']);
-            $student = Student::create($data);
-
-            Enrolments::start($student, $year, $stream, $programme, $data['admitted_on'], 'Admitted');
-
-            return $student;
-        }, attempts: 5); // retried if MySQL reports a deadlock (see GenerateAdmissionNumber)
+        return ['data' => $data, 'year' => $year, 'stream' => $stream, 'programme' => $programme];
     }
 }
