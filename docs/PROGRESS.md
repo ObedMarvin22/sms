@@ -36,7 +36,7 @@ Done when:
 - [x] 3. `IdentifySchool` middleware and the subdomain route group (web + API). Unknown → 404;
       suspended → suspended page.
 - [x] 4. `BelongsToSchool` trait + Pest architecture test.
-- [ ] 5. Users per school: nullable `school_id`, composite unique email, login scoped to the
+- [x] 5. Users per school: nullable `school_id`, composite unique email, login scoped to the
       current school, `EnsureUserBelongsToSchool` middleware for sessions and tokens.
 - [ ] 6. spatie/laravel-permission with teams (`school_id`); `SeedDefaultRoles` Action with the
       eleven roles and their permissions; team id set in `IdentifySchool`.

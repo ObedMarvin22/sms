@@ -226,3 +226,39 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
 - **Lesson for later:** anything that commits inside a test (DDL, some locking tests) silently
   turns on per-test re-migration. The Sprint 3 concurrency test for admission numbers will need
   real commits; give it its own approach (DatabaseTruncation or a separate connection).
+
+## 2026-10-30 — Users per school: scoped user provider + membership check
+
+- **Decision:** `users.school_id` is nullable (null = Orange Tree platform user) with a foreign key
+  and a unique index on `(school_id, email)`. `school_id` is not mass-assignable.
+  `config/auth.php` uses the `school_eloquent` driver (`App\Support\Tenancy\SchoolUserProvider`),
+  which overrides `newModelQuery()` so every auth lookup (login, session, remember-me, password
+  reset) only finds users of the current school, or only platform users when no school is set.
+  `EnsureUserBelongsToSchool` (`school.member`) runs after authentication on every school route
+  group (web, API, Fortify) and as Livewire persistent middleware: a session from another school
+  is logged out, an API token from another school gets 403.
+- **Reason:** One override covers every lookup, instead of patching login, reset and session
+  separately. The middleware is needed for Sanctum tokens, which load their user from the token
+  without going through the provider. A probe confirmed the tests fail (5 of 15) if the provider
+  is switched back to plain `eloquent`.
+- **Alternatives:** Fortify `authenticateUsing()` (covers login only, not session or reset);
+  `BelongsToSchool` on `User` (cannot express platform users with a null school).
+
+## 2026-10-30 — Public registration and passkeys turned off
+
+- **Decision:** `Features::registration()` and `Features::passkeys()` are commented out in
+  `config/fortify.php`. The login page hides "Sign up" and the passkey button; the
+  `.well-known/passkey-endpoints` route only exists when passkeys are on. `CreateNewUser` still
+  assigns the current school in case registration is ever re-enabled.
+- **Reason:** Staff are invited and parents activate by phone (SPEC section 5), so open
+  self-registration would let anyone create an account at any school. Passkey login finds the
+  user by credential, bypassing the scoped provider.
+- **Revisit:** Passkeys can return once their login lookup is school-scoped.
+
+## Known limits recorded in Sprint 1 step 5
+
+- `password_reset_tokens` is keyed by email only. If the same email exists in two schools, a reset
+  requested on one replaces the other's pending link. Both still reset the correct account (the
+  lookup is scoped). A nuisance, not a leak.
+- Platform users' emails are not unique at database level (MySQL allows repeated NULLs in a unique
+  index). Step 7 must validate uniqueness among platform users.
