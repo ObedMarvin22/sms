@@ -3,11 +3,12 @@
 namespace App\Actions\Academic;
 
 use App\Models\AcademicYear;
+use App\Models\Enrolment;
 use Illuminate\Validation\ValidationException;
 
 /**
  * Deletes an academic year and its terms. The current year cannot be deleted.
- * (From Sprint 3, enrolments will also block deleting a year that is in use.)
+ * A year with student enrolments cannot be deleted either.
  */
 class DeleteAcademicYear
 {
@@ -16,6 +17,10 @@ class DeleteAcademicYear
         // Ask the database, not the passed-in model, which may be stale.
         if (AcademicYear::whereKey($year->id)->where('is_current', true)->exists()) {
             throw ValidationException::withMessages(['year' => 'The current academic year cannot be deleted.']);
+        }
+
+        if (Enrolment::where('academic_year_id', $year->id)->exists()) {
+            throw ValidationException::withMessages(['year' => "{$year->name} has student enrolments, so it cannot be deleted."]);
         }
 
         $year->delete();

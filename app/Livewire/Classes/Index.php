@@ -127,7 +127,12 @@ class Index extends Component
     public function deleteClass(int $classId, DeleteClass $deleteClass): void
     {
         $this->authorize(PermissionKey::SettingsManage->value);
-        $deleteClass->handle(SchoolClass::findOrFail($classId));
+        try {
+            $deleteClass->handle(SchoolClass::findOrFail($classId));
+        } catch (ValidationException $e) {
+            Flux::toast(variant: 'danger', text: $e->validator->errors()->first());
+        }
+
         unset($this->classes);
     }
 
