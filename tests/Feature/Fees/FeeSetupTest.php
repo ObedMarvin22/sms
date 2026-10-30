@@ -1,7 +1,5 @@
 <?php
 
-use App\Actions\Academic\CreateAcademicYear;
-use App\Actions\Classes\GenerateDefaultClasses;
 use App\Actions\Fees\CopyFeeStructures;
 use App\Actions\Fees\CreateFeeItem;
 use App\Actions\Fees\SaveFeeStructure;
@@ -9,13 +7,9 @@ use App\Actions\Fees\SetFeeOption;
 use App\Actions\Fees\SetOffersBoarding;
 use App\Actions\Fees\SetResidence;
 use App\Actions\Fees\UpdateFeeItem;
-use App\Actions\Roles\SeedDefaultRoles;
-use App\Actions\Students\AdmitStudent;
-use App\Enums\AcademicPeriodType;
 use App\Enums\FeeCategory;
 use App\Enums\Residence;
 use App\Enums\RoleKey;
-use App\Enums\SchoolLevel;
 use App\Livewire\Fees\Items;
 use App\Livewire\Fees\Structures;
 use App\Livewire\School\Profile;
@@ -24,43 +18,15 @@ use App\Models\Activity;
 use App\Models\FeeItem;
 use App\Models\FeeStructure;
 use App\Models\FeeStructureItem;
-use App\Models\School;
 use App\Models\SchoolClass;
-use App\Models\Student;
 use App\Models\StudentFeeOption;
 use App\Models\Term;
-use App\Models\User;
-use App\Support\Academic\DefaultCalendar;
-use App\Support\Tenancy\CurrentSchool;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 
-beforeEach(function () {
-    $this->travelTo('2026-10-28 09:00:00');
+require_once __DIR__.'/helpers.php';
 
-    $this->school = School::factory()->active()->withLevels(SchoolLevel::Primary)->create(['subdomain' => 'greenhill']);
-    app(CurrentSchool::class)->set($this->school);
-    app(SeedDefaultRoles::class)->handle($this->school);
-    $calendar = DefaultCalendar::for(2026, AcademicPeriodType::Term);
-    app(CreateAcademicYear::class)->handle($calendar['name'], $calendar['starts_on'], $calendar['ends_on'], $calendar['terms']);
-    app(GenerateDefaultClasses::class)->handle();
-
-    [$this->term1, $this->term2] = Term::orderBy('starts_on')->take(2)->get()->all();
-    $this->p1 = SchoolClass::where('name', 'Primary 1')->sole();
-    $this->p2 = SchoolClass::where('name', 'Primary 2')->sole();
-
-    $this->tuition = app(CreateFeeItem::class)->handle(['name' => 'Tuition', 'category' => 'tuition']);
-    $this->pta = app(CreateFeeItem::class)->handle(['name' => 'PTA dues', 'category' => 'levy']);
-    $this->bus = app(CreateFeeItem::class)->handle(['name' => 'Bus', 'category' => 'transport', 'is_optional' => true]);
-});
-
-function staffWith(RoleKey $role): User
-{
-    $user = User::factory()->for(app(CurrentSchool::class)->require())->withTwoFactor()->create();
-    $user->assignRole($role->value);
-
-    return $user;
-}
+beforeEach(fn () => setUpFeeSchool());
 
 function saveStructure(SchoolClass $class, array $amounts, ?Term $term = null, Residence $residence = Residence::Day): ?FeeStructure
 {
@@ -70,13 +36,6 @@ function saveStructure(SchoolClass $class, array $amounts, ?Term $term = null, R
     }
 
     return app(SaveFeeStructure::class)->handle($term ?? test()->term1, $class, $residence, $byId);
-}
-
-function feeStudent(string $first = 'Ama'): Student
-{
-    $stream = SchoolClass::where('name', 'Primary 1')->sole()->streams()->sole();
-
-    return app(AdmitStudent::class)->handle(['first_name' => $first, 'last_name' => 'Mensah', 'stream_id' => $stream->id, 'admitted_on' => '2026-09-08']);
 }
 
 describe('fee items', function () {

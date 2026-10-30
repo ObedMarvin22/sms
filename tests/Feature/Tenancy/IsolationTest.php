@@ -6,12 +6,15 @@ use App\Models\AttendanceRecord;
 use App\Models\AttendanceSession;
 use App\Models\ClassSubject;
 use App\Models\ClassTeacherAssignment;
+use App\Models\Discount;
 use App\Models\Enrolment;
 use App\Models\FeeItem;
 use App\Models\FeeStructure;
 use App\Models\FeeStructureItem;
 use App\Models\Guardian;
 use App\Models\GuardianStudent;
+use App\Models\InstalmentPlan;
+use App\Models\InstalmentPlanStep;
 use App\Models\Notification;
 use App\Models\Programme;
 use App\Models\ProgrammeSubject;
@@ -20,9 +23,11 @@ use App\Models\SchoolClass;
 use App\Models\Staff;
 use App\Models\Stream;
 use App\Models\Student;
+use App\Models\StudentDiscount;
 use App\Models\StudentFeeOption;
 use App\Models\StudentImport;
 use App\Models\StudentImportRow;
+use App\Models\StudentInstalmentPlan;
 use App\Models\Subject;
 use App\Models\TeachingAssignment;
 use App\Models\Term;
@@ -50,6 +55,11 @@ dataset('school-owned models', [
     'AttendanceSession' => [fn (School $school): Model => AttendanceSession::factory()->create(['school_id' => $school->id])],
     'AttendanceRecord' => [fn (School $school): Model => AttendanceRecord::factory()->create(['school_id' => $school->id])],
     'FeeItem' => [fn (School $school): Model => FeeItem::factory()->for($school)->create()],
+    'Discount' => [fn (School $school): Model => Discount::factory()->for($school)->create()],
+    'StudentDiscount' => [fn (School $school): Model => StudentDiscount::factory()->create(['school_id' => $school->id])],
+    'InstalmentPlan' => [fn (School $school): Model => InstalmentPlan::factory()->create(['school_id' => $school->id])],
+    'InstalmentPlanStep' => [fn (School $school): Model => InstalmentPlanStep::factory()->create(['school_id' => $school->id])],
+    'StudentInstalmentPlan' => [fn (School $school): Model => StudentInstalmentPlan::factory()->create(['school_id' => $school->id])],
     'FeeStructure' => [fn (School $school): Model => FeeStructure::factory()->create(['school_id' => $school->id])],
     'FeeStructureItem' => [fn (School $school): Model => FeeStructureItem::factory()->create(['school_id' => $school->id])],
     'StudentFeeOption' => [fn (School $school): Model => StudentFeeOption::factory()->create(['school_id' => $school->id])],
