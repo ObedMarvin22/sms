@@ -23,8 +23,10 @@ class Activity extends SpatieActivity
         static::addGlobalScope(new SchoolScope);
 
         static::creating(function (Activity $activity): void {
+            $subject = $activity->subject;
+
             $activity->school_id ??= app(CurrentSchool::class)->id()
-                ?? $activity->subject?->getAttribute('school_id');
+                ?? ($subject instanceof School ? $subject->id : $subject?->getAttribute('school_id'));
         });
     }
 }
