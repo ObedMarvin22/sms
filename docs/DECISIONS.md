@@ -385,3 +385,20 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
 - **Reason:** Roadmap Sprint 1 step 10. Model events must stay on while seeding:
   `BelongsToSchool` fills `school_id` and the activity log records changes through them.
   The class teachers give a quick sign-in without setting up two-factor.
+
+## 2026-10-30 — Staff shell: theme and navigation
+
+- **Decision:** `App\Support\Branding\SchoolTheme` turns `primary_colour` into Flux's accent CSS
+  variables, written as an inline `style` on `<html>` (it beats both the light and `.dark` theme
+  rules). Only a strict `#RRGGBB` value is used; anything else keeps the default theme. Text on the
+  accent is black or white by WCAG contrast. `App\Support\Navigation\StaffNavigation` is the single
+  list of sidebar items (label, icon, route, optional `PermissionKey`, group); an item shows only if
+  its route exists and the user `can()` its permission in the current school, so items can be listed
+  before their screen is built. The sidebar calls it directly.
+- **Reason:** One place to maintain the menu; a page never shows a link the user cannot open.
+- **Not a view composer:** planned as one, but `<x-layouts::app.sidebar>` renders under a hashed
+  anonymous-component namespace (e.g. `e60dd9d2…::app.sidebar`), so a composer keyed on
+  `layouts.app.sidebar` silently never ran (the menu test caught it). Calling the class from the
+  layout is simpler and cannot silently break.
+- **Reminder:** Tailwind only emits classes it saw at the last build. Run `npm run build` after
+  adding classes (noted in docs/DEVELOPMENT.md); the badge was blank until the rebuild.
