@@ -35,7 +35,7 @@ Done when:
 - [x] 2. `CurrentSchool` holder bound in the container.
 - [x] 3. `IdentifySchool` middleware and the subdomain route group (web + API). Unknown → 404;
       suspended → suspended page.
-- [ ] 4. `BelongsToSchool` trait + Pest architecture test.
+- [x] 4. `BelongsToSchool` trait + Pest architecture test.
 - [ ] 5. Users per school: nullable `school_id`, composite unique email, login scoped to the
       current school, `EnsureUserBelongsToSchool` middleware for sessions and tokens.
 - [ ] 6. spatie/laravel-permission with teams (`school_id`); `SeedDefaultRoles` Action with the

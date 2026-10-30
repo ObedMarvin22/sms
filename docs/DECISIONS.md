@@ -194,3 +194,35 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
 - `admin` is not yet a reserved subdomain. Step 7 reserves it for the console (and `www`, `api`).
 - Emails use `APP_URL` for the header link, not the school's subdomain. Fix with school-branded
   emails.
+
+## 2026-10-30 — `BelongsToSchool` rules
+
+- **Decision:** The trait adds `SchoolScope` (filters by the current school when one is set) and
+  model events:
+  - **creating:** fill `school_id` from `CurrentSchool`. No current school and no `school_id` →
+    `NoCurrentSchool`. A `school_id` for a different school than the current one →
+    `CrossSchoolWrite`. With no current school, an explicit `school_id` is allowed (seeders,
+    platform code).
+  - **updating:** changing `school_id` → `CrossSchoolWrite`.
+  `SchoolScope` lives in `App\Support\Tenancy`, outside `App\Models`, so the arch test only sees
+  real models. Platform models are listed in `tests/Arch/TenancyTest.php` (`School`, and `User`
+  until step 5).
+- **Reason:** SPEC section 4, plus failing loudly on the two ways a tenant leak usually happens
+  (writing with the wrong id, moving a row).
+- **Known limit:** bulk `query()->update([...])` skips model events, so it could change `school_id`
+  on the current school's own rows. The scope still stops it touching other schools' rows (tested).
+  Never bulk-update `school_id`.
+- **Alternatives:** Throw when querying with no current school (stricter, but breaks console
+  commands, seeders and the platform console, which SPEC says see all schools).
+
+## 2026-10-30 — Testing the trait with a temporary-table fixture
+
+- **Decision:** `Tests\Fixtures\Models\TenantNote` uses the trait on a MySQL TEMPORARY table
+  created per test, with no secondary indexes. `phpstan.neon` analyses `tests/Fixtures` so the
+  trait is type-checked through it.
+- **Reason:** No real school-owned model exists yet. `CREATE TEMPORARY TABLE` does not commit
+  the test transaction, but Laravel adds indexes with a separate `ALTER TABLE`, which does. That
+  made RefreshDatabase re-run `migrate:fresh` before every test (34 s for 13 tests, now 3.6 s).
+- **Lesson for later:** anything that commits inside a test (DDL, some locking tests) silently
+  turns on per-test re-migration. The Sprint 3 concurrency test for admission numbers will need
+  real commits; give it its own approach (DatabaseTruncation or a separate connection).
