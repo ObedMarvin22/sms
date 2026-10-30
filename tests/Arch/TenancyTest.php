@@ -2,6 +2,7 @@
 
 use App\Models\Activity;
 use App\Models\Concerns\BelongsToSchool;
+use App\Models\PaystackEvent;
 use App\Models\School;
 use App\Models\User;
 
@@ -15,6 +16,9 @@ const PLATFORM_MODELS = [
     User::class,
     // Nullable school_id (platform events); has SchoolScope and fills school_id itself.
     Activity::class,
+    // Paystack webhook events: Paystack does not know our schools; the school comes from our
+    // own transaction reference when the event is processed (Sprint 4 step 4).
+    PaystackEvent::class,
 ];
 
 arch('school-owned models use BelongsToSchool')
