@@ -150,3 +150,47 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   test); a tenancy package (ruled out in CLAUDE.md).
 - **Open:** Queued jobs must carry the school id and restore it when they run. This is added with
   the first tenant-aware job (Sprint 3 import / Sprint 4 billing).
+
+## 2026-10-30 — How the school is resolved (IdentifySchool)
+
+- **Decision:** School routes (web, API and Fortify's auth routes) live in a
+  `Route::domain('{school}.'.base_domain)` group with the `school` middleware alias.
+  `IdentifySchool` reads the `{school}` route parameter, removes it from the route (so
+  controllers and Livewire components never receive it), looks up the school, and:
+  - 404 for an unknown subdomain
+  - 403 suspended page for a suspended school (JSON on the API)
+  - otherwise fills `CurrentSchool`, shares `$currentSchool` with views, and sets
+    `URL::defaults(['school' => ...])`
+  It is placed before authentication in the middleware priority list. The bare domain only
+  serves the landing page.
+- **Reason:** Using the route's own domain parameter avoids hand-parsing the Host header, and
+  Laravel only matches it for hosts ending in the base domain. `URL::defaults` keeps every
+  `route()` call on the right subdomain without passing the school around.
+- **Alternatives:** Parsing `$request->getHost()` in a global middleware (runs on every route,
+  including the bare domain and Livewire assets).
+
+## 2026-10-30 — Livewire updates re-resolve the school
+
+- **Decision:** `IdentifySchool` is registered with `Livewire::addPersistentMiddleware()`.
+- **Reason:** Livewire posts component updates to its own `/livewire-…/update` endpoint, which
+  has no domain, so route middleware does not run there. Persistent middleware makes Livewire
+  rebuild the original page's request (on the current host) and re-run `IdentifySchool`.
+  Checked in the browser: the profile form's update request on Greenhill succeeded.
+- **Open:** Livewire's `upload-file` and `preview-file` endpoints are also domain-less. Review
+  them when the logo upload is built (Sprint 2).
+
+## 2026-10-30 — Test URLs
+
+- **Decision:** `phpunit.xml` sets `APP_URL=http://localhost`. `TestCase::onSchool()` and the
+  `OnSchoolSubdomain` trait send test requests to a school's subdomain. The starter kit's tests
+  use the trait. The logout test now expects a redirect to the school's own `/`.
+- **Reason:** With `APP_URL=http://localhost:8000` from `.env`, some generated URLs carried
+  `:8000` and others did not, so tests depended on the dev server's port.
+
+## Open items noted in Sprint 1 step 3
+
+- Public registration is still open on every school (starter kit). Step 5 decides who may
+  create accounts (staff are invited).
+- `admin` is not yet a reserved subdomain. Step 7 reserves it for the console (and `www`, `api`).
+- Emails use `APP_URL` for the header link, not the school's subdomain. Fix with school-branded
+  emails.

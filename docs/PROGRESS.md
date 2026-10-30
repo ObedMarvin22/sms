@@ -33,7 +33,7 @@ Done when:
 
 - [x] 1. `schools` migration, model, factory, `SchoolStatus` enum.
 - [x] 2. `CurrentSchool` holder bound in the container.
-- [ ] 3. `IdentifySchool` middleware and the subdomain route group (web + API). Unknown → 404;
+- [x] 3. `IdentifySchool` middleware and the subdomain route group (web + API). Unknown → 404;
       suspended → suspended page.
 - [ ] 4. `BelongsToSchool` trait + Pest architecture test.
 - [ ] 5. Users per school: nullable `school_id`, composite unique email, login scoped to the
