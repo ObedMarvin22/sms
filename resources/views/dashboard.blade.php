@@ -1,18 +1,17 @@
 <x-layouts::app :title="__('Dashboard')">
-    <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">
-        <div class="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
-                <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/20 dark:stroke-neutral-100/20" />
-            </div>
-            <div class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
-                <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/20 dark:stroke-neutral-100/20" />
-            </div>
-            <div class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
-                <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/20 dark:stroke-neutral-100/20" />
-            </div>
-        </div>
-        <div class="relative h-full flex-1 overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
-            <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/20 dark:stroke-neutral-100/20" />
+    {{-- Placeholder until the real dashboard: who you are, here. --}}
+    <div class="flex max-w-2xl flex-col gap-4">
+        <flux:heading size="xl">{{ $currentSchool->name }}</flux:heading>
+
+        <flux:text>{{ __('Welcome, :name.', ['name' => auth()->user()->name]) }}</flux:text>
+
+        @php($roles = auth()->user()->getRoleNames()->map(fn ($name) => \App\Enums\RoleKey::tryFrom($name)?->label() ?? $name))
+        <div class="flex flex-wrap gap-2" data-test="dashboard-roles">
+            @forelse ($roles as $role)
+                <flux:badge color="zinc">{{ $role }}</flux:badge>
+            @empty
+                <flux:text>{{ __('You have no role at this school yet. Ask an administrator.') }}</flux:text>
+            @endforelse
         </div>
     </div>
 </x-layouts::app>

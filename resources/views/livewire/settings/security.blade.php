@@ -3,13 +3,7 @@
 
     <flux:heading level="2" class="sr-only">{{ __('Security settings') }}</flux:heading>
 
-    {{-- Shown until a role that needs it (EnsureTwoFactorEnabled) has two-factor confirmed. --}}
-    @if (auth()->user()->requiresTwoFactor() && ! auth()->user()->hasConfirmedTwoFactor())
-        <flux:callout variant="warning" icon="shield-exclamation" class="mb-6" data-test="two-factor-required">
-            <flux:callout.heading>{{ __('Two-factor authentication required') }}</flux:callout.heading>
-            <flux:callout.text>{{ __('Your role requires two-factor authentication. Please set it up to continue.') }}</flux:callout.text>
-        </flux:callout>
-    @endif
+    <x-two-factor-required-notice class="mb-6" />
 
     <x-settings.layout :heading="__('Update password')" :subheading="__('Ensure your account is using a long, random password to stay secure')">
         <form method="POST" wire:submit="updatePassword" class="mt-6 space-y-6">

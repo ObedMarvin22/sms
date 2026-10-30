@@ -7,6 +7,9 @@
 
         <x-auth-session-status class="text-center" :status="session('status')" />
 
+        {{-- Explains why staff land here when their role needs two-factor (the flash is gone by now). --}}
+        <x-two-factor-required-notice />
+
         <x-passkey-verify
             options-route="passkey.confirm-options"
             submit-route="passkey.confirm"
