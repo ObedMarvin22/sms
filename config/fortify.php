@@ -88,7 +88,8 @@ return [
 
     'prefix' => '',
 
-    'domain' => null,
+    // Auth lives on each school subdomain (same as routes/web.php). The console gets its own guard.
+    'domain' => '{school}.'.env('APP_BASE_DOMAIN', 'localhost'),
 
     /*
     |--------------------------------------------------------------------------
@@ -101,7 +102,7 @@ return [
     |
     */
 
-    'middleware' => ['web'],
+    'middleware' => ['web', 'school'],
 
     /*
     |--------------------------------------------------------------------------

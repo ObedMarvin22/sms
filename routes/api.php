@@ -3,6 +3,11 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+// Every API route runs inside a school: {school}.APP_BASE_DOMAIN/api/...
+Route::domain('{school}.'.config('app.base_domain'))
+    ->middleware('school')
+    ->group(function () {
+        Route::get('/user', function (Request $request) {
+            return $request->user();
+        })->middleware('auth:sanctum');
+    });
