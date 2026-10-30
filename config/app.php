@@ -66,6 +66,9 @@ return [
 
     'base_domain' => env('APP_BASE_DOMAIN', 'localhost'),
 
+    // Local demo data only (DemoStudentsSeeder). phpunit.xml lowers it so seeder tests stay fast.
+    'demo_students_per_school' => (int) env('DEMO_STUDENTS_PER_SCHOOL', 600),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone
