@@ -109,8 +109,9 @@ return [
 
         /**
          * Whether to enable font subsetting or not.
+         * On: only the characters used are embedded (a one-page class list drops from ~1.1 MB).
          */
-        'enable_font_subsetting' => false,
+        'enable_font_subsetting' => true,
 
         /**
          * The PDF rendering backend to use
