@@ -26,6 +26,9 @@ class SchoolUserProvider extends EloquentUserProvider
         $query = parent::newModelQuery($model);
         $column = $query->getModel()->qualifyColumn('school_id');
 
+        // Deactivated users (e.g. staff who left) can no longer sign in or keep a session.
+        $query->whereNull($query->getModel()->qualifyColumn('deactivated_at'));
+
         // Resolved per call: the provider outlives a single request in queue workers.
         $schoolId = app(CurrentSchool::class)->id();
 

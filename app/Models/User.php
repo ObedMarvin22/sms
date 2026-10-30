@@ -26,6 +26,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property int $id
  * @property int|null $school_id Null for Orange Tree platform users.
  * @property PlatformRoleKey|null $platform_role Only for platform users.
+ * @property CarbonImmutable|null $deactivated_at Set when the user may no longer sign in.
  * @property string $name
  * @property string $email
  * @property CarbonImmutable|null $email_verified_at
@@ -84,6 +85,7 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'platform_role' => PlatformRoleKey::class,
+            'deactivated_at' => 'immutable_datetime',
         ];
     }
 
