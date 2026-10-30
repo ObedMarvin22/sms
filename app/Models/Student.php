@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Gender;
+use App\Enums\Residence;
 use App\Enums\StudentStatus;
 use App\Models\Concerns\BelongsToSchool;
 use Carbon\CarbonImmutable;
@@ -26,6 +27,7 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property CarbonImmutable|null $date_of_birth
  * @property CarbonImmutable $admitted_on
  * @property StudentStatus $status
+ * @property Residence $residence
  * @property-read string $full_name
  */
 #[Fillable(['admission_number', 'first_name', 'last_name', 'other_names', 'gender', 'date_of_birth', 'admitted_on'])]
@@ -44,7 +46,7 @@ class Student extends Model
      *
      * @var array<string, mixed>
      */
-    protected $attributes = ['status' => 'active'];
+    protected $attributes = ['status' => 'active', 'residence' => 'day'];
 
     /**
      * Every enrolment, newest first: the student's history.
@@ -74,6 +76,16 @@ class Student extends Model
         return $this->hasMany(GuardianStudent::class)->orderByDesc('is_primary')->orderBy('id');
     }
 
+    /**
+     * Optional fee items this student takes (transport, feeding, ...).
+     *
+     * @return HasMany<StudentFeeOption, $this>
+     */
+    public function feeOptions(): HasMany
+    {
+        return $this->hasMany(StudentFeeOption::class);
+    }
+
     public function getFullNameAttribute(): string
     {
         return trim($this->first_name.' '.($this->other_names ? $this->other_names.' ' : '').$this->last_name);
@@ -82,7 +94,7 @@ class Student extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()->useLogName('students')
-            ->logOnly(['admission_number', 'first_name', 'last_name', 'other_names', 'gender', 'date_of_birth', 'status'])
+            ->logOnly(['admission_number', 'first_name', 'last_name', 'other_names', 'gender', 'date_of_birth', 'status', 'residence'])
             ->logOnlyDirty()->dontLogEmptyChanges();
     }
 
@@ -94,6 +106,7 @@ class Student extends Model
         return [
             'gender' => Gender::class,
             'status' => StudentStatus::class,
+            'residence' => Residence::class,
             'date_of_birth' => 'immutable_date',
             'admitted_on' => 'immutable_date',
         ];
