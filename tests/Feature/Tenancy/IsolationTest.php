@@ -9,6 +9,7 @@ use App\Models\ClassTeacherAssignment;
 use App\Models\Enrolment;
 use App\Models\Guardian;
 use App\Models\GuardianStudent;
+use App\Models\Notification;
 use App\Models\Programme;
 use App\Models\ProgrammeSubject;
 use App\Models\School;
@@ -24,6 +25,7 @@ use App\Models\Term;
 use App\Support\Tenancy\CurrentSchool;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Str;
 
 /*
 | SPEC section 4: every school-owned model gets an isolation test. Add each new model to the
@@ -43,6 +45,14 @@ dataset('school-owned models', [
     'StudentImportRow' => [fn (School $school): Model => StudentImportRow::factory()->create(['school_id' => $school->id])],
     'AttendanceSession' => [fn (School $school): Model => AttendanceSession::factory()->create(['school_id' => $school->id])],
     'AttendanceRecord' => [fn (School $school): Model => AttendanceRecord::factory()->create(['school_id' => $school->id])],
+    'Notification' => [fn (School $school): Model => Notification::create([
+        'id' => (string) Str::uuid(),
+        'school_id' => $school->id,
+        'type' => 'test',
+        'notifiable_type' => Guardian::class,
+        'notifiable_id' => Guardian::factory()->for($school)->create()->id,
+        'data' => ['message' => 'Hello'],
+    ])],
     'AdmissionSequence' => [fn (School $school): Model => AdmissionSequence::factory()->for($school)->create()],
     'Staff' => [fn (School $school): Model => Staff::factory()->for($school)->create()],
     'TeachingAssignment' => [fn (School $school): Model => TeachingAssignment::factory()->create(['school_id' => $school->id])],

@@ -6,8 +6,6 @@ use App\Actions\Attendance\SetAttendanceLockTime;
 use App\Actions\Attendance\TakeAttendance;
 use App\Actions\Classes\GenerateDefaultClasses;
 use App\Actions\Roles\SeedDefaultRoles;
-use App\Actions\Staff\AssignClassTeacher;
-use App\Actions\Students\AdmitStudent;
 use App\Actions\Students\MoveStudent;
 use App\Enums\AcademicPeriodType;
 use App\Enums\AttendanceStatus;
@@ -21,9 +19,7 @@ use App\Models\AttendanceRecord;
 use App\Models\AttendanceSession;
 use App\Models\School;
 use App\Models\SchoolClass;
-use App\Models\Staff;
 use App\Models\Stream;
-use App\Models\Student;
 use App\Models\User;
 use App\Support\Academic\DefaultCalendar;
 use App\Support\Tenancy\CurrentSchool;
@@ -31,6 +27,8 @@ use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
+
+require_once __DIR__.'/helpers.php';
 
 beforeEach(function () {
     $this->travelTo('2026-10-28 08:00:00'); // a Wednesday in the first term, before the 10:00 lock
@@ -54,40 +52,6 @@ beforeEach(function () {
     $this->kofi = pupil('Kofi', $this->p1);
     $this->ama = pupil('Ama', $this->p1);
 });
-
-function classTeacherOf(Stream $stream): User
-{
-    $user = User::factory()->for(app(CurrentSchool::class)->require())->create();
-    $user->assignRole(RoleKey::ClassTeacher->value);
-    $staff = Staff::factory()->for(app(CurrentSchool::class)->require())->create(['user_id' => $user->id]);
-    app(AssignClassTeacher::class)->handle($stream, $staff);
-
-    return $user;
-}
-
-function pupil(string $firstName, Stream $stream): Student
-{
-    return app(AdmitStudent::class)->handle(['first_name' => $firstName, 'last_name' => 'Mensah', 'stream_id' => $stream->id, 'admitted_on' => '2026-09-08']);
-}
-
-/**
- * @param  array<int, string>  $statuses  student id => status; everyone else present
- */
-function register(User $user, Stream $stream, array $statuses = [], string $date = '2026-10-28', ?string $reason = null): AttendanceSession
-{
-    $marks = [];
-    foreach (AttendanceRules::enrolmentsOn($stream, CarbonImmutable::parse($date)) as $enrolment) {
-        $marks[$enrolment->student_id] = ['status' => $statuses[$enrolment->student_id] ?? 'present', 'note' => ''];
-    }
-
-    return app(TakeAttendance::class)->handle($user, $stream, $date, $marks, $reason);
-}
-
-function markOf(Student $student, string $date = '2026-10-28'): ?AttendanceStatus
-{
-    return AttendanceRecord::where('student_id', $student->id)
-        ->whereHas('session', fn ($q) => $q->whereDate('date', $date))->first()?->status;
-}
 
 it('lets the class teacher take their register, linked to each enrolment', function () {
     $session = register($this->teacher, $this->p1, [$this->ama->id => 'absent']);
