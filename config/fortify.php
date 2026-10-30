@@ -102,7 +102,7 @@ return [
     |
     */
 
-    'middleware' => ['web', 'school'],
+    'middleware' => ['web', 'school', 'school.member'],
 
     /*
     |--------------------------------------------------------------------------
@@ -162,7 +162,8 @@ return [
     */
 
     'features' => [
-        Features::registration(),
+        // Off: staff are invited (console / staff screens); parents activate by phone.
+        // Features::registration(),
         Features::resetPasswords(),
         Features::emailVerification(),
         Features::twoFactorAuthentication([
@@ -170,9 +171,11 @@ return [
             'confirmPassword' => true,
             // 'window' => 0
         ]),
-        Features::passkeys([
-            'confirmPassword' => true,
-        ]),
+        // Off for now: passkey login finds the user by credential, bypassing the
+        // school-scoped user provider. Revisit with school scoping (DECISIONS.md).
+        // Features::passkeys([
+        //     'confirmPassword' => true,
+        // ]),
     ],
 
 ];

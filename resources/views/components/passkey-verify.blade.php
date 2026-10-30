@@ -6,6 +6,9 @@
     'separator' => __('Or continue with email'),
 ])
 
+{{-- Renders nothing while the Fortify passkeys feature is off (config/fortify.php). --}}
+@if (\Laravel\Fortify\Features::canManagePasskeys())
+
 @assets
 @vite('resources/js/passkeys.js')
 @endassets
@@ -74,3 +77,4 @@
         </div>
     </template>
 </div>
+@endif

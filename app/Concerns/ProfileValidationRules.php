@@ -3,7 +3,9 @@
 namespace App\Concerns;
 
 use App\Models\User;
+use App\Support\Tenancy\CurrentSchool;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
 
@@ -44,9 +46,10 @@ trait ProfileValidationRules
             'string',
             'email',
             'max:255',
-            $userId === null
-                ? Rule::unique(User::class)
-                : Rule::unique(User::class)->ignore($userId),
+            // Unique within the current school (null school = platform users).
+            Rule::unique(User::class)
+                ->where(fn (Builder $query) => $query->where('school_id', app(CurrentSchool::class)->id()))
+                ->ignore($userId),
         ];
     }
 }
