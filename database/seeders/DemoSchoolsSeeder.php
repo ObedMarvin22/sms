@@ -25,17 +25,19 @@ class DemoSchoolsSeeder extends Seeder
     public const CONSOLE_ADMIN_EMAIL = 'admin@orangetree.test';
 
     /**
-     * @var array<string, array{name: string, levels: list<SchoolLevel>, admin: string, teacher: string}>
+     * @var array<string, array{name: string, colour: string, levels: list<SchoolLevel>, admin: string, teacher: string}>
      */
     private const SCHOOLS = [
         'greenhill' => [
             'name' => 'Greenhill Academy',
+            'colour' => '#0A7D3C',
             'levels' => [SchoolLevel::Creche, SchoolLevel::Kg, SchoolLevel::Primary, SchoolLevel::Jhs],
             'admin' => 'Ama Mensah',
             'teacher' => 'Kwame Owusu',
         ],
         'hillview' => [
             'name' => 'Hillview School',
+            'colour' => '#1E3A8A',
             'levels' => [SchoolLevel::Primary, SchoolLevel::Jhs, SchoolLevel::Shs],
             'admin' => 'Efua Asante',
             'teacher' => 'Yaw Boateng',
@@ -51,6 +53,7 @@ class DemoSchoolsSeeder extends Seeder
         foreach (self::SCHOOLS as $subdomain => $spec) {
             $school = School::firstOrCreate(['subdomain' => $subdomain], [
                 'name' => $spec['name'],
+                'primary_colour' => $spec['colour'],
                 'status' => SchoolStatus::Active,
                 'levels_offered' => $spec['levels'],
                 'settings' => [],
