@@ -92,7 +92,7 @@ Done when:
       normalisation, duplicate detection by phone. (Obed: parent accounts are per school.)
 - [x] 5. Excel import for students + guardians: template download, dry-run preview with row
       errors, queued chunked import (100 rows per job).
-- [ ] 6. Daily attendance register by class teacher; lock at a school-set time; admin-only edits
+- [x] 6. Daily attendance register by class teacher; lock at a school-set time; admin-only edits
       after lock, logged.
 - [ ] 7. Absence notification to guardians (in-app + log for now).
 - [ ] 8. Student search, class lists, printable class list PDF.

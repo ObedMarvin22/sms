@@ -652,3 +652,26 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
 - **Only `.xlsx`.** One format to support and test; CSV loses leading zeros and dates.
 - **`AdmitStudent::prepare()`** holds every admission check without saving, so the dry run
   cannot drift from real admission rules.
+
+## 2026-10-30 — Attendance register (Sprint 3 step 6)
+
+- **One register a day, in the morning (Obed's choice).** Latecomers are marked Late.
+  `attendance_sessions` is unique per (school, stream, date). *Rejected:* morning and afternoon
+  registers (twice the teacher's work; can be added later as a session "period" column).
+- **Statuses:** present, late, absent, excused. Late counts as in school.
+- **Who takes it:** the stream's class teacher for the current year (`class_teacher_assignments`
+  via their staff record), or anyone with `attendance.edit_locked` (heads, administrators). Other
+  teachers are refused even though their role has `attendance.take`.
+- **Which days:** today or earlier, Monday to Friday, within the current term. *Deferred:*
+  holidays calendar and Saturday schools (a school setting later).
+- **Who is on it:** students enrolled in the stream that day. A student moved on day D is on the
+  new stream's register from D; a leaver is still on the register on their last day.
+- **Lock time** is a school setting (default 10:00, `schools.settings.attendance_lock_time`).
+  Ghana is on UTC all year, the same as `APP_TIMEZONE`, so no conversion. Before it the class
+  teacher may correct freely; after it only `attendance.edit_locked` may change marks, with a
+  reason.
+- **Logging:** only changes after the lock are logged, one activity entry per changed mark (old,
+  new, reason, who). Logging every morning's marks (≈600 rows a day per school) would flood the
+  activity log with nothing worth auditing.
+- **Concurrent saves** of the same register lock the stream row first, so they run one after
+  the other; the unique index is the safety net.
