@@ -9,6 +9,10 @@
 
 <flux:sidebar.brand :name="$name" {{ $attributes }}>
     <x-slot name="logo" class="flex aspect-square size-8 items-center justify-center rounded-md bg-accent text-xs font-semibold text-accent-foreground">
-        <span data-test="school-initials">{{ $initials }}</span>
+        @if ($school?->logo_path)
+            <img src="{{ route('school.logo') }}?v={{ $school->updated_at?->timestamp }}" alt="" class="size-8 rounded-md bg-white object-contain" data-test="school-logo">
+        @else
+            <span data-test="school-initials">{{ $initials }}</span>
+        @endif
     </x-slot>
 </flux:sidebar.brand>

@@ -1,9 +1,12 @@
 <?php
 
+use App\Enums\PermissionKey;
+use App\Http\Controllers\SchoolLogoController;
 use App\Livewire\Console\Login as ConsoleLogin;
 use App\Livewire\Console\Schools\Create as ConsoleSchoolsCreate;
 use App\Livewire\Console\Schools\Index as ConsoleSchoolsIndex;
 use App\Livewire\Invitations\AcceptInvitation;
+use App\Livewire\School\Profile as SchoolProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -42,6 +45,9 @@ Route::domain('{school}.'.config('app.base_domain'))
     ->group(function () {
         Route::redirect('/', '/login')->name('school.home');
 
+        // This school's logo only (private disk). Public: the login page shows it.
+        Route::get('branding/logo', SchoolLogoController::class)->name('school.logo');
+
         // Signed, single-use link from SchoolInvitation (App\Support\Invitations\InvitationLink).
         Route::livewire('invitation/{user}/{fingerprint}', AcceptInvitation::class)
             ->middleware('signed')
@@ -51,6 +57,10 @@ Route::domain('{school}.'.config('app.base_domain'))
         // this group, so staff who must set up two-factor can still reach them.
         Route::middleware(['auth', 'verified', 'two-factor.required'])->group(function () {
             Route::view('dashboard', 'dashboard')->name('dashboard');
+
+            Route::livewire('settings/school', SchoolProfile::class)
+                ->middleware('can:'.PermissionKey::SettingsManage->value)
+                ->name('school.profile');
         });
 
         require __DIR__.'/settings.php';
