@@ -121,9 +121,10 @@ Done when:
 - [x] 3. Append-only ledger, `Money` cast, balance calculation, `RecordPayment` Action, receipt
       numbers under row lock, receipt PDF. (Plus reversals, balance adjustments, statement and
       the guardian payment notice.)
-- [ ] 4. Paystack: `PaystackClient`; subaccount creation from the console; transaction
+- [x] 4. Paystack: `PaystackClient`; subaccount creation from the console; transaction
       initialisation; webhook with signature check, verify call and idempotency; nightly
-      reconciliation command. All tested with `Http::fake()`.
+      reconciliation command. All tested with `Http::fake()`. (Not yet tried against Paystack's
+      test mode with real test keys: needs Obed's test account.)
 - [ ] 5. SMS: `SmsGateway` interface, `log` driver, one provider driver (ask Obed which),
       notification channel, per-school credit wallet with low-credit warning; absence and
       payment notifications via SMS where enabled.

@@ -841,3 +841,41 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   balance; "contact only" guardians are skipped, as with absences.
 - **Amount in words** on receipts is our own small class (`AmountInWords`, British "and"), no
   package.
+
+## 2026-10-30 — Paystack (Sprint 4 step 4)
+
+- **Test keys only.** `.env.example` has empty `PAYSTACK_*` lines. Every test fakes HTTP and calls
+  `Http::preventStrayRequests()`, so nothing reaches Paystack from the suite. Live keys go only on
+  production, set by Obed.
+- **Webhook stores, then queues.** `POST /webhooks/paystack` (main domain, CSRF off for
+  `webhooks/*`) checks `x-paystack-signature` (HMAC-SHA512 of the raw body), stores the event
+  under a unique key (`event:data.id`) and answers 200 at once; `ProcessPaystackEvent` (cron
+  queue) does the rest within a minute. A repeated delivery is stored and queued once.
+  *Rejected:* doing the verify call inside the webhook request (timeouts on shared hosting).
+- **Never trust the webhook alone.** `SettlePaystackTransaction` always calls Paystack's verify
+  endpoint and records the payment only when it says success, in GHS, for exactly the expected
+  total. Otherwise: failed (no money taken) or flagged "needs attention" (nothing recorded).
+  It is the only way a Paystack payment is recorded; staff cannot record one by hand.
+- **The school comes from our reference** (`OT{school id}-{ULID}`, unique across schools), never
+  from metadata in the event. `ProcessPaystackEvent` is platform code: it finds the transaction
+  without the school scope (commented), then works inside that school.
+- **Paystack payments reuse `RecordPayment`** with method `paystack`, no user (recorded_by null),
+  the Paystack reference, and a note when the parent paid the charge. Receipt numbers, ledger,
+  guardian notice and logging are therefore identical to cash payments.
+- **Charge:** schools absorb it by default; "parents pay it" grosses the amount up so the school
+  receives the full fee: total = amount / (1 − rate), rounded up to the pesewa. Rate in config
+  (`PAYSTACK_CHARGE_BASIS_POINTS`, default 195 = 1.95%). The subaccount bears the charge in
+  both cases (`bearer: subaccount`).
+- **Email for Paystack:** the payer's or primary guardian's email if valid, else
+  `{phone digits}@{subdomain}.{base domain}` (Paystack only needs a valid-looking address).
+- **Subaccounts from the console** (super admin): bank or MoMo provider from Paystack's list
+  (cached a day), account checked with `/bank/resolve`, `percentage_charge` 0 (Orange Tree never
+  holds school money). Changing a connected account is deferred (done in Paystack's dashboard
+  for now).
+- **Nightly `paystack:reconcile`** (02:00): re-verifies pending and paid transactions from the last
+  3 days per connected school; records missed successes, flags anything that no longer matches.
+  Flags show on Fees → Payments; nothing is reversed automatically.
+- **Return page** `/pay/return` on the school's subdomain verifies immediately (the webhook may be
+  later) and tells the parent the outcome. Staff can create a payment link on the student page
+  (useful before the parent app exists).
+- `PaystackEvent` is a platform model (no `school_id`), listed in the architecture test.
