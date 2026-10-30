@@ -1,7 +1,18 @@
 <?php
 
+use App\Actions\Attendance\AttendanceRules;
 use App\Enums\PlatformRoleKey;
+use App\Enums\SchoolLevel;
+use App\Models\AcademicYear;
+use App\Models\ClassTeacherAssignment;
+use App\Models\Enrolment;
+use App\Models\Guardian;
+use App\Models\GuardianStudent;
 use App\Models\School;
+use App\Models\SchoolClass;
+use App\Models\Staff;
+use App\Models\Student;
+use App\Models\Term;
 use App\Models\User;
 use App\Support\Tenancy\CurrentSchool;
 use Database\Seeders\DatabaseSeeder;
@@ -57,11 +68,71 @@ it('creates a console super admin', function () {
 
 it('can run again without creating duplicates', function () {
     $this->seed(DatabaseSeeder::class);
-    $counts = [School::count(), User::count(), Role::count()];
+    $greenhill = School::where('subdomain', 'greenhill')->sole();
+    $schoolCounts = fn () => app(CurrentSchool::class)->runFor($greenhill, fn () => [
+        AcademicYear::count(), SchoolClass::count(), Staff::count(), Student::count(), Guardian::count(), ClassTeacherAssignment::count(),
+    ]);
+    $counts = [School::count(), User::count(), Role::count(), ...$schoolCounts()];
 
     $this->seed(DatabaseSeeder::class);
 
-    expect([School::count(), User::count(), Role::count()])->toBe($counts);
+    expect([School::count(), User::count(), Role::count(), ...$schoolCounts()])->toBe($counts);
+});
+
+it('sets each school up for this year with the configured number of students', function () {
+    $this->travelTo('2026-10-30 08:00:00');
+    config(['app.demo_students_per_school' => 30]);
+    $this->seed(DatabaseSeeder::class);
+
+    School::all()->each(fn (School $school) => app(CurrentSchool::class)->runFor($school, function (School $school) {
+        expect(Term::current()->sole()->name)->toBe('First term')
+            ->and(Student::count())->toBe(30)
+            ->and(Enrolment::where('is_current', true)->count())->toBe(30)
+            // Every child has exactly one primary contact.
+            ->and(GuardianStudent::where('is_primary', true)->count())->toBe(30)
+            ->and(Student::whereDoesntHave('guardianLinks')->exists())->toBeFalse()
+            ->and(Guardian::pluck('phone')->every(fn (string $phone) => preg_match('/^\+233\d{9}$/', $phone) === 1))->toBeTrue();
+
+        // Every class gets students.
+        expect(SchoolClass::whereDoesntHave('streams', fn ($q) => $q->whereIn('id', Enrolment::where('is_current', true)->select('stream_id')))->exists())->toBeFalse();
+
+        if ($school->levels_offered->contains(SchoolLevel::Shs)) {
+            expect(Enrolment::whereHas('stream.schoolClass', fn ($q) => $q->where('level', SchoolLevel::Shs->value))->whereNull('programme_id')->exists())->toBeFalse();
+        }
+    }));
+});
+
+it('makes the demo teacher class teacher of Primary 4A', function () {
+    $this->seed(DatabaseSeeder::class);
+    $greenhill = School::where('subdomain', 'greenhill')->sole();
+
+    app(CurrentSchool::class)->runFor($greenhill, function () {
+        $teacher = User::where('email', 'teacher@greenhill.test')->sole();
+
+        expect(AttendanceRules::streamsFor($teacher)->map->full_name->all())->toBe(['Primary 4A']);
+    });
+});
+
+it('gives brothers and sisters the same guardian records', function () {
+    config(['app.demo_students_per_school' => 60]);
+    $this->seed(DatabaseSeeder::class);
+
+    app(CurrentSchool::class)->runFor(School::where('subdomain', 'greenhill')->sole(), function () {
+        $shared = Guardian::has('links', '>', 1)->with('links.student')->get();
+
+        expect($shared)->not->toBeEmpty()
+            ->and($shared->every(fn (Guardian $g) => $g->links->pluck('student.last_name')->unique()->count() === 1))->toBeTrue();
+    });
+});
+
+it('produces the same students every time (fixed seed per school)', function () {
+    $this->seed(DatabaseSeeder::class);
+
+    // The same first students as every local migrate:fresh --seed, whatever the total.
+    $first = app(CurrentSchool::class)->runFor(School::where('subdomain', 'greenhill')->sole(),
+        fn () => Student::orderBy('id')->take(3)->get()->map->full_name->all());
+
+    expect($first)->toBe(['Grace Annan', 'Selorm Kwaku Annan', 'Richard Yaw Dzeble']);
 });
 
 it('refuses to run in production', function () {
