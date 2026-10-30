@@ -552,3 +552,24 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
 - **Gotchas found:** `stream()` is a method on Livewire's base component (renamed to
   `selectedStream`); a new `Staff` model did not know its DB default status until
   `$attributes = ['status' => 'active']` was added.
+
+## 2026-10-30 — Students and admission numbers
+
+- **Decision:** `students` (soft deletes, unique `(school_id, admission_number)`) and
+  `admission_sequences` (one counter per school and scope). Format per school in SchoolSettings:
+  `admission_prefix` (default: initials of the school name) and `admission_number_format`
+  (default `{PREFIX}/{YYYY}/{SEQ:4}`; tokens {PREFIX}, {YYYY}, {YY}, {SEQ:n}). With the year in the
+  format, numbering restarts each year (scope = year), otherwise one sequence ("all").
+  A typed-in number is kept if unique (also against deleted students); the generator skips numbers
+  already in use. `GenerateAdmissionNumber` locks the counter row (`SELECT … FOR UPDATE`) inside
+  the transaction that saves the student; the unique index is the safety net.
+- **Concurrency bug found by the test:** two first-ever admissions in a scope both ran
+  `INSERT IGNORE` on the counter and then `FOR UPDATE`, and MySQL killed one with a deadlock.
+  Fix: select-for-update first, insert only when missing, and `DB::transaction(..., attempts: 5)`
+  in `AdmitStudent` and the generator so MySQL deadlocks are retried. The worker script now exits
+  non-zero on failure (it first printed the error and exited 0, which hid the crash).
+- **Test design:** `tests/Concurrency` is its own suite outside `tests/Feature` (no rolled-back
+  transaction): 5 real PHP processes admit 20 students each with real commits, expecting exactly
+  0001–0100. Without the lock the test fails with a duplicate (verified). It cleans up its rows.
+- **Screen:** Students (`students.view`; admit/edit with `students.manage`) behind `school.ready`.
+  The add/edit modal is only rendered for users who can manage students.
