@@ -5,3 +5,7 @@ arch('no debugging calls are left in the code')
     ->not->toBeUsed();
 
 arch('PHP preset')->preset()->php();
+
+arch('enums are string-backed')
+    ->expect('App\Enums')
+    ->toBeStringBackedEnums();
