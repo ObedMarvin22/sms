@@ -2,6 +2,8 @@
 
 namespace App\Livewire\School;
 
+use App\Actions\Attendance\AttendanceRules;
+use App\Actions\Attendance\SetAttendanceLockTime;
 use App\Actions\Schools\UpdateSchoolProfile;
 use App\Actions\Students\SetAdmissionFormat;
 use App\Enums\PermissionKey;
@@ -44,6 +46,8 @@ class Profile extends Component
 
     public string $admission_number_format = '';
 
+    public string $attendance_lock_time = '';
+
     public function mount(): void
     {
         $this->authorize(PermissionKey::SettingsManage->value);
@@ -59,6 +63,7 @@ class Profile extends Component
         $format = AdmissionNumberFormat::for($school);
         $this->admission_prefix = $format->prefix;
         $this->admission_number_format = $format->format;
+        $this->attendance_lock_time = AttendanceRules::lockTime($school);
         $this->levels = array_values($school->levels_offered->map(fn (SchoolLevel $level) => $level->value)->all());
     }
 
@@ -113,6 +118,22 @@ class Profile extends Component
         }
 
         Flux::toast(variant: 'success', text: __('Admission number format saved.'));
+    }
+
+    public function saveAttendanceLockTime(SetAttendanceLockTime $setLockTime): void
+    {
+        $this->authorize(PermissionKey::SettingsManage->value);
+        $this->resetErrorBag();
+
+        try {
+            $setLockTime->handle($this->school(), $this->attendance_lock_time);
+        } catch (ValidationException $e) {
+            $this->setErrorBag($e->validator->errors());
+
+            return;
+        }
+
+        Flux::toast(variant: 'success', text: __('Registers now lock at :time.', ['time' => $this->attendance_lock_time]));
     }
 
     /**

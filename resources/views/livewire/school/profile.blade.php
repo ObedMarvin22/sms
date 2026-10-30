@@ -65,4 +65,18 @@
             <flux:button type="submit">{{ __('Save format') }}</flux:button>
         </div>
     </form>
+
+    <flux:separator />
+
+    <form wire:submit="saveAttendanceLockTime" class="flex flex-col gap-4" data-test="attendance-lock">
+        <div>
+            <flux:heading size="lg">{{ __('Attendance') }}</flux:heading>
+            <flux:text>{{ __('Each day\'s register locks at this time. After it, only staff who may edit locked registers can change marks, with a reason.') }}</flux:text>
+        </div>
+        <flux:input type="time" wire:model="attendance_lock_time" :label="__('Register locks at')" class="max-w-40" />
+        <flux:error name="attendance_lock_time" />
+        <div>
+            <flux:button type="submit">{{ __('Save lock time') }}</flux:button>
+        </div>
+    </form>
 </div>

@@ -28,6 +28,9 @@ final class StaffNavigation
             new NavItem('Guardians', 'phone', 'guardians.index', PermissionKey::StudentsView, 'People'),
             new NavItem('Promotion', 'arrow-trending-up', 'students.promotion', PermissionKey::StudentsManage, 'People'),
             new NavItem('Staff', 'users', 'staff.index', PermissionKey::StaffManage, 'People'),
+
+            new NavItem('Register', 'check-circle', 'attendance.register', PermissionKey::AttendanceTake, 'Attendance'),
+            new NavItem("Today's attendance", 'chart-bar', 'attendance.today', PermissionKey::AttendanceEditLocked, 'Attendance'),
             new NavItem('Teaching assignments', 'clipboard-document-list', 'staff.assignments', PermissionKey::StaffManage, 'People'),
 
             // Sprint 2: school setup (route names fixed as each screen is built).

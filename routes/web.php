@@ -5,6 +5,8 @@ use App\Http\Controllers\SchoolLogoController;
 use App\Http\Controllers\StudentImportTemplateController;
 use App\Livewire\Academic\CreateYear as CreateAcademicYear;
 use App\Livewire\Academic\Years as AcademicYears;
+use App\Livewire\Attendance\Register as AttendanceRegister;
+use App\Livewire\Attendance\Today as AttendanceToday;
 use App\Livewire\Classes\Index as ClassesIndex;
 use App\Livewire\Classes\Subjects as ClassSubjects;
 use App\Livewire\Console\Login as ConsoleLogin;
@@ -83,6 +85,15 @@ Route::domain('{school}.'.config('app.base_domain'))
                 });
                 Route::livewire('students/{student}', StudentsShow::class)->name('students.show');
                 Route::livewire('guardians', GuardiansIndex::class)->name('guardians.index');
+            });
+
+            // Registers need a current term and classes. Register checks attendance.take or
+            // attendance.edit_locked itself (the "can" middleware takes one permission).
+            Route::middleware('school.ready')->group(function () {
+                Route::livewire('attendance', AttendanceRegister::class)->name('attendance.register');
+                Route::livewire('attendance/today', AttendanceToday::class)
+                    ->middleware('can:'.PermissionKey::AttendanceEditLocked->value)
+                    ->name('attendance.today');
             });
 
             Route::middleware('can:'.PermissionKey::StaffManage->value)->group(function () {
