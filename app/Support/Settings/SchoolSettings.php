@@ -2,6 +2,7 @@
 
 namespace App\Support\Settings;
 
+use App\Enums\AcademicPeriodType;
 use App\Models\School;
 
 /**
@@ -13,7 +14,10 @@ use App\Models\School;
 final class SchoolSettings
 {
     /** @var array<string, mixed> */
-    public const DEFAULTS = [];
+    public const DEFAULTS = [
+        // Terms (3 per year) or semesters (2). Fixed once the school has an academic year.
+        'academic_period' => 'term',
+    ];
 
     /**
      * @param  array<string, mixed>  $values
@@ -28,6 +32,11 @@ final class SchoolSettings
     public function get(string $key, mixed $default = null): mixed
     {
         return array_key_exists($key, $this->values) ? $this->values[$key] : $default;
+    }
+
+    public function academicPeriod(): AcademicPeriodType
+    {
+        return AcademicPeriodType::tryFrom((string) $this->get('academic_period')) ?? AcademicPeriodType::Term;
     }
 
     /**
