@@ -136,7 +136,8 @@ return [
      *
      * To enable, set to true, and then create listeners to watch these events.
      */
-    'events_enabled' => false,
+    // On: App\Listeners\LogRoleChanges writes role and permission changes to the activity log.
+    'events_enabled' => true,
 
     /*
      * Teams Feature.

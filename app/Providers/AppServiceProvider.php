@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Http\Middleware\EnsureUserBelongsToSchool;
 use App\Http\Middleware\IdentifySchool;
+use App\Listeners\LogRoleChanges;
 use App\Models\User;
 use App\Support\Tenancy\CurrentSchool;
 use App\Support\Tenancy\ReservedSubdomains;
@@ -15,10 +16,15 @@ use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Livewire;
+use Spatie\Permission\Events\PermissionAttachedEvent;
+use Spatie\Permission\Events\PermissionDetachedEvent;
+use Spatie\Permission\Events\RoleAttachedEvent;
+use Spatie\Permission\Events\RoleDetachedEvent;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -46,6 +52,12 @@ class AppServiceProvider extends ServiceProvider
         // Livewire updates post to its own endpoint; re-run these there using the
         // original page's route, so components always have the current school and user.
         Livewire::addPersistentMiddleware([IdentifySchool::class, EnsureUserBelongsToSchool::class]);
+
+        // Audit trail for role assignments and permission grants.
+        Event::listen(RoleAttachedEvent::class, [LogRoleChanges::class, 'roleAttached']);
+        Event::listen(RoleDetachedEvent::class, [LogRoleChanges::class, 'roleDetached']);
+        Event::listen(PermissionAttachedEvent::class, [LogRoleChanges::class, 'permissionAttached']);
+        Event::listen(PermissionDetachedEvent::class, [LogRoleChanges::class, 'permissionDetached']);
 
         // Console: only super admins create schools.
         Gate::define('create-schools', fn (User $user): bool => $user->platform_role?->canCreateSchools() ?? false);
