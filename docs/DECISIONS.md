@@ -603,3 +603,24 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
 - **Rejected:** one platform-level parent account across schools (would need a central parent
   domain, cross-school token rules and shared ownership of the parent's details).
 - **Possible later:** a "switch school" convenience that links accounts with the same phone.
+
+## 2026-10-30 — Guardian rules (Sprint 3 step 4)
+
+- **One guardian per phone per school.** `unique (school_id, phone)`; the check also counts
+  soft-deleted guardians, so an archived record is never duplicated (it will be restored instead
+  when deleting guardians is built). Siblings share one guardian record. *Rejected:* matching on
+  name too (names vary in spelling far more than phone numbers do).
+- **Relationship, access level, primary contact and pickup belong to the link, not the guardian.**
+  A father can have full access for one child and limited for another (e.g. a step-child).
+  Access levels: full, limited (attendance and notices only), none (contact only). They are
+  enforced in the parent API from Sprint 4.
+- **`can_pick_up` defaults to yes** for guardians. Spec section 11 adds separately registered
+  pickup persons later; this flag lets a school mark a guardian who must not collect a child
+  (logged, like all pickup changes).
+- **A child always keeps one guardian and exactly one primary contact.** The first guardian
+  becomes primary; removing the primary passes it to the next oldest link. The is_primary
+  column uses the true-or-NULL unique-index pattern, like `is_current`.
+- **Links are saved as models, never `attach()`/`detach()`**, so BelongsToSchool fills school_id
+  and the activity log records every change.
+- **Deferred:** guardian ID numbers with encrypted casts (SPEC §9) until a screen needs them;
+  deleting/archiving a guardian record.

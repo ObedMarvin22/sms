@@ -88,9 +88,8 @@ Done when:
 - [x] 2. Students with per-school admission number format, generated under a row lock
       (concurrency test).
 - [x] 3. Enrolment on admission; promotion, transfer and withdrawal create new enrolment records.
-- [ ] 4. Guardians: create/link, relationship, access level, primary contact, `+233`
-      normalisation, duplicate detection by phone. (First ask Obed: one parent account across
-      schools vs per school.)
+- [x] 4. Guardians: create/link, relationship, access level, primary contact, `+233`
+      normalisation, duplicate detection by phone. (Obed: parent accounts are per school.)
 - [ ] 5. Excel import for students + guardians: template download, dry-run preview with row
       errors, queued chunked import (100 rows per job).
 - [ ] 6. Daily attendance register by class teacher; lock at a school-set time; admin-only edits
