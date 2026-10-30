@@ -21,8 +21,10 @@ use App\Models\InstalmentPlan;
 use App\Models\InstalmentPlanStep;
 use App\Models\LedgerEntry;
 use App\Models\Notification;
+use App\Models\Payment;
 use App\Models\Programme;
 use App\Models\ProgrammeSubject;
+use App\Models\ReceiptSequence;
 use App\Models\School;
 use App\Models\SchoolClass;
 use App\Models\Staff;
@@ -61,6 +63,8 @@ dataset('school-owned models', [
     'AttendanceRecord' => [fn (School $school): Model => AttendanceRecord::factory()->create(['school_id' => $school->id])],
     'FeeItem' => [fn (School $school): Model => FeeItem::factory()->for($school)->create()],
     'Discount' => [fn (School $school): Model => Discount::factory()->for($school)->create()],
+    'Payment' => [fn (School $school): Model => Payment::factory()->create(['school_id' => $school->id])],
+    'ReceiptSequence' => [fn (School $school): Model => ReceiptSequence::factory()->for($school)->create()],
     'Bill' => [fn (School $school): Model => Bill::factory()->create(['school_id' => $school->id])],
     'BillLine' => [fn (School $school): Model => BillLine::factory()->create(['school_id' => $school->id])],
     'BillInstalment' => [fn (School $school): Model => BillInstalment::factory()->create(['school_id' => $school->id])],
