@@ -44,13 +44,13 @@ Done when:
       (school, roles, invitation for first administrator), list of schools.
 - [x] 8. Activity log on users and roles.
 - [x] 9. Staff 2FA (starter kit's feature if present; otherwise note it for Sprint 4).
-- [ ] 10. Seeder: two demo schools (`greenhill`, `hillview`) with an admin each.
+- [x] 10. Seeder: two demo schools (`greenhill`, `hillview`) with an admin each.
 
 Done when:
 - [x] each subdomain shows its own school's login; unknown subdomain 404s; suspended shows the page
 - [x] a Greenhill user cannot log in on Hillview; a Greenhill session/token is rejected on Hillview
 - [x] creating a school in the console seeds roles and invites the admin
-- [ ] isolation and architecture tests pass; CI green
+- [ ] isolation and architecture tests pass; CI green — **local: yes (182 tests). CI: still blocked** by the GitHub billing lock (job not started).
 
 **STOP for review.**
 

@@ -373,3 +373,15 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
 - **Deferred:** two-factor for Orange Tree console users. The console has its own login and would
   need its own challenge. Recommended for super admins before go-live.
 - Sprint 4 step 10 ("Staff 2FA if not done in Sprint 1") is therefore already covered.
+
+## 2026-10-30 — Demo seeder
+
+- **Decision:** `DemoSchoolsSeeder` creates Greenhill (Creche, KG, Primary, JHS) and Hillview
+  (Primary, JHS, SHS), both active, each with an administrator and a class teacher, plus an
+  Orange Tree console super admin. All use the password `password`; credentials are in
+  `docs/DEVELOPMENT.md`. It refuses to run in production and can run twice without duplicates.
+  It skips the invitation email (sets a known password instead). The starter kit's
+  `WithoutModelEvents` was removed from `DatabaseSeeder`.
+- **Reason:** Roadmap Sprint 1 step 10. Model events must stay on while seeding:
+  `BelongsToSchool` fills `school_id` and the activity log records changes through them.
+  The class teachers give a quick sign-in without setting up two-factor.
