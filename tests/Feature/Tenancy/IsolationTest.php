@@ -2,6 +2,8 @@
 
 use App\Models\AcademicYear;
 use App\Models\AdmissionSequence;
+use App\Models\AttendanceRecord;
+use App\Models\AttendanceSession;
 use App\Models\ClassSubject;
 use App\Models\ClassTeacherAssignment;
 use App\Models\Enrolment;
@@ -39,6 +41,8 @@ dataset('school-owned models', [
     'Student' => [fn (School $school): Model => Student::factory()->for($school)->create()],
     'StudentImport' => [fn (School $school): Model => StudentImport::factory()->for($school)->create()],
     'StudentImportRow' => [fn (School $school): Model => StudentImportRow::factory()->create(['school_id' => $school->id])],
+    'AttendanceSession' => [fn (School $school): Model => AttendanceSession::factory()->create(['school_id' => $school->id])],
+    'AttendanceRecord' => [fn (School $school): Model => AttendanceRecord::factory()->create(['school_id' => $school->id])],
     'AdmissionSequence' => [fn (School $school): Model => AdmissionSequence::factory()->for($school)->create()],
     'Staff' => [fn (School $school): Model => Staff::factory()->for($school)->create()],
     'TeachingAssignment' => [fn (School $school): Model => TeachingAssignment::factory()->create(['school_id' => $school->id])],
