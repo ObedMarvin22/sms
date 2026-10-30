@@ -11,6 +11,7 @@ use App\Livewire\Console\Schools\Create as ConsoleSchoolsCreate;
 use App\Livewire\Console\Schools\Index as ConsoleSchoolsIndex;
 use App\Livewire\Invitations\AcceptInvitation;
 use App\Livewire\School\Profile as SchoolProfile;
+use App\Livewire\Setup\Wizard as SetupWizard;
 use App\Livewire\Subjects\Index as SubjectsIndex;
 use App\Livewire\Subjects\Programmes as SubjectsProgrammes;
 use Illuminate\Http\Request;
@@ -65,6 +66,7 @@ Route::domain('{school}.'.config('app.base_domain'))
             Route::view('dashboard', 'dashboard')->name('dashboard');
 
             Route::middleware('can:'.PermissionKey::SettingsManage->value)->group(function () {
+                Route::livewire('setup', SetupWizard::class)->name('setup');
                 Route::livewire('settings/school', SchoolProfile::class)->name('school.profile');
                 Route::livewire('settings/academic-years', AcademicYears::class)->name('academic-years.index');
                 Route::livewire('settings/academic-years/create', CreateAcademicYear::class)->name('academic-years.create');

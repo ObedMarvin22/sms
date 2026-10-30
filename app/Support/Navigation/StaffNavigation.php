@@ -24,6 +24,7 @@ final class StaffNavigation
             new NavItem('Dashboard', 'home', 'dashboard'),
 
             // Sprint 2: school setup (route names fixed as each screen is built).
+            new NavItem('Setup checklist', 'clipboard-document-check', 'setup', PermissionKey::SettingsManage, 'School setup'),
             new NavItem('School profile', 'building-library', 'school.profile', PermissionKey::SettingsManage, 'School setup'),
             new NavItem('Academic years', 'calendar-days', 'academic-years.index', PermissionKey::SettingsManage, 'School setup'),
             new NavItem('Classes', 'rectangle-group', 'classes.index', PermissionKey::SettingsManage, 'School setup'),
