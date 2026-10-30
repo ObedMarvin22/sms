@@ -79,4 +79,13 @@
             <flux:button type="submit">{{ __('Save lock time') }}</flux:button>
         </div>
     </form>
+
+    <flux:separator />
+
+    <div class="flex flex-col gap-2" data-test="offers-boarding">
+        <flux:heading size="lg">{{ __('Boarding') }}</flux:heading>
+        <flux:switch wire:model.live="offers_boarding" :label="__('This school takes boarders')"
+            :description="__('Adds boarding fee structures and a day / boarding choice on each student.')" />
+        <flux:error name="offers_boarding" />
+    </div>
 </div>

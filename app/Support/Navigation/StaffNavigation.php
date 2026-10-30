@@ -34,6 +34,10 @@ final class StaffNavigation
             new NavItem("Today's attendance", 'chart-bar', 'attendance.today', PermissionKey::AttendanceEditLocked, 'Attendance'),
             new NavItem('Teaching assignments', 'clipboard-document-list', 'staff.assignments', PermissionKey::StaffManage, 'People'),
 
+            // Sprint 4: fees.
+            new NavItem('Fee structures', 'table-cells', 'fees.structures', PermissionKey::FinanceView, 'Fees'),
+            new NavItem('Fee items', 'tag', 'fees.items', PermissionKey::FinanceView, 'Fees'),
+
             // Sprint 2: school setup (route names fixed as each screen is built).
             new NavItem('Setup checklist', 'clipboard-document-check', 'setup', PermissionKey::SettingsManage, 'School setup'),
             new NavItem('School profile', 'building-library', 'school.profile', PermissionKey::SettingsManage, 'School setup'),

@@ -13,6 +13,8 @@ use App\Livewire\Classes\Subjects as ClassSubjects;
 use App\Livewire\Console\Login as ConsoleLogin;
 use App\Livewire\Console\Schools\Create as ConsoleSchoolsCreate;
 use App\Livewire\Console\Schools\Index as ConsoleSchoolsIndex;
+use App\Livewire\Fees\Items as FeeItems;
+use App\Livewire\Fees\Structures as FeeStructures;
 use App\Livewire\Guardians\Index as GuardiansIndex;
 use App\Livewire\Invitations\AcceptInvitation;
 use App\Livewire\School\Profile as SchoolProfile;
@@ -98,6 +100,12 @@ Route::domain('{school}.'.config('app.base_domain'))
                 Route::livewire('attendance/today', AttendanceToday::class)
                     ->middleware('can:'.PermissionKey::AttendanceEditLocked->value)
                     ->name('attendance.today');
+            });
+
+            // Fees: finance.view to look; changes need fees.manage (checked in each component).
+            Route::middleware(['can:'.PermissionKey::FinanceView->value, 'school.ready'])->group(function () {
+                Route::livewire('fees/items', FeeItems::class)->name('fees.items');
+                Route::livewire('fees/structures', FeeStructures::class)->name('fees.structures');
             });
 
             Route::middleware('can:'.PermissionKey::StaffManage->value)->group(function () {

@@ -4,11 +4,13 @@ namespace App\Livewire\School;
 
 use App\Actions\Attendance\AttendanceRules;
 use App\Actions\Attendance\SetAttendanceLockTime;
+use App\Actions\Fees\SetOffersBoarding;
 use App\Actions\Schools\UpdateSchoolProfile;
 use App\Actions\Students\SetAdmissionFormat;
 use App\Enums\PermissionKey;
 use App\Enums\SchoolLevel;
 use App\Models\School;
+use App\Support\Settings\SchoolSettings;
 use App\Support\Students\AdmissionNumberFormat;
 use App\Support\Tenancy\CurrentSchool;
 use Flux\Flux;
@@ -48,6 +50,8 @@ class Profile extends Component
 
     public string $attendance_lock_time = '';
 
+    public bool $offers_boarding = false;
+
     public function mount(): void
     {
         $this->authorize(PermissionKey::SettingsManage->value);
@@ -64,6 +68,7 @@ class Profile extends Component
         $this->admission_prefix = $format->prefix;
         $this->admission_number_format = $format->format;
         $this->attendance_lock_time = AttendanceRules::lockTime($school);
+        $this->offers_boarding = (bool) SchoolSettings::for($school)->get('offers_boarding', false);
         $this->levels = array_values($school->levels_offered->map(fn (SchoolLevel $level) => $level->value)->all());
     }
 
@@ -118,6 +123,23 @@ class Profile extends Component
         }
 
         Flux::toast(variant: 'success', text: __('Admission number format saved.'));
+    }
+
+    public function updatedOffersBoarding(SetOffersBoarding $setOffersBoarding): void
+    {
+        $this->authorize(PermissionKey::SettingsManage->value);
+        $this->resetErrorBag();
+
+        try {
+            $setOffersBoarding->handle($this->school(), $this->offers_boarding);
+        } catch (ValidationException $e) {
+            $this->offers_boarding = ! $this->offers_boarding;
+            $this->setErrorBag($e->validator->errors());
+
+            return;
+        }
+
+        Flux::toast(variant: 'success', text: $this->offers_boarding ? __('Boarding turned on.') : __('Boarding turned off.'));
     }
 
     public function saveAttendanceLockTime(SetAttendanceLockTime $setLockTime): void

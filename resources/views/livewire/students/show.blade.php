@@ -27,6 +27,8 @@
 
     <livewire:students.guardians :student-id="$student->id" />
 
+    <livewire:students.fees :student-id="$student->id" />
+
     <div>
         <flux:heading size="lg" class="mb-2">{{ __('Enrolment history') }}</flux:heading>
         <flux:table>
