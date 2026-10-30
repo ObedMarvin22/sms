@@ -335,3 +335,23 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
 - **Decision:** `User` and `School` docblocks type dates as `CarbonImmutable`.
 - **Reason:** The starter kit calls `Date::use(CarbonImmutable::class)`, so Eloquent returns
   immutable dates; its docblocks said `Illuminate\Support\Carbon`. PHPStan caught the mismatch.
+
+## 2026-10-30 — Activity log: school-aware model, users and roles
+
+- **Decision:** `activity_log.school_id` (nullable, indexed, no foreign key so the trail outlives
+  what it describes). `App\Models\Activity` extends Spatie's model: it applies `SchoolScope` and,
+  on create, takes the current school or else the subject's `school_id` (so a console change to a
+  school's user shows up in that school's log); platform-only events keep null. It is exempt from
+  the `BelongsToSchool` arch rule for that reason.
+  - **Users** (`LogsActivity`, log "users"): only `name`, `email`, `platform_role`,
+    `two_factor_confirmed_at`, dirty values only. A password change is a separate
+    `password_changed` entry with no value. Secrets are never logged (tested).
+  - **Roles** (log "roles"): `config/permission.php` `events_enabled = true`;
+    `App\Listeners\LogRoleChanges` records role assigned/removed and permission granted/revoked,
+    with names in `properties`.
+  The causer is whoever is signed in on the active guard (school user or platform user).
+- **Reason:** CLAUDE.md requires logging permission changes; SPEC section 14 lists the activity log.
+- **Note:** Creating a school logs its default permission grants (one entry per role). That is an
+  accurate record of who set the school up, so it is kept.
+- **Note:** `school_id` and `platform_role` are not mass-assignable on `User`; `update([...])`
+  silently ignores them. Set them explicitly (a test tripped over this).

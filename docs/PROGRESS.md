@@ -42,7 +42,7 @@ Done when:
       eleven roles and their permissions; team id set in `IdentifySchool`.
 - [x] 7. Orange Tree console on `admin.localhost`: platform-user guard, `CreateSchool` Action
       (school, roles, invitation for first administrator), list of schools.
-- [ ] 8. Activity log on users and roles.
+- [x] 8. Activity log on users and roles.
 - [ ] 9. Staff 2FA (starter kit's feature if present; otherwise note it for Sprint 4).
 - [ ] 10. Seeder: two demo schools (`greenhill`, `hillview`) with an admin each.
 
