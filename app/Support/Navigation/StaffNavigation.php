@@ -23,6 +23,10 @@ final class StaffNavigation
         return new self([
             new NavItem('Dashboard', 'home', 'dashboard'),
 
+            // Sprint 3: people.
+            new NavItem('Staff', 'users', 'staff.index', PermissionKey::StaffManage, 'People'),
+            new NavItem('Teaching assignments', 'clipboard-document-list', 'staff.assignments', PermissionKey::StaffManage, 'People'),
+
             // Sprint 2: school setup (route names fixed as each screen is built).
             new NavItem('Setup checklist', 'clipboard-document-check', 'setup', PermissionKey::SettingsManage, 'School setup'),
             new NavItem('School profile', 'building-library', 'school.profile', PermissionKey::SettingsManage, 'School setup'),

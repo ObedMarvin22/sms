@@ -12,6 +12,8 @@ use App\Livewire\Console\Schools\Index as ConsoleSchoolsIndex;
 use App\Livewire\Invitations\AcceptInvitation;
 use App\Livewire\School\Profile as SchoolProfile;
 use App\Livewire\Setup\Wizard as SetupWizard;
+use App\Livewire\Staff\Index as StaffIndex;
+use App\Livewire\Staff\TeachingAssignments as StaffTeachingAssignments;
 use App\Livewire\Subjects\Index as SubjectsIndex;
 use App\Livewire\Subjects\Programmes as SubjectsProgrammes;
 use Illuminate\Http\Request;
@@ -64,6 +66,11 @@ Route::domain('{school}.'.config('app.base_domain'))
         // this group, so staff who must set up two-factor can still reach them.
         Route::middleware(['auth', 'verified', 'two-factor.required'])->group(function () {
             Route::view('dashboard', 'dashboard')->name('dashboard');
+
+            Route::middleware('can:'.PermissionKey::StaffManage->value)->group(function () {
+                Route::livewire('staff', StaffIndex::class)->name('staff.index');
+                Route::livewire('staff/teaching-assignments', StaffTeachingAssignments::class)->name('staff.assignments');
+            });
 
             Route::middleware('can:'.PermissionKey::SettingsManage->value)->group(function () {
                 Route::livewire('setup', SetupWizard::class)->name('setup');
