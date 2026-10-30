@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\IdentifySchool;
+use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,7 +15,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'school' => IdentifySchool::class,
+        ]);
+
+        // Resolve the school before authentication runs on the same route.
+        $middleware->prependToPriorityList(
+            before: AuthenticatesRequests::class,
+            prepend: IdentifySchool::class,
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

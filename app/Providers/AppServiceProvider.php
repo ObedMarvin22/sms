@@ -2,12 +2,14 @@
 
 namespace App\Providers;
 
+use App\Http\Middleware\IdentifySchool;
 use App\Support\Tenancy\CurrentSchool;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,6 +28,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+
+        // Livewire updates post to its own endpoint; re-run IdentifySchool there using the
+        // original page's route, so components always have the current school.
+        Livewire::addPersistentMiddleware([IdentifySchool::class]);
     }
 
     /**
