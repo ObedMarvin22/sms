@@ -5,11 +5,12 @@ namespace Tests\Feature\Auth;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Fortify\Features;
+use Tests\Concerns\OnSchoolSubdomain;
 use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
 {
-    use RefreshDatabase;
+    use OnSchoolSubdomain, RefreshDatabase;
 
     public function test_login_screen_can_be_rendered(): void
     {
@@ -74,7 +75,8 @@ class AuthenticationTest extends TestCase
 
         $response = $this->actingAs($user)->post(route('logout'));
 
-        $response->assertRedirect(route('home'));
+        // Logging out stays on the school's own subdomain.
+        $response->assertRedirect(route('school.home'));
 
         $this->assertGuest();
     }

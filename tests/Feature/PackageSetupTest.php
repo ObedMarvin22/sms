@@ -8,6 +8,8 @@ use Maatwebsite\Excel\Excel;
 it('protects the API user route with Sanctum', function () {
     expect(config('auth.guards'))->toHaveKey('sanctum');
 
+    $this->onSchool();
+
     $this->getJson('/api/user')->assertUnauthorized();
 });
 
