@@ -15,7 +15,7 @@
             <flux:table.column>{{ __('Subdomain') }}</flux:table.column>
             <flux:table.column>{{ __('Status') }}</flux:table.column>
             <flux:table.column>{{ __('Created') }}</flux:table.column>
-            <flux:table.column>{{ __('Online payments') }}</flux:table.column>
+            <flux:table.column>{{ __('Payments and SMS') }}</flux:table.column>
         </flux:table.columns>
 
         <flux:table.rows>
@@ -31,6 +31,8 @@
                         <flux:link :href="route('console.schools.payments', $school)" wire:navigate data-test="payments-link">
                             {{ $school->paystack_subaccount_code ? __('Connected') : __('Set up') }}
                         </flux:link>
+                        ·
+                        <flux:link :href="route('console.schools.sms', $school)" wire:navigate data-test="sms-link">{{ __('SMS') }}</flux:link>
                     </flux:table.cell>
                 </flux:table.row>
             @empty

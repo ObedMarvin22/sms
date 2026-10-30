@@ -8,9 +8,12 @@ use App\Actions\Fees\SetOffersBoarding;
 use App\Actions\Paystack\PaystackCharge;
 use App\Actions\Paystack\SetPaystackChargePayer;
 use App\Actions\Schools\UpdateSchoolProfile;
+use App\Actions\Sms\SetSmsSettings;
+use App\Actions\Sms\SmsSettings;
 use App\Actions\Students\SetAdmissionFormat;
 use App\Enums\PermissionKey;
 use App\Enums\SchoolLevel;
+use App\Models\MessageCreditEntry;
 use App\Models\School;
 use App\Support\Settings\SchoolSettings;
 use App\Support\Students\AdmissionNumberFormat;
@@ -56,6 +59,11 @@ class Profile extends Component
 
     public string $paystack_charge_payer = 'school';
 
+    /** @var list<string> SmsEvent values */
+    public array $sms_events = [];
+
+    public string $sms_low_credit_threshold = '';
+
     public function mount(): void
     {
         $this->authorize(PermissionKey::SettingsManage->value);
@@ -74,6 +82,8 @@ class Profile extends Component
         $this->attendance_lock_time = AttendanceRules::lockTime($school);
         $this->offers_boarding = (bool) SchoolSettings::for($school)->get('offers_boarding', false);
         $this->paystack_charge_payer = app(CurrentSchool::class)->runFor($school, fn () => PaystackCharge::payer());
+        $this->sms_events = array_values(array_map(strval(...), (array) SchoolSettings::for($school)->get('sms_events', [])));
+        $this->sms_low_credit_threshold = (string) SmsSettings::threshold($school);
         $this->levels = array_values($school->levels_offered->map(fn (SchoolLevel $level) => $level->value)->all());
     }
 
@@ -128,6 +138,27 @@ class Profile extends Component
         }
 
         Flux::toast(variant: 'success', text: __('Admission number format saved.'));
+    }
+
+    public function smsBalance(): int
+    {
+        return MessageCreditEntry::balance();
+    }
+
+    public function saveSmsSettings(SetSmsSettings $setSmsSettings): void
+    {
+        $this->authorize(PermissionKey::SettingsManage->value);
+        $this->resetErrorBag();
+
+        try {
+            $setSmsSettings->handle($this->school(), $this->sms_events, $this->sms_low_credit_threshold);
+        } catch (ValidationException $e) {
+            $this->setErrorBag($e->validator->errors());
+
+            return;
+        }
+
+        Flux::toast(variant: 'success', text: __('SMS settings saved.'));
     }
 
     public function updatedPaystackChargePayer(SetPaystackChargePayer $setPayer): void

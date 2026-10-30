@@ -18,10 +18,12 @@ use App\Livewire\Console\Login as ConsoleLogin;
 use App\Livewire\Console\Schools\Create as ConsoleSchoolsCreate;
 use App\Livewire\Console\Schools\Index as ConsoleSchoolsIndex;
 use App\Livewire\Console\Schools\Payments as ConsoleSchoolPayments;
+use App\Livewire\Console\Schools\Sms as ConsoleSchoolSms;
 use App\Livewire\Fees\Billing as FeeBilling;
 use App\Livewire\Fees\Discounts as FeeDiscounts;
 use App\Livewire\Fees\InstalmentPlans as FeeInstalmentPlans;
 use App\Livewire\Fees\Items as FeeItems;
+use App\Livewire\Fees\Messages as FeeMessages;
 use App\Livewire\Fees\Payments as FeePayments;
 use App\Livewire\Fees\Structures as FeeStructures;
 use App\Livewire\Guardians\Index as GuardiansIndex;
@@ -55,6 +57,7 @@ Route::domain('admin.'.config('app.base_domain'))
             Route::livewire('schools', ConsoleSchoolsIndex::class)->name('schools.index');
             Route::livewire('schools/create', ConsoleSchoolsCreate::class)->name('schools.create');
             Route::livewire('schools/{school}/payments', ConsoleSchoolPayments::class)->name('schools.payments');
+            Route::livewire('schools/{school}/sms', ConsoleSchoolSms::class)->name('schools.sms');
 
             Route::post('logout', function (Request $request) {
                 Auth::guard('platform')->logout();
@@ -122,6 +125,7 @@ Route::domain('{school}.'.config('app.base_domain'))
                 Route::livewire('fees/discounts', FeeDiscounts::class)->name('fees.discounts');
                 Route::livewire('fees/instalment-plans', FeeInstalmentPlans::class)->name('fees.plans');
                 Route::livewire('fees/billing', FeeBilling::class)->name('fees.billing');
+                Route::livewire('fees/messages', FeeMessages::class)->name('fees.messages');
             });
 
             // Payments and receipts: finance.view or payments.record (Gate in AppServiceProvider).

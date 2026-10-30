@@ -98,6 +98,29 @@
 
     <flux:separator />
 
+    <form wire:submit="saveSmsSettings" class="flex flex-col gap-3" data-test="sms-settings">
+        <div>
+            <flux:heading size="lg">{{ __('SMS') }}</flux:heading>
+            <flux:text>
+                {{ __('Parents always get notices in the app. Tick the ones that should also go by SMS (each uses your SMS credit). Sent as :sender; :units units left.', [
+                    'sender' => \App\Actions\Sms\SmsSettings::sender($this->school()),
+                    'units' => number_format($this->smsBalance()),
+                ]) }}
+            </flux:text>
+        </div>
+        <flux:checkbox.group wire:model="sms_events">
+            @foreach (\App\Enums\SmsEvent::cases() as $event)
+                <flux:checkbox :value="$event->value" :label="$event->label()" />
+            @endforeach
+        </flux:checkbox.group>
+        <flux:error name="sms_events" />
+        <flux:input wire:model="sms_low_credit_threshold" :label="__('Warn finance staff below (units)')" inputmode="numeric" class="max-w-48" />
+        <flux:error name="sms_low_credit_threshold" />
+        <div><flux:button type="submit">{{ __('Save SMS settings') }}</flux:button></div>
+    </form>
+
+    <flux:separator />
+
     <div class="flex flex-col gap-2" data-test="offers-boarding">
         <flux:heading size="lg">{{ __('Boarding') }}</flux:heading>
         <flux:switch wire:model.live="offers_boarding" :label="__('This school takes boarders')"
