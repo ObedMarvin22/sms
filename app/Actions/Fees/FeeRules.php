@@ -2,9 +2,11 @@
 
 namespace App\Actions\Fees;
 
+use App\Enums\DiscountType;
 use App\Enums\FeeCategory;
 use App\Models\FeeItem;
 use App\Support\Money\Money;
+use App\Support\Money\Percent;
 use App\Support\Settings\SchoolSettings;
 use App\Support\Tenancy\CurrentSchool;
 use Illuminate\Validation\ValidationException;
@@ -53,6 +55,54 @@ final class FeeRules
         }
 
         return $amount;
+    }
+
+    /**
+     * A discount or scholarship's size: a percentage up to 100% (basis points) or a fixed
+     * amount (pesewas).
+     *
+     * @return array{DiscountType, int}
+     */
+    public static function reduction(string $type, string $value): array
+    {
+        $type = DiscountType::tryFrom($type) ?? throw ValidationException::withMessages(['type' => 'Choose a percentage or a fixed amount.']);
+
+        if ($type === DiscountType::Fixed) {
+            return [$type, self::amount($value, 'value')->pesewas];
+        }
+
+        try {
+            $basisPoints = Percent::parse($value);
+        } catch (InvalidArgumentException) {
+            $basisPoints = 0;
+        }
+        if ($basisPoints <= 0 || $basisPoints > Percent::HUNDRED) {
+            throw ValidationException::withMessages(['value' => 'Enter a percentage between 0.01 and 100, like 10 or 12.5.']);
+        }
+
+        return [$type, $basisPoints];
+    }
+
+    /**
+     * Which fee items a reduction applies to: null for the whole bill, or a non-empty list of
+     * this school's fee item ids.
+     *
+     * @param  array<int|string>  $ids
+     * @return list<int>|null
+     */
+    public static function feeItemIds(bool $wholeBill, array $ids): ?array
+    {
+        if ($wholeBill) {
+            return null;
+        }
+
+        $ids = array_values(array_unique(array_map(intval(...), $ids)));
+        if ($ids === [] || FeeItem::whereIn('id', $ids)->count() !== count($ids)) {
+            throw ValidationException::withMessages(['fee_item_ids' => 'Choose the fee items it applies to.']);
+        }
+        sort($ids);
+
+        return $ids;
     }
 
     public static function offersBoarding(): bool
