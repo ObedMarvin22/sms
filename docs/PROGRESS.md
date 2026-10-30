@@ -84,7 +84,7 @@ Done when:
 
 ## Sprint 3 — people and attendance
 
-- [ ] 1. Staff records, email invitations, role assignment, teaching assignments.
+- [x] 1. Staff records, email invitations, role assignment, teaching assignments.
 - [ ] 2. Students with per-school admission number format, generated under a row lock
       (concurrency test).
 - [ ] 3. Enrolment on admission; promotion, transfer and withdrawal create new enrolment records.

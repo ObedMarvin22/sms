@@ -530,3 +530,25 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
 - **Open:** front-end assets are built locally and uploaded (`public/build` is not in Git and the
   server has no Node). Automating this from CI is a follow-up (with the release script in Pilot
   preparation).
+
+## 2026-10-30 — Staff, role granting and assignments
+
+- **Decision:** `staff` (soft deletes) with optional `user_id`: staff with an email get a login,
+  roles and the Sprint 1 invitation; without one they are records only (Obed's choice). Adding an
+  email later gives them a login. `users.deactivated_at`: the school-scoped user provider skips
+  deactivated users, so leavers cannot sign in and an open session ends on the next request.
+  `MarkStaffLeft` deactivates the login and removes their assignments (record kept).
+  `teaching_assignments` (one teacher per subject per stream per year, Obed's choice) and
+  `class_teacher_assignments` (one per stream per year); a teacher can only be assigned to a
+  subject the stream's class takes, and only active staff. Index names are given explicitly
+  because MySQL limits them to 64 characters.
+- **Role granting (changed with Obed during the step):** the strict "only roles whose permissions
+  you hold" rule meant administrators could not give teacher roles (they lack attendance.take,
+  grades.enter, pickup.release). Now only **sensitive** permissions must be held by the granter
+  (`PermissionKey::isSensitive()`: settings, roles, staff, locked-attendance edits, grades
+  approval, fees, payments, finance view, pickup restrictions, audit). So administrators can set
+  up teachers, but cannot make anyone bursar. Never the Parent role; you cannot remove your own
+  proprietor/administrator role.
+- **Gotchas found:** `stream()` is a method on Livewire's base component (renamed to
+  `selectedStream`); a new `Staff` model did not know its DB default status until
+  `$attributes = ['status' => 'active']` was added.
