@@ -64,6 +64,16 @@ class Student extends Model
         return $this->hasOne(Enrolment::class)->where('is_current', true);
     }
 
+    /**
+     * Links to this child's guardians, primary contact first.
+     *
+     * @return HasMany<GuardianStudent, $this>
+     */
+    public function guardianLinks(): HasMany
+    {
+        return $this->hasMany(GuardianStudent::class)->orderByDesc('is_primary')->orderBy('id');
+    }
+
     public function getFullNameAttribute(): string
     {
         return trim($this->first_name.' '.($this->other_names ? $this->other_names.' ' : '').$this->last_name);
