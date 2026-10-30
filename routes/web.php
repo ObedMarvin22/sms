@@ -2,6 +2,8 @@
 
 use App\Enums\PermissionKey;
 use App\Http\Controllers\SchoolLogoController;
+use App\Livewire\Academic\CreateYear as CreateAcademicYear;
+use App\Livewire\Academic\Years as AcademicYears;
 use App\Livewire\Console\Login as ConsoleLogin;
 use App\Livewire\Console\Schools\Create as ConsoleSchoolsCreate;
 use App\Livewire\Console\Schools\Index as ConsoleSchoolsIndex;
@@ -58,9 +60,11 @@ Route::domain('{school}.'.config('app.base_domain'))
         Route::middleware(['auth', 'verified', 'two-factor.required'])->group(function () {
             Route::view('dashboard', 'dashboard')->name('dashboard');
 
-            Route::livewire('settings/school', SchoolProfile::class)
-                ->middleware('can:'.PermissionKey::SettingsManage->value)
-                ->name('school.profile');
+            Route::middleware('can:'.PermissionKey::SettingsManage->value)->group(function () {
+                Route::livewire('settings/school', SchoolProfile::class)->name('school.profile');
+                Route::livewire('settings/academic-years', AcademicYears::class)->name('academic-years.index');
+                Route::livewire('settings/academic-years/create', CreateAcademicYear::class)->name('academic-years.create');
+            });
         });
 
         require __DIR__.'/settings.php';
