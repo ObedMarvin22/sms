@@ -136,3 +136,17 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
 - **Reason:** Readable values in the database, logs and API responses. A unit test pins each
   enum's stored values, because renaming one would orphan existing rows.
 - **Alternatives:** Int-backed enums (smaller, but opaque in data and the API).
+
+## 2026-10-30 — `CurrentSchool` is scoped, and `require()` throws
+
+- **Decision:** `CurrentSchool` is registered with `$this->app->scoped(...)`. Code that must have a
+  tenant calls `require()`, which throws `NoCurrentSchool`. `get()` and `id()` return null for
+  code that may legitimately run without one (platform/console code).
+- **Reason:** The queue worker on the server is one process handling many jobs. A scoped
+  binding is reset before each job, so one school's context can never leak into another
+  school's job. A test proves this (it fails if the binding is changed to `singleton`).
+  Failing loudly is safer than silently running a query without a tenant.
+- **Alternatives:** `singleton` (leaks across jobs); a static/global helper (hidden state, hard to
+  test); a tenancy package (ruled out in CLAUDE.md).
+- **Open:** Queued jobs must carry the school id and restore it when they run. This is added with
+  the first tenant-aware job (Sprint 3 import / Sprint 4 billing).
