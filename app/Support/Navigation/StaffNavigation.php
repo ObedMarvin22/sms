@@ -35,6 +35,7 @@ final class StaffNavigation
             new NavItem('Teaching assignments', 'clipboard-document-list', 'staff.assignments', PermissionKey::StaffManage, 'People'),
 
             // Sprint 4: fees.
+            new NavItem('Billing', 'document-text', 'fees.billing', PermissionKey::FinanceView, 'Fees'),
             new NavItem('Fee structures', 'table-cells', 'fees.structures', PermissionKey::FinanceView, 'Fees'),
             new NavItem('Fee items', 'tag', 'fees.items', PermissionKey::FinanceView, 'Fees'),
             new NavItem('Discounts', 'receipt-percent', 'fees.discounts', PermissionKey::FinanceView, 'Fees'),

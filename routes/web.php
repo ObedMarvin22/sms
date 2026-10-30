@@ -13,6 +13,7 @@ use App\Livewire\Classes\Subjects as ClassSubjects;
 use App\Livewire\Console\Login as ConsoleLogin;
 use App\Livewire\Console\Schools\Create as ConsoleSchoolsCreate;
 use App\Livewire\Console\Schools\Index as ConsoleSchoolsIndex;
+use App\Livewire\Fees\Billing as FeeBilling;
 use App\Livewire\Fees\Discounts as FeeDiscounts;
 use App\Livewire\Fees\InstalmentPlans as FeeInstalmentPlans;
 use App\Livewire\Fees\Items as FeeItems;
@@ -110,6 +111,7 @@ Route::domain('{school}.'.config('app.base_domain'))
                 Route::livewire('fees/structures', FeeStructures::class)->name('fees.structures');
                 Route::livewire('fees/discounts', FeeDiscounts::class)->name('fees.discounts');
                 Route::livewire('fees/instalment-plans', FeeInstalmentPlans::class)->name('fees.plans');
+                Route::livewire('fees/billing', FeeBilling::class)->name('fees.billing');
             });
 
             Route::middleware('can:'.PermissionKey::StaffManage->value)->group(function () {

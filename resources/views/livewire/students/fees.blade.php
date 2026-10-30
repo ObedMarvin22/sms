@@ -1,7 +1,45 @@
 <div>
     @if ($this->canView())
         <div class="flex flex-col gap-4" data-test="student-fees">
-            <flux:heading size="lg">{{ __('Fees') }}</flux:heading>
+            <div class="flex flex-wrap items-baseline justify-between gap-2">
+                <flux:heading size="lg">{{ __('Fees') }}</flux:heading>
+                @php($balance = $this->balance())
+                <flux:text data-test="balance">
+                    {{ $balance->pesewas < 0 ? __('In credit: :amount', ['amount' => \App\Support\Money\Money::pesewas(-$balance->pesewas)->format()]) : __('Owes: :amount', ['amount' => $balance->format()]) }}
+                </flux:text>
+            </div>
+
+            @foreach ($this->bills() as $bill)
+                <details class="rounded-lg border border-zinc-200 p-3 dark:border-zinc-700" wire:key="bill-{{ $bill->id }}" data-test="bill">
+                    <summary class="cursor-pointer">
+                        {{ $bill->term->academicYear->name }} · {{ $bill->term->name }} ({{ $bill->schoolClass->name }}, {{ $bill->residence->label() }}):
+                        <strong>{{ $bill->net->format() }}</strong>
+                    </summary>
+                    <table class="mt-2 w-full text-sm">
+                        @foreach ($bill->lines as $line)
+                            <tr>
+                                <td class="py-0.5">{{ $line->description }}</td>
+                                <td class="py-0.5 text-end font-mono">{{ $line->amount->format() }}</td>
+                            </tr>
+                        @endforeach
+                        <tr class="border-t border-zinc-200 dark:border-zinc-700">
+                            <td class="py-0.5">{{ __('This term') }}</td>
+                            <td class="py-0.5 text-end font-mono">{{ $bill->net->format() }}</td>
+                        </tr>
+                        <tr>
+                            <td class="py-0.5">{{ __('Arrears when billed') }}</td>
+                            <td class="py-0.5 text-end font-mono">{{ $bill->arrears->format() }}</td>
+                        </tr>
+                        <tr class="font-medium">
+                            <td class="py-0.5">{{ __('Total payable') }}</td>
+                            <td class="py-0.5 text-end font-mono">{{ $bill->payable()->format() }}</td>
+                        </tr>
+                    </table>
+                    <flux:text size="sm" class="mt-2">
+                        {{ __('Due') }}: {{ $bill->instalments->map(fn ($i) => $i->amount->format().' by '.$i->due_on->format('j M'))->implode(' · ') }}
+                    </flux:text>
+                </details>
+            @endforeach
 
             @if ($this->offersBoarding())
                 @if ($this->canManage())

@@ -13,13 +13,16 @@ use App\Enums\DiscountKind;
 use App\Enums\DiscountType;
 use App\Enums\PermissionKey;
 use App\Enums\Residence;
+use App\Models\Bill;
 use App\Models\Discount;
 use App\Models\FeeItem;
 use App\Models\InstalmentPlan;
+use App\Models\LedgerEntry;
 use App\Models\Student;
 use App\Models\StudentDiscount;
 use App\Models\StudentInstalmentPlan;
 use App\Models\Term;
+use App\Support\Money\Money;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
@@ -266,6 +269,25 @@ class Fees extends Component
         }
 
         Flux::toast(variant: 'success', text: __('Instalment plan saved.'));
+    }
+
+    /**
+     * Newest first.
+     *
+     * @return Collection<int, Bill>
+     */
+    public function bills(): Collection
+    {
+        return Bill::with(['term.academicYear', 'schoolClass', 'lines', 'instalments'])
+            ->where('student_id', $this->studentId)->latest('issued_at')->latest('id')->get();
+    }
+
+    /**
+     * What the student owes now, from the ledger (negative: in credit).
+     */
+    public function balance(): Money
+    {
+        return LedgerEntry::balanceFor($this->studentId);
     }
 
     public function render(): View
