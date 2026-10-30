@@ -1,6 +1,6 @@
 <?php
 
-use Spatie\Permission\DefaultTeamResolver;
+use App\Support\Tenancy\CurrentSchoolTeamResolver;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -153,7 +153,8 @@ return [
     /*
      * The class to use to resolve the permissions team id
      */
-    'team_resolver' => DefaultTeamResolver::class,
+    // The team is always the current school (App\Support\Tenancy\CurrentSchool).
+    'team_resolver' => CurrentSchoolTeamResolver::class,
 
     /*
      * Passport Client Credentials Grant

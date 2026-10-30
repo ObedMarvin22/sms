@@ -4,6 +4,7 @@ namespace App\Support\Tenancy;
 
 use App\Exceptions\NoCurrentSchool;
 use App\Models\School;
+use Closure;
 
 /**
  * The school (tenant) for the current request or queued job.
@@ -48,5 +49,27 @@ class CurrentSchool
     public function clear(): void
     {
         $this->school = null;
+    }
+
+    /**
+     * Run code as the given school, then restore the previous one (even on failure).
+     *
+     * For platform code (console, seeders) that acts on one school at a time.
+     *
+     * @template TReturn
+     *
+     * @param  Closure(School): TReturn  $callback
+     * @return TReturn
+     */
+    public function runFor(School $school, Closure $callback): mixed
+    {
+        $previous = $this->school;
+        $this->school = $school;
+
+        try {
+            return $callback($school);
+        } finally {
+            $this->school = $previous;
+        }
     }
 }
