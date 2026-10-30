@@ -782,3 +782,36 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
 - **Stacking** (how a sibling discount, a staff-child discount and a scholarship combine on one
   bill) is decided in step 2, where it can be tested against real bills.
 - Every change is logged under `fees`.
+
+## 2026-10-30 — Term billing (Sprint 4 step 2)
+
+- **Reductions stack, each on the full price** (Obed's choice). Order: sibling discount,
+  hand-given discounts (by name), scholarships (by name). A percentage is worked out on each
+  covered line's full price; a fixed amount is taken line by line. Nothing takes a line below
+  zero, so a bill can reach GH₵0 but never go negative; later reductions get only what is left.
+  Each reduction is its own negative bill line. *Rejected:* only the largest reduction.
+- **Rounding:** percentages round to the nearest pesewa, half up (`BillStudent::percentOf`).
+  Instalments round the same way and the last one takes the remainder, so they always add up
+  to the net exactly.
+- **A bill holds this term's charges only.** `arrears` is the ledger balance just before the bill,
+  printed for information; "total payable" is arrears + net. Arrears are never charged twice
+  because the balance always comes from the ledger.
+- **`ledger_entries` came forward from step 3** (one change of order, agreed): issuing a bill
+  writes one debit (none for a GH₵0 bill). The table has no `updated_at`; `LedgerEntry` throws on
+  any update or delete. Payments, adjustments and reversals arrive in step 3.
+- **One bill per student per term** (unique index), issued under a lock on the student row; a
+  second attempt gets the existing bill back. Running billing again bills only students without
+  a bill, so late admissions are billed by simply running it again.
+- **Sibling order:** children sharing any guardian, by admission date then id. Only active,
+  currently enrolled siblings count, so when the eldest leaves the next child pays full price.
+- **Students who cannot be billed are skipped with a reason** (no structure for their class and
+  residence, not enrolled this year, nothing to charge, already billed by someone else) and
+  listed on the run. A run is finished when billed + skipped = students in it; the student list
+  is taken once, inside the transaction that creates the run.
+- **Only the current academic year's terms** can be billed. Bills are never edited; mistakes
+  are corrected with ledger adjustments (step 3).
+- **Logging:** the run is logged (started, finished with counts and total), not each bill: the
+  bill, its lines and its ledger entry are the record. Same reasoning as attendance.
+- **Preview is an estimate** (compulsory items × students per class, before discounts and optional
+  items), so it stays fast for 600 students on shared hosting.
+- The generic isolation test now touches `created_at` for models without `updated_at`.

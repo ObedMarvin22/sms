@@ -116,7 +116,8 @@ Done when:
       scholarships, instalment plans.
       - [x] Part A: Money, fee items, fee structures per term, residence, optional items.
       - [x] Part B: discounts, scholarships, instalment plans (applied to bills in step 2).
-- [ ] 2. `GenerateTermBills` queued, chunked job; arrears carried forward.
+- [x] 2. `GenerateTermBills` queued, chunked job; arrears carried forward. (Built as
+      `StartTermBilling` + `BillStudentsChunk`; the ledger table and bill debits came forward from step 3.)
 - [ ] 3. Append-only ledger, `Money` cast, balance calculation, `RecordPayment` Action, receipt
       numbers under row lock, receipt PDF.
 - [ ] 4. Paystack: `PaystackClient`; subaccount creation from the console; transaction
