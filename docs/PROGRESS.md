@@ -87,7 +87,7 @@ Done when:
 - [x] 1. Staff records, email invitations, role assignment, teaching assignments.
 - [x] 2. Students with per-school admission number format, generated under a row lock
       (concurrency test).
-- [ ] 3. Enrolment on admission; promotion, transfer and withdrawal create new enrolment records.
+- [x] 3. Enrolment on admission; promotion, transfer and withdrawal create new enrolment records.
 - [ ] 4. Guardians: create/link, relationship, access level, primary contact, `+233`
       normalisation, duplicate detection by phone. (First ask Obed: one parent account across
       schools vs per school.)
@@ -101,8 +101,8 @@ Done when:
 
 Done when:
 - [ ] 600-row import works with clear errors
-- [ ] concurrent admissions never collide (tested)
-- [ ] promotion keeps history
+- [x] concurrent admissions never collide (tested)
+- [x] promotion keeps history
 - [ ] teachers can only register their own class
 - [ ] absence creates notification
 - [ ] CI green

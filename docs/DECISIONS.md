@@ -573,3 +573,21 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   0001–0100. Without the lock the test fails with a duplicate (verified). It cleans up its rows.
 - **Screen:** Students (`students.view`; admit/edit with `students.manage`) behind `school.ready`.
   The add/edit modal is only rendered for users who can manage students.
+
+## 2026-10-30 — Enrolments
+
+- **Decision:** `enrolments` (school-owned): student, academic year, stream, optional programme
+  (required for SHS streams, refused for others), `starts_on`/`ends_on`, `status`
+  (`EnrolmentStatus`), reason, and `is_current` (true/NULL with a unique `(student_id, is_current)`
+  index, as for terms). History is never overwritten: `App\Actions\Students\Enrolments::end()`
+  closes the current enrolment, then `start()` opens the next. Admission now needs a stream and
+  enrols into the current year (the admission date must fall inside it). `MoveStudent` (same
+  year), `PromoteStudents` (promote / repeat same class / graduate, into a year that starts after
+  the current one ends, new enrolment on that year's first day), `WithdrawStudent` (withdrawn,
+  transferred to another school, graduated). Foreign keys restrict deletes; `DeleteClass`,
+  `DeleteStream` and `DeleteAcademicYear` refuse anything with enrolments (promised in Sprint 2).
+- **Screens:** the Students list shows the current class; the student page shows the history and
+  (with `students.manage`) move / leaving; Promotion defaults each student to the first stream of
+  the next class, or graduation from the last class.
+- **Note:** tests that admit students must now set up a current year and classes; the concurrency
+  test creates them with real commits and cleans them up.
