@@ -502,3 +502,20 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   middleware, so they cannot disagree.
 - **Verified:** a test takes a brand-new school (created via the console Action) to complete
   setup using only the Actions; the browser showed the banner and correct step states on Hillview.
+
+## 2026-10-30 — Permission checks enforced by tests
+
+- **Decision:** `tests/Feature/Security/RouteGuardsTest.php` reads the route table: every signed-in
+  school route must have a `can:` check unless it is on a short allow-list of things every staff
+  member may use (dashboard, own account settings, two-factor setup, password confirmation,
+  logout, `api/user`). Every school route must run `IdentifySchool` and `EnsureUserBelongsToSchool`;
+  every console route except its login needs the platform guard. `SettingsAccessTest` builds the
+  list of `can:settings.manage` screens from the routes and checks each one per role (six roles
+  and a member without roles refused; proprietor, headteacher, administrator allowed; another
+  school's administrator sent to login). Livewire keeps re-running `Authorize` on updates.
+- **Reason:** Sprint 2 "teacher refused on settings (tested)", and future screens are covered
+  without anyone remembering to add a test. A probe (removing the group's `can:`) made the guard
+  test fail and list all eight settings routes.
+- **Found:** no unguarded routes; nothing needed fixing.
+- **Open:** whether parents may open the staff dashboard at all is decided with the parent app
+  (Sprint 4).

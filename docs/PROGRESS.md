@@ -68,7 +68,7 @@ Done when:
 - [x] 6. Class–subject mapping.
 - [x] 7. Setup wizard for new schools (steps 2–6 in order); student entry blocked until a current
       term and a class exist.
-- [ ] 8. Permission checks on every screen, with tests that a teacher is refused on settings screens.
+- [x] 8. Permission checks on every screen, with tests that a teacher is refused on settings screens.
 - [ ] 9. Staging environment checklist written to `docs/DEPLOYMENT.md`.
 
 Done when:
