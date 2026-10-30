@@ -28,6 +28,17 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    // Fee payments settle straight to each school's subaccount (SPEC section 8). Use test keys
+    // (sk_test_...) everywhere except production; never commit keys.
+    'paystack' => [
+        'base_url' => env('PAYSTACK_BASE_URL', 'https://api.paystack.co'),
+        'public_key' => env('PAYSTACK_PUBLIC_KEY'),
+        'secret_key' => env('PAYSTACK_SECRET_KEY'),
+        // Paystack's local charge in basis points (195 = 1.95%), used when a school passes the
+        // charge on to parents. Check Paystack's Ghana pricing when it changes.
+        'charge_basis_points' => (int) env('PAYSTACK_CHARGE_BASIS_POINTS', 195),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
