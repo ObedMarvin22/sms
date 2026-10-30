@@ -735,3 +735,26 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
 - **N+1 guard:** `tests/Feature/Performance/ListPagesTest.php` requires every list page to run
   the same number of queries for 10 and 20 students (after a warm-up request that fills the
   permission cache).
+
+## 2026-10-30 — Fee setup, part A (Sprint 4 step 1)
+
+- **`Money` value object now, not in step 3.** Fee structures store amounts, so the minimal
+  version (`App\Support\Money\Money` + `App\Casts\MoneyCast`) came forward from step 3. Whole
+  pesewas in `unsignedBigInteger` columns; typed input like "1,250.50" or "GH₵80" is parsed with
+  a regex, never through floats. JSON and the activity log see the pesewa integer.
+- **Residence lives on the student** (`students.residence`, day by default, logged). A student
+  can change between terms without a new enrolment; bills (step 2) will record the residence they
+  were billed at. *Rejected:* on the enrolment (a mid-year change would need a new enrolment).
+- **Boarding is a school setting** (`offers_boarding`, School profile, default off). Off hides the
+  Boarding column and the residence switch; it cannot be turned off while anyone is a boarder.
+- **Fee structures are per term** × class × residence (unique), because first term usually
+  carries extras. "Copy from <previous term>" fills a new term in one click, leaving classes that
+  already have a structure untouched and skipping archived items.
+- **Fee items are archived, never deleted**, so structures and future bills keep their names. An
+  archived item may stay on a structure it is already on but cannot be added to another.
+- **Optional items are opt-in per student** and stay on until removed. The amount comes from the
+  student's fee structure. An item cannot be made compulsory while students take it.
+- **Permissions:** fee screens need `finance.view` (route); changes need `fees.manage` (checked
+  in each component), so the headteacher sees fees read-only. Every change is in the activity
+  log under `fees` (items, structures, lines, student options) or `students` (residence).
+- **Amounts:** more than GH₵0 and at most GH₵1,000,000 per line, at most two decimal places.
