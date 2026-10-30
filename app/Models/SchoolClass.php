@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
@@ -40,6 +41,18 @@ class SchoolClass extends Model
     public function streams(): HasMany
     {
         return $this->hasMany(Stream::class)->orderBy('name');
+    }
+
+    /**
+     * @return BelongsToMany<Subject, $this, ClassSubject, 'pivot'>
+     */
+    public function subjects(): BelongsToMany
+    {
+        return $this->belongsToMany(Subject::class, 'class_subject')
+            ->using(ClassSubject::class)
+            ->withPivot(['id', 'school_id'])
+            ->withTimestamps()
+            ->orderBy('name');
     }
 
     public function getActivitylogOptions(): LogOptions
