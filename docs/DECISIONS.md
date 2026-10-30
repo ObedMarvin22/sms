@@ -712,3 +712,26 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   **Font subsetting turned on** in `config/dompdf.php`: without it, every PDF embeds the whole
   DejaVu font (~1.1 MB for a one-page list).
 - **Guardian phones are shown as stored** (+233…). *Deferred:* a local display format (024…).
+
+## 2026-10-30 — Demo seeder and list-page speed (Sprint 3 step 9)
+
+- **Demo data goes through the Actions** (AdmitStudent, AddGuardian, LinkGuardian, setup
+  Actions), so it obeys the real rules: admission numbers, enrolments, one primary contact,
+  activity log. Cost: about 80 s for 1,200 students locally. *Rejected:* bulk inserts (fast but
+  could drift from the rules and skip the log).
+- **Deterministic:** each school has its own seeded `Random\Randomizer` (Mt19937 seeded with the
+  subdomain), separate from PHP's global random state, so names and phones are the same on
+  every run. Ghanaian first names (including day names), surnames and mobile prefixes.
+- **Families:** about one in three families have two or three children in the school and share
+  guardian records. About 60% of children have both parents listed; some aunts/uncles are
+  "contact only".
+- **Size from config** (`app.demo_students_per_school`, env `DEMO_STUDENTS_PER_SCHOOL`, default
+  600; phpunit.xml uses 24). Student seeding is skipped for a school that already has students.
+- **Speed check, 600 students per school (EXPLAIN):** the student list walks the existing
+  (school, status, last name, first name) index in order; class lists use the stream index and
+  sort about 50 rows; guardian phone lookup uses the unique index. Word searches (`%word%`) scan
+  the school's rows, which is fine at this size. **No new indexes were needed.** *Revisit:*
+  full-text search if a school passes a few thousand students.
+- **N+1 guard:** `tests/Feature/Performance/ListPagesTest.php` requires every list page to run
+  the same number of queries for 10 and 20 students (after a warm-up request that fills the
+  permission cache).

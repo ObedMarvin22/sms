@@ -59,10 +59,19 @@ refuses to run in production.
 | Where | Email | Role | Notes |
 | --- | --- | --- | --- |
 | greenhill | `admin@greenhill.test` | Administrator | Must set up two-factor on first sign-in |
-| greenhill | `teacher@greenhill.test` | Class teacher | No two-factor required |
+| greenhill | `teacher@greenhill.test` | Class teacher | Class teacher of Primary 4A; no two-factor required |
 | hillview | `admin@hillview.test` | Administrator | Must set up two-factor on first sign-in |
-| hillview | `teacher@hillview.test` | Class teacher | No two-factor required |
+| hillview | `teacher@hillview.test` | Class teacher | Class teacher of Primary 4A; no two-factor required |
 | console | `admin@orangetree.test` | Super admin | Can create schools |
+
+Each school is set up for the current school year (first term current, default classes and
+subjects; Hillview also has SHS programmes) with 600 students and their guardians. Brothers and
+sisters share guardian records, and guardian phones are made-up `+233…` numbers. A fixed random
+seed per school gives the same students every time (Greenhill's first student is Grace Annan).
+
+Seeding takes about 80 seconds on a laptop (every admission runs through the real Actions). For
+a quicker reset set a smaller number in `.env`, e.g. `DEMO_STUDENTS_PER_SCHOOL=100`. The tests
+use 24 (phpunit.xml).
 
 To create a real console account (prompts for the password in your terminal):
 

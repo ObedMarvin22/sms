@@ -96,7 +96,7 @@ Done when:
       after lock, logged.
 - [x] 7. Absence notification to guardians (in-app + log for now).
 - [x] 8. Student search, class lists, printable class list PDF.
-- [ ] 9. Seeder upgrade: ~600 students per demo school with guardians; list pages stay fast.
+- [x] 9. Seeder upgrade: ~600 students per demo school with guardians; list pages stay fast.
 
 Done when:
 - [ ] 600-row import works with clear errors
