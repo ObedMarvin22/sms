@@ -2,17 +2,18 @@
 
 namespace App\Notifications;
 
+use App\Enums\SmsEvent;
 use App\Models\AttendanceRecord;
 use App\Models\School;
-use App\Notifications\Channels\HasLogMessage;
-use App\Notifications\Channels\LogChannel;
+use App\Notifications\Channels\HasSmsMessage;
+use App\Notifications\Channels\SmsChannel;
 use Carbon\CarbonImmutable;
 use Illuminate\Notifications\Notification;
 
 /**
  * Tells a guardian their child was marked absent on today's register (sent by NotifyAbsences).
  */
-class StudentAbsent extends Notification implements HasLogMessage
+class StudentAbsent extends Notification implements HasSmsMessage
 {
     public function __construct(
         public readonly AttendanceRecord $record,
@@ -21,13 +22,18 @@ class StudentAbsent extends Notification implements HasLogMessage
     ) {}
 
     /**
-     * In-app always; the log stands in for SMS until Sprint 4.
+     * In-app always; SMS when the school turned absence SMS on (SmsChannel decides).
      *
      * @return list<string>
      */
     public function via(object $notifiable): array
     {
-        return ['database', LogChannel::class];
+        return ['database', SmsChannel::class];
+    }
+
+    public function smsEvent(): SmsEvent
+    {
+        return SmsEvent::Absence;
     }
 
     /**
@@ -43,7 +49,7 @@ class StudentAbsent extends Notification implements HasLogMessage
         ];
     }
 
-    public function toLog(object $notifiable): string
+    public function toSms(object $notifiable): string
     {
         return $this->message();
     }

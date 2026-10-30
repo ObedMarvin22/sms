@@ -25,6 +25,9 @@ final class SchoolSettings
         'offers_boarding' => false,
         // Who pays Paystack's charge: "school" (absorbs it) or "parent" (amount grossed up).
         'paystack_charge_payer' => 'school',
+        // SmsEvent values that also go by SMS (none until the school chooses), and when to warn.
+        'sms_events' => [],
+        'sms_low_credit_threshold' => 100,
     ];
 
     /**

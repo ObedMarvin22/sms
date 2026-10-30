@@ -2,17 +2,18 @@
 
 namespace App\Notifications;
 
+use App\Enums\SmsEvent;
 use App\Models\Payment;
 use App\Models\School;
-use App\Notifications\Channels\HasLogMessage;
-use App\Notifications\Channels\LogChannel;
+use App\Notifications\Channels\HasSmsMessage;
+use App\Notifications\Channels\SmsChannel;
 use App\Support\Money\Money;
 use Illuminate\Notifications\Notification;
 
 /**
  * Tells a guardian the school received a payment for their child (sent by RecordPayment).
  */
-class PaymentReceived extends Notification implements HasLogMessage
+class PaymentReceived extends Notification implements HasSmsMessage
 {
     public function __construct(
         public readonly Payment $payment,
@@ -21,13 +22,18 @@ class PaymentReceived extends Notification implements HasLogMessage
     ) {}
 
     /**
-     * In-app always; the log stands in for SMS until step 5.
+     * In-app always; SMS when the school turned payment SMS on (SmsChannel decides).
      *
      * @return list<string>
      */
     public function via(object $notifiable): array
     {
-        return ['database', LogChannel::class];
+        return ['database', SmsChannel::class];
+    }
+
+    public function smsEvent(): SmsEvent
+    {
+        return SmsEvent::Payment;
     }
 
     /**
@@ -45,9 +51,13 @@ class PaymentReceived extends Notification implements HasLogMessage
         ];
     }
 
-    public function toLog(object $notifiable): string
+    /**
+     * "₵" is not in the GSM alphabet: one would make the whole SMS Unicode (70 characters a unit
+     * instead of 160), so the SMS says "GHS".
+     */
+    public function toSms(object $notifiable): string
     {
-        return $this->message();
+        return str_replace('GH₵', 'GHS', $this->message());
     }
 
     private function message(): string

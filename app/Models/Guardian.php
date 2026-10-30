@@ -71,7 +71,7 @@ class Guardian extends Model
     }
 
     /**
-     * The number paid channels (SMS, from Sprint 4) send to; LogChannel records it for now.
+     * The number SMS notices go to (SmsChannel).
      */
     public function routeNotificationForSms(): string
     {
