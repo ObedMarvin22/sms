@@ -24,6 +24,7 @@ final class StaffNavigation
             new NavItem('Dashboard', 'home', 'dashboard'),
 
             // Sprint 3: people.
+            new NavItem('Students', 'user-group', 'students.index', PermissionKey::StudentsView, 'People'),
             new NavItem('Staff', 'users', 'staff.index', PermissionKey::StaffManage, 'People'),
             new NavItem('Teaching assignments', 'clipboard-document-list', 'staff.assignments', PermissionKey::StaffManage, 'People'),
 

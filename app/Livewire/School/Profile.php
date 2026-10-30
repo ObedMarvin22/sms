@@ -3,9 +3,11 @@
 namespace App\Livewire\School;
 
 use App\Actions\Schools\UpdateSchoolProfile;
+use App\Actions\Students\SetAdmissionFormat;
 use App\Enums\PermissionKey;
 use App\Enums\SchoolLevel;
 use App\Models\School;
+use App\Support\Students\AdmissionNumberFormat;
 use App\Support\Tenancy\CurrentSchool;
 use Flux\Flux;
 use Illuminate\Validation\ValidationException;
@@ -38,6 +40,10 @@ class Profile extends Component
 
     public ?TemporaryUploadedFile $logo = null;
 
+    public string $admission_prefix = '';
+
+    public string $admission_number_format = '';
+
     public function mount(): void
     {
         $this->authorize(PermissionKey::SettingsManage->value);
@@ -50,6 +56,9 @@ class Profile extends Component
         $this->phone = $school->phone;
         $this->email = $school->email;
         $this->address = $school->address;
+        $format = AdmissionNumberFormat::for($school);
+        $this->admission_prefix = $format->prefix;
+        $this->admission_number_format = $format->format;
         $this->levels = array_values($school->levels_offered->map(fn (SchoolLevel $level) => $level->value)->all());
     }
 
@@ -88,6 +97,34 @@ class Profile extends Component
     public function levelOptions(): array
     {
         return SchoolLevel::cases();
+    }
+
+    public function saveAdmissionFormat(SetAdmissionFormat $setAdmissionFormat): void
+    {
+        $this->authorize(PermissionKey::SettingsManage->value);
+        $this->resetErrorBag();
+
+        try {
+            $setAdmissionFormat->handle($this->school(), $this->admission_prefix, $this->admission_number_format);
+        } catch (ValidationException $e) {
+            $this->setErrorBag($e->validator->errors());
+
+            return;
+        }
+
+        Flux::toast(variant: 'success', text: __('Admission number format saved.'));
+    }
+
+    /**
+     * Example of the next number in the format being edited (or null while it is invalid).
+     */
+    public function admissionPreview(): ?string
+    {
+        if (AdmissionNumberFormat::problem($this->admission_number_format) !== null) {
+            return null;
+        }
+
+        return (new AdmissionNumberFormat($this->admission_number_format, mb_strtoupper(trim($this->admission_prefix))))->render((int) now()->year, 1);
     }
 
     public function school(): School

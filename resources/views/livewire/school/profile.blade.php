@@ -47,4 +47,22 @@
             <flux:button type="submit" variant="primary" data-test="save-school-profile">{{ __('Save') }}</flux:button>
         </div>
     </form>
+
+    <flux:separator />
+
+    <form wire:submit="saveAdmissionFormat" class="flex flex-col gap-4" data-test="admission-format">
+        <div>
+            <flux:heading size="lg">{{ __('Admission numbers') }}</flux:heading>
+            <flux:text>{{ __('Tokens: {PREFIX}, {YYYY}, {YY} and {SEQ:n}. With the year in it, numbering restarts each year. Existing numbers do not change.') }}</flux:text>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-[10rem_1fr]">
+            <flux:input wire:model.live.debounce.300ms="admission_prefix" :label="__('Prefix')" />
+            <flux:input wire:model.live.debounce.300ms="admission_number_format" :label="__('Format')" />
+        </div>
+        <flux:error name="admission_prefix" /><flux:error name="admission_number_format" />
+        <flux:text data-test="admission-preview">{{ __('Next number looks like:') }} <span class="font-mono">{{ $this->admissionPreview() ?? '—' }}</span></flux:text>
+        <div>
+            <flux:button type="submit">{{ __('Save format') }}</flux:button>
+        </div>
+    </form>
 </div>

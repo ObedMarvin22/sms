@@ -14,6 +14,7 @@ use App\Livewire\School\Profile as SchoolProfile;
 use App\Livewire\Setup\Wizard as SetupWizard;
 use App\Livewire\Staff\Index as StaffIndex;
 use App\Livewire\Staff\TeachingAssignments as StaffTeachingAssignments;
+use App\Livewire\Students\Index as StudentsIndex;
 use App\Livewire\Subjects\Index as SubjectsIndex;
 use App\Livewire\Subjects\Programmes as SubjectsProgrammes;
 use Illuminate\Http\Request;
@@ -66,6 +67,11 @@ Route::domain('{school}.'.config('app.base_domain'))
         // this group, so staff who must set up two-factor can still reach them.
         Route::middleware(['auth', 'verified', 'two-factor.required'])->group(function () {
             Route::view('dashboard', 'dashboard')->name('dashboard');
+
+            // Student screens need a current term and a class first (setup wizard).
+            Route::middleware(['can:'.PermissionKey::StudentsView->value, 'school.ready'])->group(function () {
+                Route::livewire('students', StudentsIndex::class)->name('students.index');
+            });
 
             Route::middleware('can:'.PermissionKey::StaffManage->value)->group(function () {
                 Route::livewire('staff', StaffIndex::class)->name('staff.index');
