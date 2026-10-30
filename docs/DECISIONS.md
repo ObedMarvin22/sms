@@ -591,3 +591,15 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   the next class, or graduation from the last class.
 - **Note:** tests that admit students must now set up a current year and classes; the concurrency
   test creates them with real commits and cleans them up.
+
+## 2026-10-30 — Parent accounts are per school (Obed's decision)
+
+- **Decision:** A guardian record (and later their parent-app login) belongs to one school. A
+  parent with children at two Orange Tree schools has two separate accounts, possibly with the
+  same phone number, and signs in on each school's subdomain.
+- **Reason:** It fits the fixed decisions (parent PWA at `/parent` on each school's subdomain,
+  sessions and tokens bound to one school, `EnsureUserBelongsToSchool`) and keeps each school in
+  control of its own data under Act 843 (no school can change a parent's details at another).
+- **Rejected:** one platform-level parent account across schools (would need a central parent
+  domain, cross-school token rules and shared ownership of the parent's details).
+- **Possible later:** a "switch school" convenience that links accounts with the same phone.
