@@ -46,3 +46,15 @@ it('labels every role', function () {
     expect(RoleKey::Bursar->label())->toBe('Bursar / Accountant')
         ->and(RoleKey::GateStaff->label())->toBe('Gate / pickup staff');
 });
+
+it('marks money, approval and admin permissions as sensitive', function () {
+    $sensitive = array_values(array_map(
+        fn (PermissionKey $p) => $p->value,
+        array_filter(PermissionKey::cases(), fn (PermissionKey $p) => $p->isSensitive()),
+    ));
+
+    expect($sensitive)->toBe([
+        'settings.manage', 'roles.manage', 'staff.manage', 'attendance.edit_locked', 'grades.approve',
+        'fees.manage', 'payments.record', 'finance.view', 'pickup.restrict', 'audit.view',
+    ]);
+});
