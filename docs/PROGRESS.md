@@ -60,7 +60,7 @@ Done when:
 
 - [x] 1. Staff app shell: layout with school logo and colours; sidebar filtered by permissions.
       (Logo shows initials until step 2 adds uploads.)
-- [ ] 2. School profile and settings (logo upload under the school's storage folder, colours,
+- [x] 2. School profile and settings (logo upload under the school's storage folder, colours,
       contacts, levels offered, settings JSON).
 - [ ] 3. Academic years and terms/semesters (dates, census date, one current year/term).
 - [ ] 4. Levels, classes and streams with default class generation from levels offered.

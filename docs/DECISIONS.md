@@ -402,3 +402,28 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   layout is simpler and cannot silently break.
 - **Reminder:** Tailwind only emits classes it saw at the last build. Run `npm run build` after
   adding classes (noted in docs/DEVELOPMENT.md); the badge was blank until the rebuild.
+
+## 2026-10-30 — School profile, contacts and logos
+
+- **Decision:** `schools` gets `phone` (`+233XXXXXXXXX`), `email` and `address` columns (Obed's
+  choice over keeping them in the settings JSON). `App\Support\Phone::normalise()` accepts common
+  Ghanaian formats and rejects anything else. `UpdateSchoolProfile` tidies input (trim, lowercase
+  email) before validating. `App\Support\Settings\SchoolSettings` wraps `settings` JSON with
+  defaults; features add their keys when built. `School` logs profile changes ("schools" log),
+  and activity entries about a `School` take that school's id.
+- **Logos:** PNG/JPG/WebP up to 1 MB (no SVG: it can carry scripts), stored on the private
+  `local` disk at `schools/{id}/branding/logo.{ext}`; the previous file is deleted on replace.
+  Served only by `{school}.domain/branding/logo`, which reads the *current* school's logo and
+  takes no id or path, so one school cannot request another's file. Public, because the login
+  page shows it. Laravel's own `/storage/...` route for the private disk refuses unsigned
+  requests (403), and this app never signs logo URLs.
+- **Livewire uploads (open item from Sprint 1 closed):** the temporary upload cap is 2 MB.
+  I first added `auth:web,platform` to the upload route; a real upload in the browser then
+  failed with 401. That route has no school domain, so `IdentifySchool` does not run and the
+  school-scoped user provider cannot see school staff. `auth` was removed again. Protection
+  rests on Livewire's signed, expiring upload URL (issued only on pages the user could open),
+  private temporary storage, and the save Action's permission check and file validation.
+- **Lesson:** any domain-less route cannot rely on `auth` for school staff. Keep school
+  features inside the `{school}` route group.
+- **Test speed:** tests that seed roles for two schools take ~0.9 s each (permission grants are
+  activity-logged). Not re-migration (checked). Revisit if the suite becomes a burden.
