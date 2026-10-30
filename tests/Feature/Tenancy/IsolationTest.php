@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\AcademicYear;
+use App\Models\ClassSubject;
 use App\Models\Programme;
 use App\Models\ProgrammeSubject;
 use App\Models\School;
@@ -22,6 +23,7 @@ dataset('school-owned models', [
     'SchoolClass' => [fn (School $school): Model => SchoolClass::factory()->for($school)->create()],
     'Stream' => [fn (School $school): Model => Stream::factory()->for(SchoolClass::factory()->for($school))->create()],
     'Subject' => [fn (School $school): Model => Subject::factory()->for($school)->create()],
+    'ClassSubject' => [fn (School $school): Model => ClassSubject::factory()->state(['school_class_id' => SchoolClass::factory()->for($school)])->create()],
     'Programme' => [fn (School $school): Model => Programme::factory()->for($school)->create()],
     'ProgrammeSubject' => [fn (School $school): Model => ProgrammeSubject::factory()->state(['programme_id' => Programme::factory()->for($school)])->create()],
 ]);
