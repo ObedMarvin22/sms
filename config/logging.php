@@ -65,6 +65,15 @@ return [
             'replace_placeholders' => true,
         ],
 
+        // LogChannel: messages that would go by SMS (until Sprint 4), and the SMS log driver later.
+        'notifications' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/notifications.log'),
+            'level' => 'info',
+            'days' => env('LOG_DAILY_DAYS', 14),
+            'replace_placeholders' => true,
+        ],
+
         'daily' => [
             'driver' => 'daily',
             'path' => storage_path('logs/laravel.log'),
