@@ -9,6 +9,22 @@
         @endif
     </div>
 
+    @if (($attention = $this->attention())->isNotEmpty())
+        <flux:callout variant="warning" icon="exclamation-triangle" data-test="needs-attention">
+            <flux:callout.heading>{{ __('Online payments that need attention') }}</flux:callout.heading>
+            <flux:callout.text>
+                <ul class="mt-1 list-disc ps-5">
+                    @foreach ($attention as $transaction)
+                        <li wire:key="attention-{{ $transaction->id }}">
+                            {{ $transaction->student->full_name }}, {{ $transaction->total->format() }}
+                            (<span class="font-mono">{{ $transaction->reference }}</span>): {{ $transaction->attention }}
+                        </li>
+                    @endforeach
+                </ul>
+            </flux:callout.text>
+        </flux:callout>
+    @endif
+
     <div class="grid gap-3 sm:grid-cols-[1fr_10rem_10rem_10rem]">
         <flux:input wire:model.live.debounce.300ms="search" :label="__('Search')" icon="magnifying-glass" :placeholder="__('Receipt, reference, student or admission number')" />
         <flux:select wire:model.live="methodFilter" :label="__('Method')">
@@ -104,7 +120,7 @@
                 @endif
 
                 <flux:radio.group wire:model.live="form.method" variant="segmented" :label="__('Paid by')" size="sm">
-                    @foreach ($this->methods() as $method)
+                    @foreach (\App\Enums\PaymentMethod::manual() as $method)
                         <flux:radio :value="$method->value" :label="$method->label()" />
                     @endforeach
                 </flux:radio.group>

@@ -10,6 +10,7 @@ use App\Actions\Fees\SetInstalmentPlan;
 use App\Actions\Fees\SetResidence;
 use App\Actions\Fees\SetStudentDiscount;
 use App\Actions\Payments\AdjustBalance;
+use App\Actions\Paystack\InitialisePaystackPayment;
 use App\Enums\DiscountKind;
 use App\Enums\DiscountType;
 use App\Enums\PermissionKey;
@@ -25,6 +26,7 @@ use App\Models\StudentInstalmentPlan;
 use App\Models\Term;
 use App\Models\User;
 use App\Support\Money\Money;
+use App\Support\Tenancy\CurrentSchool;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
@@ -43,6 +45,12 @@ class Fees extends Component
     public int $studentId;
 
     public string $residence = '';
+
+    public string $linkAmount = '';
+
+    public string $paymentLink = '';
+
+    public string $linkTotal = '';
 
     /** @var array{direction: string, amount: string, reason: string} */
     public array $adjust = ['direction' => 'charge', 'amount' => '', 'reason' => ''];
@@ -302,6 +310,33 @@ class Fees extends Component
         }
 
         return $rows;
+    }
+
+    public function takesOnlinePayments(): bool
+    {
+        return app(CurrentSchool::class)->require()->paystack_subaccount_code !== null;
+    }
+
+    /**
+     * Staff make a Paystack payment link for a parent (e.g. to send by WhatsApp).
+     */
+    public function createPaymentLink(InitialisePaystackPayment $initialise): void
+    {
+        $this->authorize(PermissionKey::PaymentsRecord->value);
+        $this->resetErrorBag();
+        $user = Auth::user();
+        abort_unless($user instanceof User, 403);
+
+        try {
+            $result = $initialise->handle($this->student(), $this->linkAmount, route('paystack.return'), initiatedBy: $user);
+        } catch (ValidationException $e) {
+            $this->setErrorBag($e->validator->errors());
+
+            return;
+        }
+
+        $this->paymentLink = $result['authorization_url'];
+        $this->linkTotal = $result['transaction']->total->format();
     }
 
     public function canRecordPayments(): bool

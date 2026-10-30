@@ -16,7 +16,30 @@
                 @if ($this->canManage())
                     <flux:button size="sm" icon="adjustments-horizontal" wire:click="startAdjust" data-test="adjust-balance">{{ __('Adjust balance') }}</flux:button>
                 @endif
+                @if ($this->canRecordPayments() && $this->takesOnlinePayments())
+                    <flux:modal.trigger name="payment-link">
+                        <flux:button size="sm" icon="link" data-test="payment-link">{{ __('Online payment link') }}</flux:button>
+                    </flux:modal.trigger>
+                @endif
             </div>
+
+            @if ($this->canRecordPayments() && $this->takesOnlinePayments())
+                <flux:modal name="payment-link" class="md:w-[30rem]">
+                    <form wire:submit="createPaymentLink" class="flex flex-col gap-4">
+                        <flux:heading size="lg">{{ __('Online payment link') }}</flux:heading>
+                        <flux:text>{{ __('Send the link to the parent. When they pay by card or mobile money, the receipt is issued automatically.') }}</flux:text>
+                        <flux:input wire:model="linkAmount" :label="__('Amount (GH₵)')" inputmode="decimal" class="max-w-48" />
+                        <flux:error name="amount" />
+                        @if ($paymentLink !== '')
+                            <flux:input readonly :value="$paymentLink" :label="__('Parent pays :total', ['total' => $linkTotal])" copyable data-test="link" />
+                        @endif
+                        <div class="flex justify-end gap-2">
+                            <flux:modal.close><flux:button variant="ghost">{{ __('Close') }}</flux:button></flux:modal.close>
+                            <flux:button type="submit" variant="primary">{{ __('Create link') }}</flux:button>
+                        </div>
+                    </form>
+                </flux:modal>
+            @endif
 
             @if ($statement = $this->statement())
                 <details class="rounded-lg border border-zinc-200 p-3 dark:border-zinc-700" data-test="statement">

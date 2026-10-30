@@ -15,6 +15,7 @@
             <flux:table.column>{{ __('Subdomain') }}</flux:table.column>
             <flux:table.column>{{ __('Status') }}</flux:table.column>
             <flux:table.column>{{ __('Created') }}</flux:table.column>
+            <flux:table.column>{{ __('Online payments') }}</flux:table.column>
         </flux:table.columns>
 
         <flux:table.rows>
@@ -26,10 +27,15 @@
                     </flux:table.cell>
                     <flux:table.cell><flux:badge size="sm">{{ $school->status->label() }}</flux:badge></flux:table.cell>
                     <flux:table.cell>{{ $school->created_at?->toDateString() }}</flux:table.cell>
+                    <flux:table.cell>
+                        <flux:link :href="route('console.schools.payments', $school)" wire:navigate data-test="payments-link">
+                            {{ $school->paystack_subaccount_code ? __('Connected') : __('Set up') }}
+                        </flux:link>
+                    </flux:table.cell>
                 </flux:table.row>
             @empty
                 <flux:table.row>
-                    <flux:table.cell colspan="4">{{ __('No schools yet.') }}</flux:table.cell>
+                    <flux:table.cell colspan="5">{{ __('No schools yet.') }}</flux:table.cell>
                 </flux:table.row>
             @endforelse
         </flux:table.rows>

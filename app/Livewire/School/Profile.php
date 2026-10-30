@@ -5,6 +5,8 @@ namespace App\Livewire\School;
 use App\Actions\Attendance\AttendanceRules;
 use App\Actions\Attendance\SetAttendanceLockTime;
 use App\Actions\Fees\SetOffersBoarding;
+use App\Actions\Paystack\PaystackCharge;
+use App\Actions\Paystack\SetPaystackChargePayer;
 use App\Actions\Schools\UpdateSchoolProfile;
 use App\Actions\Students\SetAdmissionFormat;
 use App\Enums\PermissionKey;
@@ -52,6 +54,8 @@ class Profile extends Component
 
     public bool $offers_boarding = false;
 
+    public string $paystack_charge_payer = 'school';
+
     public function mount(): void
     {
         $this->authorize(PermissionKey::SettingsManage->value);
@@ -69,6 +73,7 @@ class Profile extends Component
         $this->admission_number_format = $format->format;
         $this->attendance_lock_time = AttendanceRules::lockTime($school);
         $this->offers_boarding = (bool) SchoolSettings::for($school)->get('offers_boarding', false);
+        $this->paystack_charge_payer = app(CurrentSchool::class)->runFor($school, fn () => PaystackCharge::payer());
         $this->levels = array_values($school->levels_offered->map(fn (SchoolLevel $level) => $level->value)->all());
     }
 
@@ -123,6 +128,22 @@ class Profile extends Component
         }
 
         Flux::toast(variant: 'success', text: __('Admission number format saved.'));
+    }
+
+    public function updatedPaystackChargePayer(SetPaystackChargePayer $setPayer): void
+    {
+        $this->authorize(PermissionKey::SettingsManage->value);
+        $this->resetErrorBag();
+
+        try {
+            $setPayer->handle($this->school(), $this->paystack_charge_payer);
+        } catch (ValidationException $e) {
+            $this->setErrorBag($e->validator->errors());
+
+            return;
+        }
+
+        Flux::toast(variant: 'success', text: __('Saved.'));
     }
 
     public function updatedOffersBoarding(SetOffersBoarding $setOffersBoarding): void

@@ -5,9 +5,11 @@ namespace App\Livewire\Fees;
 use App\Actions\Payments\RecordPayment;
 use App\Actions\Payments\ReversePayment;
 use App\Enums\PaymentMethod;
+use App\Enums\PaystackTransactionStatus;
 use App\Enums\PermissionKey;
 use App\Models\LedgerEntry;
 use App\Models\Payment;
+use App\Models\PaystackTransaction;
 use App\Models\Student;
 use App\Models\User;
 use App\Support\Money\Money;
@@ -113,6 +115,16 @@ class Payments extends Component
             ->when(preg_match('/^\d{4}-\d{2}-\d{2}$/', $this->to) === 1, fn ($q) => $q->where('paid_on', '<=', $this->to))
             ->latest('id')
             ->paginate(25);
+    }
+
+    /**
+     * Online payments Paystack and our records disagree on (ReconcilePaystack, SettlePaystackTransaction).
+     *
+     * @return Collection<int, PaystackTransaction>
+     */
+    public function attention(): Collection
+    {
+        return PaystackTransaction::with('student')->where('status', PaystackTransactionStatus::Attention->value)->latest('id')->get();
     }
 
     /**

@@ -82,6 +82,22 @@
 
     <flux:separator />
 
+    <div class="flex flex-col gap-2" data-test="online-payments">
+        <flux:heading size="lg">{{ __('Online payments') }}</flux:heading>
+        @if ($this->school()->paystack_subaccount_code)
+            <flux:text>{{ __('Parents can pay online. Money settles to: :account', ['account' => $this->school()->paystack_settlement]) }}</flux:text>
+            <flux:radio.group wire:model.live="paystack_charge_payer" :label="__('Paystack\'s charge (about :rate)', ['rate' => \App\Support\Money\Percent::format(\App\Actions\Paystack\PaystackCharge::basisPoints())])">
+                <flux:radio value="school" :label="__('The school absorbs it')" :description="__('Parents pay exactly the fee amount.')" />
+                <flux:radio value="parent" :label="__('Parents pay it')" :description="__('The charge is added at checkout so the school receives the full fee.')" />
+            </flux:radio.group>
+            <flux:error name="paystack_charge_payer" />
+        @else
+            <flux:text>{{ __('Not set up yet. Orange Tree connects your school to Paystack with your bank or mobile money account.') }}</flux:text>
+        @endif
+    </div>
+
+    <flux:separator />
+
     <div class="flex flex-col gap-2" data-test="offers-boarding">
         <flux:heading size="lg">{{ __('Boarding') }}</flux:heading>
         <flux:switch wire:model.live="offers_boarding" :label="__('This school takes boarders')"
