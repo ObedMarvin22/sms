@@ -116,3 +116,23 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
 - **Note:** Pest arch rules only inspect namespaced classes (checked with a probe class).
 - **Note:** The starter kit's Fortify classes in `app/Actions/Fortify` use `create()`/`reset()`
   as Fortify requires, not `handle()`. The Sprint 1 Actions rule must exempt them.
+
+## 2026-10-30 — `schools` table shape
+
+- **Decision:** `status` is a `string(20)` column (default `trial`, indexed) cast to
+  `SchoolStatus`, not a MySQL `ENUM`. `levels_offered` is JSON cast with
+  `AsEnumCollection::of(SchoolLevel::class)`. Colours are two `string(7)` hex columns. `plan` is a
+  nullable string until the `plans` table exists (Sprint 4). `paystack_subaccount_code` is nullable
+  and unique. `sms_sender_id` is `string(11)` (the SMS sender ID limit). `subdomain` is
+  `string(63)` (the DNS label limit) and unique.
+- **Reason:** New statuses need no `ALTER TABLE`, and the PHP enum stays the single source of
+  truth. Typed casts mean code never compares raw strings.
+- **Alternatives:** MySQL `ENUM` columns; colours and plan inside `settings` JSON (harder to
+  validate and query).
+
+## 2026-10-30 — All enums are string-backed
+
+- **Decision:** Every enum in `App\Enums` is string-backed, enforced by an arch test.
+- **Reason:** Readable values in the database, logs and API responses. A unit test pins each
+  enum's stored values, because renaming one would orphan existing rows.
+- **Alternatives:** Int-backed enums (smaller, but opaque in data and the API).

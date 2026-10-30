@@ -31,7 +31,7 @@ Done when:
 
 ## Sprint 1 — foundation: tenancy, auth, roles
 
-- [ ] 1. `schools` migration, model, factory, `SchoolStatus` enum.
+- [x] 1. `schools` migration, model, factory, `SchoolStatus` enum.
 - [ ] 2. `CurrentSchool` holder bound in the container.
 - [ ] 3. `IdentifySchool` middleware and the subdomain route group (web + API). Unknown → 404;
       suspended → suspended page.
