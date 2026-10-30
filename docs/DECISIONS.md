@@ -675,3 +675,23 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   activity log with nothing worth auditing.
 - **Concurrent saves** of the same register lock the stream row first, so they run one after
   the other; the unique index is the safety net.
+
+## 2026-10-30 — Absence notification (Sprint 3 step 7)
+
+- **Notices go out at the lock time, not on save.** A command (`attendance:notify-absences`,
+  every weekday minute from the scheduler) notifies each school once its registers lock, so a
+  teacher's corrections before then never reach parents. An absence an administrator marks
+  after the lock is notified when they save. *Rejected:* notifying on save (false alarms from
+  mistakes fixed minutes later).
+- **Once per student per day**, recorded in `attendance_records.absence_notified_at`. A student
+  with no guardian to tell stays unstamped, so a guardian added later that day still hears.
+  Only Absent notifies; Late and Excused do not. Earlier days are never notified.
+- **Recipients:** every linked guardian except access level "none" (contact only).
+- **Notifications are stored against the guardian** (Guardian is Notifiable), not a user, so
+  the parent app can show them from activation even though most guardians have no login yet.
+  The `notifications` table has `school_id`; `App\Models\Notification` extends Laravel's
+  `DatabaseNotification` with `BelongsToSchool`.
+- **"Log for now":** `LogChannel` writes the message SMS would carry, with the phone, to
+  `storage/logs/notifications.log`. Sprint 4 step 5 replaces it with the SMS channel.
+- **Deferred:** a correction notice when an absence is reversed after notifying; a school
+  setting to switch notices off; web push and SMS (Sprint 4).

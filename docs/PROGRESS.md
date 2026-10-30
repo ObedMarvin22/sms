@@ -94,7 +94,7 @@ Done when:
       errors, queued chunked import (100 rows per job).
 - [x] 6. Daily attendance register by class teacher; lock at a school-set time; admin-only edits
       after lock, logged.
-- [ ] 7. Absence notification to guardians (in-app + log for now).
+- [x] 7. Absence notification to guardians (in-app + log for now).
 - [ ] 8. Student search, class lists, printable class list PDF.
 - [ ] 9. Seeder upgrade: ~600 students per demo school with guardians; list pages stay fast.
 
