@@ -28,6 +28,7 @@ final class StaffNavigation
             new NavItem('Academic years', 'calendar-days', 'academic-years.index', PermissionKey::SettingsManage, 'School setup'),
             new NavItem('Classes', 'rectangle-group', 'classes.index', PermissionKey::SettingsManage, 'School setup'),
             new NavItem('Subjects', 'book-open', 'subjects.index', PermissionKey::SettingsManage, 'School setup'),
+            new NavItem('Class subjects', 'table-cells', 'class-subjects.index', PermissionKey::SettingsManage, 'School setup'),
         ]);
     }
 

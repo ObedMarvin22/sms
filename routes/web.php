@@ -5,6 +5,7 @@ use App\Http\Controllers\SchoolLogoController;
 use App\Livewire\Academic\CreateYear as CreateAcademicYear;
 use App\Livewire\Academic\Years as AcademicYears;
 use App\Livewire\Classes\Index as ClassesIndex;
+use App\Livewire\Classes\Subjects as ClassSubjects;
 use App\Livewire\Console\Login as ConsoleLogin;
 use App\Livewire\Console\Schools\Create as ConsoleSchoolsCreate;
 use App\Livewire\Console\Schools\Index as ConsoleSchoolsIndex;
@@ -68,6 +69,7 @@ Route::domain('{school}.'.config('app.base_domain'))
                 Route::livewire('settings/academic-years', AcademicYears::class)->name('academic-years.index');
                 Route::livewire('settings/academic-years/create', CreateAcademicYear::class)->name('academic-years.create');
                 Route::livewire('settings/classes', ClassesIndex::class)->name('classes.index');
+                Route::livewire('settings/class-subjects', ClassSubjects::class)->name('class-subjects.index');
                 Route::livewire('settings/subjects', SubjectsIndex::class)->name('subjects.index');
                 Route::livewire('settings/programmes', SubjectsProgrammes::class)->name('programmes.index');
             });
