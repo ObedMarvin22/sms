@@ -10,6 +10,8 @@ use App\Livewire\Console\Schools\Create as ConsoleSchoolsCreate;
 use App\Livewire\Console\Schools\Index as ConsoleSchoolsIndex;
 use App\Livewire\Invitations\AcceptInvitation;
 use App\Livewire\School\Profile as SchoolProfile;
+use App\Livewire\Subjects\Index as SubjectsIndex;
+use App\Livewire\Subjects\Programmes as SubjectsProgrammes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -66,6 +68,8 @@ Route::domain('{school}.'.config('app.base_domain'))
                 Route::livewire('settings/academic-years', AcademicYears::class)->name('academic-years.index');
                 Route::livewire('settings/academic-years/create', CreateAcademicYear::class)->name('academic-years.create');
                 Route::livewire('settings/classes', ClassesIndex::class)->name('classes.index');
+                Route::livewire('settings/subjects', SubjectsIndex::class)->name('subjects.index');
+                Route::livewire('settings/programmes', SubjectsProgrammes::class)->name('programmes.index');
             });
         });
 
