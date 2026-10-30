@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
@@ -65,6 +66,17 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     /**
      * Audit trail: identity and security fields only. Secrets are never logged.
      */
+    /**
+     * In-app notifications for school staff (e.g. low SMS credit), stored with the school's id
+     * like guardians' (App\Models\Notification). Console staff (no school) get none.
+     *
+     * @return MorphMany<Notification, $this>
+     */
+    public function notifications(): MorphMany
+    {
+        return $this->morphMany(Notification::class, 'notifiable')->latest();
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
