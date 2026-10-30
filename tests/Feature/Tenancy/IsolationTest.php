@@ -4,6 +4,10 @@ use App\Models\AcademicYear;
 use App\Models\AdmissionSequence;
 use App\Models\AttendanceRecord;
 use App\Models\AttendanceSession;
+use App\Models\Bill;
+use App\Models\BillingRun;
+use App\Models\BillInstalment;
+use App\Models\BillLine;
 use App\Models\ClassSubject;
 use App\Models\ClassTeacherAssignment;
 use App\Models\Discount;
@@ -15,6 +19,7 @@ use App\Models\Guardian;
 use App\Models\GuardianStudent;
 use App\Models\InstalmentPlan;
 use App\Models\InstalmentPlanStep;
+use App\Models\LedgerEntry;
 use App\Models\Notification;
 use App\Models\Programme;
 use App\Models\ProgrammeSubject;
@@ -56,6 +61,11 @@ dataset('school-owned models', [
     'AttendanceRecord' => [fn (School $school): Model => AttendanceRecord::factory()->create(['school_id' => $school->id])],
     'FeeItem' => [fn (School $school): Model => FeeItem::factory()->for($school)->create()],
     'Discount' => [fn (School $school): Model => Discount::factory()->for($school)->create()],
+    'Bill' => [fn (School $school): Model => Bill::factory()->create(['school_id' => $school->id])],
+    'BillLine' => [fn (School $school): Model => BillLine::factory()->create(['school_id' => $school->id])],
+    'BillInstalment' => [fn (School $school): Model => BillInstalment::factory()->create(['school_id' => $school->id])],
+    'BillingRun' => [fn (School $school): Model => BillingRun::factory()->create(['school_id' => $school->id])],
+    'LedgerEntry' => [fn (School $school): Model => LedgerEntry::factory()->create(['school_id' => $school->id])],
     'StudentDiscount' => [fn (School $school): Model => StudentDiscount::factory()->create(['school_id' => $school->id])],
     'InstalmentPlan' => [fn (School $school): Model => InstalmentPlan::factory()->create(['school_id' => $school->id])],
     'InstalmentPlanStep' => [fn (School $school): Model => InstalmentPlanStep::factory()->create(['school_id' => $school->id])],
@@ -106,8 +116,11 @@ it('cannot be updated or deleted from another school', function (Closure $make) 
     $class = $record::class;
     $before = $record->fresh()->getAttributes();
 
-    $this->current->runFor($this->schoolB, function () use ($class, $record) {
-        expect($class::whereKey($record->getKey())->update(['updated_at' => now()->addYear()]))->toBe(0)
+    // Any timestamp column will do; the append-only ledger has created_at only.
+    $column = $record->getUpdatedAtColumn() ?? $record->getCreatedAtColumn();
+
+    $this->current->runFor($this->schoolB, function () use ($class, $record, $column) {
+        expect($class::whereKey($record->getKey())->update([$column => now()->addYear()]))->toBe(0)
             ->and($class::whereKey($record->getKey())->delete())->toBe(0);
     });
 
