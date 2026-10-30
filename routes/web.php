@@ -9,6 +9,7 @@ use App\Livewire\Classes\Subjects as ClassSubjects;
 use App\Livewire\Console\Login as ConsoleLogin;
 use App\Livewire\Console\Schools\Create as ConsoleSchoolsCreate;
 use App\Livewire\Console\Schools\Index as ConsoleSchoolsIndex;
+use App\Livewire\Guardians\Index as GuardiansIndex;
 use App\Livewire\Invitations\AcceptInvitation;
 use App\Livewire\School\Profile as SchoolProfile;
 use App\Livewire\Setup\Wizard as SetupWizard;
@@ -77,6 +78,7 @@ Route::domain('{school}.'.config('app.base_domain'))
                     ->middleware('can:'.PermissionKey::StudentsManage->value)
                     ->name('students.promotion');
                 Route::livewire('students/{student}', StudentsShow::class)->name('students.show');
+                Route::livewire('guardians', GuardiansIndex::class)->name('guardians.index');
             });
 
             Route::middleware('can:'.PermissionKey::StaffManage->value)->group(function () {

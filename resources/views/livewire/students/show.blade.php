@@ -25,6 +25,8 @@
         <div><flux:text size="sm">{{ __('Admitted') }}</flux:text><div>{{ $student->admitted_on->format('j M Y') }}</div></div>
     </div>
 
+    <livewire:students.guardians :student-id="$student->id" />
+
     <div>
         <flux:heading size="lg" class="mb-2">{{ __('Enrolment history') }}</flux:heading>
         <flux:table>
