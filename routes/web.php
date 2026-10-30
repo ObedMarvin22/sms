@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\PermissionKey;
+use App\Http\Controllers\ClassListPdfController;
 use App\Http\Controllers\SchoolLogoController;
 use App\Http\Controllers\StudentImportTemplateController;
 use App\Livewire\Academic\CreateYear as CreateAcademicYear;
@@ -18,6 +19,7 @@ use App\Livewire\School\Profile as SchoolProfile;
 use App\Livewire\Setup\Wizard as SetupWizard;
 use App\Livewire\Staff\Index as StaffIndex;
 use App\Livewire\Staff\TeachingAssignments as StaffTeachingAssignments;
+use App\Livewire\Students\ClassList as StudentsClassList;
 use App\Livewire\Students\Import as StudentsImport;
 use App\Livewire\Students\Index as StudentsIndex;
 use App\Livewire\Students\Promotion as StudentsPromotion;
@@ -85,6 +87,8 @@ Route::domain('{school}.'.config('app.base_domain'))
                 });
                 Route::livewire('students/{student}', StudentsShow::class)->name('students.show');
                 Route::livewire('guardians', GuardiansIndex::class)->name('guardians.index');
+                Route::livewire('class-lists', StudentsClassList::class)->name('class-lists.index');
+                Route::get('class-lists/{stream}/pdf', ClassListPdfController::class)->name('class-lists.pdf');
             });
 
             // Registers need a current term and classes. take-attendance: attendance.take or

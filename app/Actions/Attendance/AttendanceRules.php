@@ -121,7 +121,7 @@ final class AttendanceRules
     /**
      * @return list<int>
      */
-    private static function classTeacherStreamIds(User $user): array
+    public static function classTeacherStreamIds(User $user): array
     {
         $yearId = AcademicYear::current()->value('id');
 
