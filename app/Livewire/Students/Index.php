@@ -6,6 +6,9 @@ use App\Actions\Students\AdmitStudent;
 use App\Actions\Students\UpdateStudent;
 use App\Enums\Gender;
 use App\Enums\PermissionKey;
+use App\Enums\SchoolLevel;
+use App\Models\Programme;
+use App\Models\Stream;
 use App\Models\Student;
 use Flux\Flux;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -58,6 +61,7 @@ class Index extends Component
         $term = trim($this->search);
 
         return Student::query()
+            ->with('currentEnrolment.stream.schoolClass')
             ->when($term !== '', fn ($q) => $q->where(fn ($q) => $q
                 ->where('admission_number', 'like', "%{$term}%")
                 ->orWhere('first_name', 'like', "%{$term}%")
@@ -114,6 +118,36 @@ class Index extends Component
     }
 
     /**
+     * Streams to admit into, labelled like "JHS 2A", in class order.
+     *
+     * @return array<int, string> stream id => label
+     */
+    #[Computed]
+    public function streamOptions(): array
+    {
+        return Stream::query()->join('school_classes', 'school_classes.id', '=', 'streams.school_class_id')
+            ->orderBy('school_classes.sequence')->orderBy('streams.name')
+            ->get(['streams.id', 'streams.name', 'school_classes.name as class_name'])
+            ->mapWithKeys(fn (Stream $s) => [$s->id => $s->getAttribute('class_name').$s->name])
+            ->all();
+    }
+
+    public function selectedStreamIsShs(): bool
+    {
+        $stream = Stream::with('schoolClass')->find((int) ($this->form['stream_id'] ?? 0));
+
+        return $stream?->schoolClass->level === SchoolLevel::Shs;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function programmeOptions(): array
+    {
+        return Programme::orderBy('name')->pluck('name', 'id')->all();
+    }
+
+    /**
      * @return list<Gender>
      */
     public function genders(): array
@@ -131,5 +165,7 @@ class Index extends Component
         $this->editingId = null;
         $this->form = array_fill_keys(['admission_number', 'first_name', 'last_name', 'other_names', 'gender', 'date_of_birth'], '');
         $this->form['admitted_on'] = now()->toDateString();
+        $this->form['stream_id'] = '';
+        $this->form['programme_id'] = '';
     }
 }

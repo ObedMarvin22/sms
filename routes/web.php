@@ -15,6 +15,8 @@ use App\Livewire\Setup\Wizard as SetupWizard;
 use App\Livewire\Staff\Index as StaffIndex;
 use App\Livewire\Staff\TeachingAssignments as StaffTeachingAssignments;
 use App\Livewire\Students\Index as StudentsIndex;
+use App\Livewire\Students\Promotion as StudentsPromotion;
+use App\Livewire\Students\Show as StudentsShow;
 use App\Livewire\Subjects\Index as SubjectsIndex;
 use App\Livewire\Subjects\Programmes as SubjectsProgrammes;
 use Illuminate\Http\Request;
@@ -71,6 +73,10 @@ Route::domain('{school}.'.config('app.base_domain'))
             // Student screens need a current term and a class first (setup wizard).
             Route::middleware(['can:'.PermissionKey::StudentsView->value, 'school.ready'])->group(function () {
                 Route::livewire('students', StudentsIndex::class)->name('students.index');
+                Route::livewire('students/promotion', StudentsPromotion::class)
+                    ->middleware('can:'.PermissionKey::StudentsManage->value)
+                    ->name('students.promotion');
+                Route::livewire('students/{student}', StudentsShow::class)->name('students.show');
             });
 
             Route::middleware('can:'.PermissionKey::StaffManage->value)->group(function () {
