@@ -427,3 +427,24 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   features inside the `{school}` route group.
 - **Test speed:** tests that seed roles for two schools take ~0.9 s each (permission grants are
   activity-logged). Not re-migration (checked). Revisit if the suite becomes a burden.
+
+## 2026-10-30 — Academic years and terms
+
+- **Decision:** `academic_years` and `terms` are school-owned (`BelongsToSchool`). "Exactly one
+  current year and term per school" is enforced by the database: `is_current` is stored as
+  `true` or NULL (a model mutator turns `false` into NULL) with a unique `(school_id, is_current)`
+  index, which allows many NULLs but one `true`. `SetCurrentTerm` clears the old rows, then sets
+  the new term and its year, in one transaction with `lockForUpdate()`. A school chooses terms (3)
+  or semesters (2) in `SchoolSettings` (`academic_period`, default terms); fixed once it has a year.
+  A new year comes with all its terms; dates must sit inside the year, be in order without
+  overlap, and each census date must fall inside its term. The first year's first term becomes
+  current automatically. The form is prefilled from `App\Support\Academic\DefaultCalendar`
+  (Ghanaian calendar, census = term start + 14 days, Obed approved). Year names: "2026/2027".
+- **Reason:** SPEC section 6. A database guarantee beats an application check under concurrency.
+- **Bugs caught by tests:** `SetCurrentTerm` first used `update(['is_current' => false])`, which
+  is silently ignored because `is_current` is not mass-assignable (third time this trap appeared;
+  use `forceFill`). `DeleteAcademicYear` trusted a stale model's `is_current`; it now asks the
+  database.
+- **Isolation tests:** `tests/Feature/Tenancy/IsolationTest.php` holds a dataset of school-owned
+  models. Each new model must be added there (invisible, not updatable/deletable from another
+  school, stamped with its school).

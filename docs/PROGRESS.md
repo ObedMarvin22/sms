@@ -62,7 +62,7 @@ Done when:
       (Logo shows initials until step 2 adds uploads.)
 - [x] 2. School profile and settings (logo upload under the school's storage folder, colours,
       contacts, levels offered, settings JSON).
-- [ ] 3. Academic years and terms/semesters (dates, census date, one current year/term).
+- [x] 3. Academic years and terms/semesters (dates, census date, one current year/term).
 - [ ] 4. Levels, classes and streams with default class generation from levels offered.
 - [ ] 5. Subjects (preset list per level, editable) and SHS programmes with core/elective subjects.
 - [ ] 6. Class–subject mapping.
