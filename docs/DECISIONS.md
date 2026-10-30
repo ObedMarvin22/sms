@@ -487,3 +487,18 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
 - **Later:** recorded scores (Sprint 5) must block removing a subject from a class.
 - **Not checked in the browser:** covered by Livewire tests (the browser pane was not drawing
   reliably this session).
+
+## 2026-10-30 — Setup wizard and "ready for students"
+
+- **Decision:** `App\Support\Setup\SetupProgress` computes each `SetupStep` (profile: levels and a
+  phone; academic year: a current term; classes; subjects; class subjects: every class has one).
+  A step is open once all earlier steps are done. The wizard (`/setup`, "Setup checklist" in the
+  sidebar) links each step to the screen already built for it and offers the same quick Actions
+  (only for open steps). Completion is recorded once in `SchoolSettings` (`setup_completed_at`).
+  Administrators see a dashboard banner until setup is complete; nobody is force-redirected.
+  `EnsureSchoolReadyForStudents` (`school.ready`) needs a current term and a class; it redirects
+  to the wizard (JSON 409 for APIs) and is applied to student routes from Sprint 3.
+- **Reason:** Roadmap Sprint 2 step 7. One class decides "done" for the wizard, the banner and the
+  middleware, so they cannot disagree.
+- **Verified:** a test takes a brand-new school (created via the console Action) to complete
+  setup using only the Actions; the browser showed the banner and correct step states on Hillview.

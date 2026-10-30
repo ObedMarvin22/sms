@@ -66,7 +66,7 @@ Done when:
 - [x] 4. Levels, classes and streams with default class generation from levels offered.
 - [x] 5. Subjects (preset list per level, editable) and SHS programmes with core/elective subjects.
 - [x] 6. Class–subject mapping.
-- [ ] 7. Setup wizard for new schools (steps 2–6 in order); student entry blocked until a current
+- [x] 7. Setup wizard for new schools (steps 2–6 in order); student entry blocked until a current
       term and a class exist.
 - [ ] 8. Permission checks on every screen, with tests that a teacher is refused on settings screens.
 - [ ] 9. Staging environment checklist written to `docs/DEPLOYMENT.md`.
