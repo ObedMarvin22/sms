@@ -41,6 +41,13 @@ C:/tools/mailpit/mailpit.exe
 
 `*.localhost` resolves to your machine in the browser; no hosts-file changes are needed.
 
+Queued work (student imports, later bills and report cards) uses the `database` queue. On the
+server cron runs it every minute; locally, keep a worker running while you test it:
+
+```bash
+php artisan queue:work --stop-when-empty
+```
+
 Tailwind only includes classes it found at the last build. After adding new classes to a
 view, run `npm run build` (or keep `npm run dev` running) or they will have no styles.
 

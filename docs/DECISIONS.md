@@ -624,3 +624,31 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   and the activity log records every change.
 - **Deferred:** guardian ID numbers with encrypted casts (SPEC §9) until a screen needs them;
   deleting/archiving a guardian record.
+
+## 2026-10-30 — Student import (Sprint 3 step 5)
+
+- **A file with any error is refused whole (Obed's choice).** The dry run lists every problem
+  by row and column; nothing is imported until the file is clean, so a school never ends up
+  with half a class. *Rejected:* importing good rows and skipping bad ones.
+- **The file is checked again when Import is clicked**, not trusted from the preview, and the
+  upload is deleted once its rows are stored (`student_import_rows`), so pupils' data does not
+  sit in a file on the server.
+- **Rows are stored, then queued 100 per job without `Bus::batch`.** Each row is imported in
+  its own transaction and only while `pending`, so a retried job never admits twice; the last
+  job to find no pending rows marks the import finished. Progress is counted from the rows.
+  *Rejected:* batches (extra moving parts; progress from rows is enough and survives retries).
+- **A row that breaks between preview and import fails alone** (e.g. its admission number was
+  typed in by hand meanwhile); the reason is shown and the rest continue.
+- **Jobs carry the school id and run through `RunInSchool` job middleware**, which wraps the
+  job in `CurrentSchool::runFor()`. Every school job implements `SchoolJob`; BelongsToSchool then
+  scopes and guards everything inside the job, as in a request.
+- **Guardians in the file:** at least one per student; a phone already on file (or earlier in
+  the file) is linked, not an error; the same new phone with two different names is an error.
+- **Accepted spellings:** Excel date cells, `YYYY-MM-DD` and `DD/MM/YYYY`; phone numbers Excel
+  turned into numbers (`244123456`); `JHS 1A`/`jhs1a`, and a single-stream class without its
+  letter; gender `F`/`M`; relationships by value or label.
+- **Speed:** 600 rows import in about 20 s locally (≈3.5 s per 100-row job); the job timeout is
+  45 s inside the worker's 50 s run. Re-measure on the server before the pilot.
+- **Only `.xlsx`.** One format to support and test; CSV loses leading zeros and dates.
+- **`AdmitStudent::prepare()`** holds every admission check without saving, so the dry run
+  cannot drift from real admission rules.

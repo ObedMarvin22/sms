@@ -90,7 +90,7 @@ Done when:
 - [x] 3. Enrolment on admission; promotion, transfer and withdrawal create new enrolment records.
 - [x] 4. Guardians: create/link, relationship, access level, primary contact, `+233`
       normalisation, duplicate detection by phone. (Obed: parent accounts are per school.)
-- [ ] 5. Excel import for students + guardians: template download, dry-run preview with row
+- [x] 5. Excel import for students + guardians: template download, dry-run preview with row
       errors, queued chunked import (100 rows per job).
 - [ ] 6. Daily attendance register by class teacher; lock at a school-set time; admin-only edits
       after lock, logged.
