@@ -14,6 +14,8 @@ use App\Models\SchoolClass;
 use App\Models\Staff;
 use App\Models\Stream;
 use App\Models\Student;
+use App\Models\StudentImport;
+use App\Models\StudentImportRow;
 use App\Models\Subject;
 use App\Models\TeachingAssignment;
 use App\Models\Term;
@@ -35,6 +37,8 @@ dataset('school-owned models', [
     'Guardian' => [fn (School $school): Model => Guardian::factory()->for($school)->create()],
     'GuardianStudent' => [fn (School $school): Model => GuardianStudent::factory()->create(['school_id' => $school->id])],
     'Student' => [fn (School $school): Model => Student::factory()->for($school)->create()],
+    'StudentImport' => [fn (School $school): Model => StudentImport::factory()->for($school)->create()],
+    'StudentImportRow' => [fn (School $school): Model => StudentImportRow::factory()->create(['school_id' => $school->id])],
     'AdmissionSequence' => [fn (School $school): Model => AdmissionSequence::factory()->for($school)->create()],
     'Staff' => [fn (School $school): Model => Staff::factory()->for($school)->create()],
     'TeachingAssignment' => [fn (School $school): Model => TeachingAssignment::factory()->create(['school_id' => $school->id])],
