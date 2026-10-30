@@ -86,6 +86,16 @@ class Student extends Model
         return $this->hasMany(StudentFeeOption::class);
     }
 
+    /**
+     * School discounts given by hand and scholarships.
+     *
+     * @return HasMany<StudentDiscount, $this>
+     */
+    public function discounts(): HasMany
+    {
+        return $this->hasMany(StudentDiscount::class);
+    }
+
     public function getFullNameAttribute(): string
     {
         return trim($this->first_name.' '.($this->other_names ? $this->other_names.' ' : '').$this->last_name);
