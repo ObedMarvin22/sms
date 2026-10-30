@@ -13,7 +13,8 @@ final readonly class NavItem
         public string $label,
         public string $icon,
         public string $route,
-        public ?PermissionKey $permission = null,
+        /** A permission, or the name of a Gate ability combining several (e.g. "view-payments"). */
+        public PermissionKey|string|null $permission = null,
         public ?string $group = null,
     ) {}
 }

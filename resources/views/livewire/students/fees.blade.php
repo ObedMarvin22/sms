@@ -9,6 +9,42 @@
                 </flux:text>
             </div>
 
+            <div class="flex flex-wrap gap-2">
+                @if ($this->canRecordPayments())
+                    <flux:button size="sm" icon="banknotes" :href="route('fees.payments', ['student' => $studentId])" wire:navigate data-test="record-payment-link">{{ __('Record payment') }}</flux:button>
+                @endif
+                @if ($this->canManage())
+                    <flux:button size="sm" icon="adjustments-horizontal" wire:click="startAdjust" data-test="adjust-balance">{{ __('Adjust balance') }}</flux:button>
+                @endif
+            </div>
+
+            @if ($statement = $this->statement())
+                <details class="rounded-lg border border-zinc-200 p-3 dark:border-zinc-700" data-test="statement">
+                    <summary class="cursor-pointer">{{ __('Statement (:count entries)', ['count' => count($statement)]) }}</summary>
+                    <table class="mt-2 w-full text-sm">
+                        <tr class="text-start text-zinc-500">
+                            <th class="py-1 text-start font-normal">{{ __('Date') }}</th>
+                            <th class="py-1 text-start font-normal">{{ __('Entry') }}</th>
+                            <th class="py-1 text-end font-normal">{{ __('Amount') }}</th>
+                            <th class="py-1 text-end font-normal">{{ __('Balance') }}</th>
+                        </tr>
+                        @foreach ($statement as $row)
+                            <tr wire:key="entry-{{ $row['entry']->id }}">
+                                <td class="py-0.5 whitespace-nowrap">{{ $row['entry']->entry_date->format('j M Y') }}</td>
+                                <td class="py-0.5">
+                                    {{ $row['entry']->description }}
+                                    @if ($row['entry']->payment && $row['entry']->type === \App\Enums\LedgerEntryType::Payment)
+                                        <flux:link :href="route('receipts.pdf', $row['entry']->payment)" class="text-xs">{{ __('receipt') }}</flux:link>
+                                    @endif
+                                </td>
+                                <td class="py-0.5 text-end font-mono">{{ $row['entry']->amount->format() }}</td>
+                                <td class="py-0.5 text-end font-mono">{{ $row['balance']->format() }}</td>
+                            </tr>
+                        @endforeach
+                    </table>
+                </details>
+            @endif
+
             @foreach ($this->bills() as $bill)
                 <details class="rounded-lg border border-zinc-200 p-3 dark:border-zinc-700" wire:key="bill-{{ $bill->id }}" data-test="bill">
                     <summary class="cursor-pointer">
@@ -120,6 +156,26 @@
         </div>
 
         @if ($this->canManage())
+            <flux:modal name="adjust-balance" class="md:w-[28rem]">
+                <form wire:submit="saveAdjustment" class="flex flex-col gap-4">
+                    <flux:heading size="lg">{{ __('Adjust balance') }}</flux:heading>
+                    <flux:text>{{ __('For corrections only. Payments are recorded under Payments; a wrong payment is reversed there.') }}</flux:text>
+                    <flux:radio.group wire:model="adjust.direction" variant="segmented" size="sm">
+                        <flux:radio value="charge" :label="__('Charge (owes more)')" />
+                        <flux:radio value="credit" :label="__('Credit (owes less)')" />
+                    </flux:radio.group>
+                    <flux:error name="direction" />
+                    <flux:input wire:model="adjust.amount" :label="__('Amount (GH₵)')" inputmode="decimal" class="max-w-48" />
+                    <flux:error name="amount" />
+                    <flux:input wire:model="adjust.reason" :label="__('Reason')" :placeholder="__('e.g. Uniform added, fees waived by proprietor')" />
+                    <flux:error name="reason" />
+                    <div class="flex justify-end gap-2">
+                        <flux:modal.close><flux:button variant="ghost">{{ __('Cancel') }}</flux:button></flux:modal.close>
+                        <flux:button type="submit" variant="primary">{{ __('Save adjustment') }}</flux:button>
+                    </div>
+                </form>
+            </flux:modal>
+
             <flux:modal name="scholarship" class="md:w-[30rem]">
                 <form wire:submit="saveScholarship" class="flex flex-col gap-4">
                     <flux:heading size="lg">{{ $editingScholarshipId ? __('Edit scholarship') : __('New scholarship') }}</flux:heading>

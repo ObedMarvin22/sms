@@ -2,6 +2,8 @@
 
 use App\Enums\PermissionKey;
 use App\Http\Controllers\ClassListPdfController;
+use App\Http\Controllers\PaymentProofController;
+use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\SchoolLogoController;
 use App\Http\Controllers\StudentImportTemplateController;
 use App\Livewire\Academic\CreateYear as CreateAcademicYear;
@@ -17,6 +19,7 @@ use App\Livewire\Fees\Billing as FeeBilling;
 use App\Livewire\Fees\Discounts as FeeDiscounts;
 use App\Livewire\Fees\InstalmentPlans as FeeInstalmentPlans;
 use App\Livewire\Fees\Items as FeeItems;
+use App\Livewire\Fees\Payments as FeePayments;
 use App\Livewire\Fees\Structures as FeeStructures;
 use App\Livewire\Guardians\Index as GuardiansIndex;
 use App\Livewire\Invitations\AcceptInvitation;
@@ -112,6 +115,13 @@ Route::domain('{school}.'.config('app.base_domain'))
                 Route::livewire('fees/discounts', FeeDiscounts::class)->name('fees.discounts');
                 Route::livewire('fees/instalment-plans', FeeInstalmentPlans::class)->name('fees.plans');
                 Route::livewire('fees/billing', FeeBilling::class)->name('fees.billing');
+            });
+
+            // Payments and receipts: finance.view or payments.record (Gate in AppServiceProvider).
+            Route::middleware(['can:view-payments', 'school.ready'])->group(function () {
+                Route::livewire('fees/payments', FeePayments::class)->name('fees.payments');
+                Route::get('receipts/{payment}/pdf', ReceiptController::class)->name('receipts.pdf');
+                Route::get('payments/{payment}/proof', PaymentProofController::class)->name('payments.proof');
             });
 
             Route::middleware('can:'.PermissionKey::StaffManage->value)->group(function () {

@@ -35,6 +35,7 @@ final class StaffNavigation
             new NavItem('Teaching assignments', 'clipboard-document-list', 'staff.assignments', PermissionKey::StaffManage, 'People'),
 
             // Sprint 4: fees.
+            new NavItem('Payments', 'banknotes', 'fees.payments', 'view-payments', 'Fees'),
             new NavItem('Billing', 'document-text', 'fees.billing', PermissionKey::FinanceView, 'Fees'),
             new NavItem('Fee structures', 'table-cells', 'fees.structures', PermissionKey::FinanceView, 'Fees'),
             new NavItem('Fee items', 'tag', 'fees.items', PermissionKey::FinanceView, 'Fees'),
@@ -65,7 +66,8 @@ final class StaffNavigation
                 continue;
             }
 
-            if ($item->permission !== null && ! $user?->can($item->permission->value)) {
+            $ability = $item->permission instanceof PermissionKey ? $item->permission->value : $item->permission;
+            if ($ability !== null && ! $user?->can($ability)) {
                 continue;
             }
 

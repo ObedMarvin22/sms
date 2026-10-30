@@ -9,6 +9,7 @@ use App\Actions\Fees\SetFeeOption;
 use App\Actions\Fees\SetInstalmentPlan;
 use App\Actions\Fees\SetResidence;
 use App\Actions\Fees\SetStudentDiscount;
+use App\Actions\Payments\AdjustBalance;
 use App\Enums\DiscountKind;
 use App\Enums\DiscountType;
 use App\Enums\PermissionKey;
@@ -22,6 +23,7 @@ use App\Models\Student;
 use App\Models\StudentDiscount;
 use App\Models\StudentInstalmentPlan;
 use App\Models\Term;
+use App\Models\User;
 use App\Support\Money\Money;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
@@ -41,6 +43,9 @@ class Fees extends Component
     public int $studentId;
 
     public string $residence = '';
+
+    /** @var array{direction: string, amount: string, reason: string} */
+    public array $adjust = ['direction' => 'charge', 'amount' => '', 'reason' => ''];
 
     /** This term's instalment plan ('' = the term's default). */
     public string $planId = '';
@@ -280,6 +285,55 @@ class Fees extends Component
     {
         return Bill::with(['term.academicYear', 'schoolClass', 'lines', 'instalments'])
             ->where('student_id', $this->studentId)->latest('issued_at')->latest('id')->get();
+    }
+
+    /**
+     * Every ledger entry, oldest first, with the balance after it.
+     *
+     * @return list<array{entry: LedgerEntry, balance: Money}>
+     */
+    public function statement(): array
+    {
+        $running = 0;
+        $rows = [];
+        foreach (LedgerEntry::with('payment')->where('student_id', $this->studentId)->orderBy('entry_date')->orderBy('id')->get() as $entry) {
+            $running += $entry->amount->pesewas;
+            $rows[] = ['entry' => $entry, 'balance' => Money::pesewas($running)];
+        }
+
+        return $rows;
+    }
+
+    public function canRecordPayments(): bool
+    {
+        return Auth::user()?->can(PermissionKey::PaymentsRecord->value) ?? false;
+    }
+
+    public function startAdjust(): void
+    {
+        $this->authorize(PermissionKey::FeesManage->value);
+        $this->resetErrorBag();
+        $this->adjust = ['direction' => 'charge', 'amount' => '', 'reason' => ''];
+        Flux::modal('adjust-balance')->show();
+    }
+
+    public function saveAdjustment(AdjustBalance $adjustBalance): void
+    {
+        $this->authorize(PermissionKey::FeesManage->value);
+        $this->resetErrorBag();
+        $user = Auth::user();
+        abort_unless($user instanceof User, 403);
+
+        try {
+            $adjustBalance->handle($user, $this->student(), $this->adjust['direction'], $this->adjust['amount'], $this->adjust['reason']);
+        } catch (ValidationException $e) {
+            $this->setErrorBag($e->validator->errors());
+
+            return;
+        }
+
+        Flux::modal('adjust-balance')->close();
+        Flux::toast(variant: 'success', text: __('Balance adjusted.'));
     }
 
     /**

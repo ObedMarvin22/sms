@@ -72,6 +72,11 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('take-attendance', fn (User $user): bool => $user->can(PermissionKey::AttendanceTake->value)
             || $user->can(PermissionKey::AttendanceEditLocked->value));
 
+        // Payments and receipts: staff who look at finances, and staff who record payments
+        // (an accounts clerk may record without seeing every report).
+        Gate::define('view-payments', fn (User $user): bool => $user->can(PermissionKey::FinanceView->value)
+            || $user->can(PermissionKey::PaymentsRecord->value));
+
         // config/auth.php: users are only ever found within the current school.
         Auth::provider('school_eloquent', fn (Application $app, array $config) => new SchoolUserProvider(
             $app->make(Hasher::class),
