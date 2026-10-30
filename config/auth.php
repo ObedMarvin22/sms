@@ -62,8 +62,9 @@ return [
     */
 
     'providers' => [
+        // Scoped to the current school (App\Support\Tenancy\SchoolUserProvider).
         'users' => [
-            'driver' => 'eloquent',
+            'driver' => 'school_eloquent',
             'model' => env('AUTH_MODEL', User::class),
         ],
 
