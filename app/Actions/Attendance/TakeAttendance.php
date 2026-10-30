@@ -22,7 +22,7 @@ use Illuminate\Validation\ValidationException;
  */
 class TakeAttendance
 {
-    public function __construct(private CurrentSchool $currentSchool) {}
+    public function __construct(private CurrentSchool $currentSchool, private NotifyAbsences $notifyAbsences) {}
 
     /**
      * @param  array<int|string, array{status?: string, note?: string|null}>  $marks  student id => mark
@@ -72,7 +72,7 @@ class TakeAttendance
 
         $reason = trim((string) $reason);
 
-        return DB::transaction(function () use ($user, $stream, $day, $rows, $locked, $reason): AttendanceSession {
+        $session = DB::transaction(function () use ($user, $stream, $day, $rows, $locked, $reason): AttendanceSession {
             $session = $this->session($stream, $day, $user);
             $existing = AttendanceRecord::where('attendance_session_id', $session->id)->get()->keyBy('student_id');
 
@@ -113,6 +113,14 @@ class TakeAttendance
 
             return $session;
         });
+
+        // Today's notices went out at the lock; an absence marked after it is notified now.
+        // Earlier days are never notified.
+        if ($locked && $day->isToday()) {
+            $this->notifyAbsences->handle($session);
+        }
+
+        return $session;
     }
 
     /**

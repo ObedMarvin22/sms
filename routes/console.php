@@ -10,3 +10,9 @@ use Illuminate\Support\Facades\Schedule;
 Schedule::command('queue:work --stop-when-empty --max-time=50')
     ->everyMinute()
     ->withoutOverlapping();
+
+// Absence notices go out once each school's registers lock (NotifyTodaysAbsences).
+Schedule::command('attendance:notify-absences')
+    ->everyMinute()
+    ->weekdays()
+    ->withoutOverlapping();
