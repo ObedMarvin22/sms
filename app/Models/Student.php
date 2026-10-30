@@ -10,6 +10,8 @@ use Database\Factories\StudentFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
@@ -43,6 +45,24 @@ class Student extends Model
      * @var array<string, mixed>
      */
     protected $attributes = ['status' => 'active'];
+
+    /**
+     * Every enrolment, newest first: the student's history.
+     *
+     * @return HasMany<Enrolment, $this>
+     */
+    public function enrolments(): HasMany
+    {
+        return $this->hasMany(Enrolment::class)->orderByDesc('starts_on')->orderByDesc('id');
+    }
+
+    /**
+     * @return HasOne<Enrolment, $this>
+     */
+    public function currentEnrolment(): HasOne
+    {
+        return $this->hasOne(Enrolment::class)->where('is_current', true);
+    }
 
     public function getFullNameAttribute(): string
     {
