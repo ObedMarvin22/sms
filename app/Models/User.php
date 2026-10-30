@@ -17,6 +17,8 @@ use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
@@ -40,13 +42,35 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasApiTokens, HasFactory, HasRoles, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
+    use HasApiTokens, HasFactory, HasRoles, LogsActivity, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
 
     /**
      * Spatie roles are school roles on the "web" guard, whichever guard is active
      * (e.g. a console super admin assigning a school's first administrator).
      */
     protected string $guard_name = 'web';
+
+    protected static function booted(): void
+    {
+        // The password itself is never logged, only that it changed.
+        static::updated(function (User $user): void {
+            if ($user->wasChanged('password')) {
+                activity('users')->performedOn($user)->event('password_changed')->log('password changed');
+            }
+        });
+    }
+
+    /**
+     * Audit trail: identity and security fields only. Secrets are never logged.
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('users')
+            ->logOnly(['name', 'email', 'platform_role', 'two_factor_confirmed_at'])
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
+    }
 
     /**
      * Get the attributes that should be cast.
