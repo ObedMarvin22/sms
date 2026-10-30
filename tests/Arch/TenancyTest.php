@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Activity;
 use App\Models\Concerns\BelongsToSchool;
 use App\Models\School;
 use App\Models\User;
@@ -12,6 +13,8 @@ const PLATFORM_MODELS = [
     School::class,
     // Nullable school_id (null = Orange Tree staff) with its own login scoping: Sprint 1 step 5.
     User::class,
+    // Nullable school_id (platform events); has SchoolScope and fills school_id itself.
+    Activity::class,
 ];
 
 arch('school-owned models use BelongsToSchool')

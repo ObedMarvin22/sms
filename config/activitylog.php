@@ -1,8 +1,8 @@
 <?php
 
+use App\Models\Activity;
 use Spatie\Activitylog\Actions\CleanActivityLogAction;
 use Spatie\Activitylog\Actions\LogActivityAction;
-use Spatie\Activitylog\Models\Activity;
 
 return [
 
@@ -40,6 +40,7 @@ return [
      * It should implement the Spatie\Activitylog\Contracts\Activity interface
      * and extend Illuminate\Database\Eloquent\Model.
      */
+    // School-aware subclass: fills and filters school_id.
     'activity_model' => Activity::class,
 
     /*
