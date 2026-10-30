@@ -19,6 +19,8 @@ final class SchoolSettings
         'academic_period' => 'term',
         // ISO date-time when the setup wizard was first completed (null until then).
         'setup_completed_at' => null,
+        // Daily registers lock at this time (HH:MM); see App\Actions\Attendance\AttendanceRules.
+        'attendance_lock_time' => '10:00',
     ];
 
     /**
