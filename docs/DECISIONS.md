@@ -475,3 +475,15 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   page returns 404 otherwise.
 - **Not verified in the browser** (usage limit): the Subjects and Programmes screens are covered
   by Livewire tests only so far.
+
+## 2026-10-30 — Class–subject mapping
+
+- **Decision:** `class_subject` (pivot model `ClassSubject`, `BelongsToSchool`) links a class to
+  the subjects it takes. A subject may only be linked to a class at a level the subject is taught
+  at. `ApplyDefaultClassSubjects` gives every class all its level's subjects (only adds).
+  `SetClassSubjects` replaces one class's list and logs what was added and removed. SHS classes
+  list every subject offered there (core and electives); which electives a *student* takes comes
+  with their programme (Sprint 3 enrolment).
+- **Later:** recorded scores (Sprint 5) must block removing a subject from a class.
+- **Not checked in the browser:** covered by Livewire tests (the browser pane was not drawing
+  reliably this session).
