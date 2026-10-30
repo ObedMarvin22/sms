@@ -5,7 +5,10 @@
             <flux:text>{{ __('Admission numbers are generated in your school\'s format unless you type one in.') }}</flux:text>
         </div>
         @if ($this->canManage())
-            <flux:button wire:click="startCreate" variant="primary" icon="plus" data-test="new-student">{{ __('Admit student') }}</flux:button>
+            <div class="flex gap-2">
+                <flux:button :href="route('students.import')" icon="arrow-up-tray" wire:navigate>{{ __('Import') }}</flux:button>
+                <flux:button wire:click="startCreate" variant="primary" icon="plus" data-test="new-student">{{ __('Admit student') }}</flux:button>
+            </div>
         @endif
     </div>
 

@@ -2,6 +2,7 @@
 
 use App\Enums\PermissionKey;
 use App\Http\Controllers\SchoolLogoController;
+use App\Http\Controllers\StudentImportTemplateController;
 use App\Livewire\Academic\CreateYear as CreateAcademicYear;
 use App\Livewire\Academic\Years as AcademicYears;
 use App\Livewire\Classes\Index as ClassesIndex;
@@ -15,6 +16,7 @@ use App\Livewire\School\Profile as SchoolProfile;
 use App\Livewire\Setup\Wizard as SetupWizard;
 use App\Livewire\Staff\Index as StaffIndex;
 use App\Livewire\Staff\TeachingAssignments as StaffTeachingAssignments;
+use App\Livewire\Students\Import as StudentsImport;
 use App\Livewire\Students\Index as StudentsIndex;
 use App\Livewire\Students\Promotion as StudentsPromotion;
 use App\Livewire\Students\Show as StudentsShow;
@@ -74,9 +76,11 @@ Route::domain('{school}.'.config('app.base_domain'))
             // Student screens need a current term and a class first (setup wizard).
             Route::middleware(['can:'.PermissionKey::StudentsView->value, 'school.ready'])->group(function () {
                 Route::livewire('students', StudentsIndex::class)->name('students.index');
-                Route::livewire('students/promotion', StudentsPromotion::class)
-                    ->middleware('can:'.PermissionKey::StudentsManage->value)
-                    ->name('students.promotion');
+                Route::middleware('can:'.PermissionKey::StudentsManage->value)->group(function () {
+                    Route::livewire('students/promotion', StudentsPromotion::class)->name('students.promotion');
+                    Route::livewire('students/import', StudentsImport::class)->name('students.import');
+                    Route::get('students/import/template', StudentImportTemplateController::class)->name('students.import.template');
+                });
                 Route::livewire('students/{student}', StudentsShow::class)->name('students.show');
                 Route::livewire('guardians', GuardiansIndex::class)->name('guardians.index');
             });
