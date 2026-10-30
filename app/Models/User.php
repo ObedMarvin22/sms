@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\PlatformRoleKey;
+use App\Enums\RoleKey;
 use Carbon\CarbonImmutable;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -84,6 +85,20 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
             'password' => 'hashed',
             'platform_role' => PlatformRoleKey::class,
         ];
+    }
+
+    /**
+     * Whether any of this user's roles in the current school requires two-factor (SPEC section 5).
+     */
+    public function requiresTwoFactor(): bool
+    {
+        return $this->getRoleNames()
+            ->contains(fn (string $name) => RoleKey::tryFrom($name)?->requiresTwoFactor() ?? false);
+    }
+
+    public function hasConfirmedTwoFactor(): bool
+    {
+        return $this->two_factor_confirmed_at !== null;
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Http\Middleware\EnsureTwoFactorEnabled;
 use App\Http\Middleware\EnsureUserBelongsToSchool;
 use App\Http\Middleware\IdentifySchool;
 use App\Listeners\LogRoleChanges;
@@ -51,7 +52,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Livewire updates post to its own endpoint; re-run these there using the
         // original page's route, so components always have the current school and user.
-        Livewire::addPersistentMiddleware([IdentifySchool::class, EnsureUserBelongsToSchool::class]);
+        Livewire::addPersistentMiddleware([IdentifySchool::class, EnsureUserBelongsToSchool::class, EnsureTwoFactorEnabled::class]);
 
         // Audit trail for role assignments and permission grants.
         Event::listen(RoleAttachedEvent::class, [LogRoleChanges::class, 'roleAttached']);

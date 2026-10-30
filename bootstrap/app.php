@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureTwoFactorEnabled;
 use App\Http\Middleware\EnsureUserBelongsToSchool;
 use App\Http\Middleware\IdentifySchool;
 use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
@@ -19,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'school' => IdentifySchool::class,
             'school.member' => EnsureUserBelongsToSchool::class,
+            'two-factor.required' => EnsureTwoFactorEnabled::class,
         ]);
 
         // Resolve the school before authentication, and check membership after it

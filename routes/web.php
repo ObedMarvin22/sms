@@ -47,7 +47,9 @@ Route::domain('{school}.'.config('app.base_domain'))
             ->middleware('signed')
             ->name('invitation.accept');
 
-        Route::middleware(['auth', 'verified'])->group(function () {
+        // Staff screens. Settings (incl. two-factor setup) are in routes/settings.php, outside
+        // this group, so staff who must set up two-factor can still reach them.
+        Route::middleware(['auth', 'verified', 'two-factor.required'])->group(function () {
             Route::view('dashboard', 'dashboard')->name('dashboard');
         });
 
