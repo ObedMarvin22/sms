@@ -21,6 +21,8 @@ final class SchoolSettings
         'setup_completed_at' => null,
         // Daily registers lock at this time (HH:MM); see App\Actions\Attendance\AttendanceRules.
         'attendance_lock_time' => '10:00',
+        // Takes boarders: shows boarding fee structures and the residence switch (App\Actions\Fees).
+        'offers_boarding' => false,
     ];
 
     /**
