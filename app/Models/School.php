@@ -30,6 +30,7 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property Collection<int, SchoolLevel> $levels_offered
  * @property string|null $plan
  * @property string|null $paystack_subaccount_code
+ * @property string|null $paystack_settlement e.g. "GCB Bank · ****1234 · Greenhill Academy Ltd"
  * @property string|null $sms_sender_id
  * @property array<string, mixed>|null $settings Read through App\Support\Settings\SchoolSettings
  * @property CarbonImmutable|null $created_at
@@ -48,6 +49,7 @@ use Spatie\Activitylog\Support\LogOptions;
     'levels_offered',
     'plan',
     'paystack_subaccount_code',
+    'paystack_settlement',
     'sms_sender_id',
     'settings',
 ])]
