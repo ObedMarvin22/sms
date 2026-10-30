@@ -38,7 +38,7 @@ Done when:
 - [x] 4. `BelongsToSchool` trait + Pest architecture test.
 - [x] 5. Users per school: nullable `school_id`, composite unique email, login scoped to the
       current school, `EnsureUserBelongsToSchool` middleware for sessions and tokens.
-- [ ] 6. spatie/laravel-permission with teams (`school_id`); `SeedDefaultRoles` Action with the
+- [x] 6. spatie/laravel-permission with teams (`school_id`); `SeedDefaultRoles` Action with the
       eleven roles and their permissions; team id set in `IdentifySchool`.
 - [ ] 7. Orange Tree console on `admin.localhost`: platform-user guard, `CreateSchool` Action
       (school, roles, invitation for first administrator), list of schools.

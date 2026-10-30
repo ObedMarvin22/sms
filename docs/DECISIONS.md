@@ -262,3 +262,29 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   lookup is scoped). A nuisance, not a leak.
 - Platform users' emails are not unique at database level (MySQL allows repeated NULLs in a unique
   index). Step 7 must validate uniqueness among platform users.
+
+## 2026-10-30 — Permission team = current school, via a team resolver
+
+- **Decision:** `config/permission.php` uses `App\Support\Tenancy\CurrentSchoolTeamResolver`,
+  which returns `CurrentSchool::id()` (an explicit `setPermissionsTeamId()` overrides it, which
+  Spatie's own artisan commands use). `IdentifySchool` does not call `setPermissionsTeamId()`:
+  setting `CurrentSchool` is enough. This is how the roadmap's "team id set in IdentifySchool" is met.
+- **Reason:** One source of truth. Spatie's registrar is a long-lived singleton, so a team id set
+  in middleware would carry into the next queued job, whereas `CurrentSchool` is scoped and reset.
+  A probe confirmed 11 tests fail with Spatie's default resolver.
+- **Alternatives:** `setPermissionsTeamId()` in `IdentifySchool` (plus remembering to reset it in
+  every job and console command).
+
+## 2026-10-30 — Default roles and permissions
+
+- **Decision:** Nine school roles (`RoleKey`) and twenty shared permissions (`PermissionKey`);
+  the default table lives in `RoleKey::defaultPermissions()` and was agreed with Obed
+  (Sprint 1 step 6 plan). Notable choices: headteacher sees finance but cannot change fees or
+  record payments; gate staff only release children; parents only get `portal.children` (which
+  children they see comes from guardian links). Proprietor, headteacher, administrator and bursar
+  `requiresTwoFactor()`. The two platform roles come with the console guard in step 7.
+  `SeedDefaultRoles` adds missing permissions and roles but never changes an existing role's
+  permissions, because schools may have edited them.
+- **Reason:** SPEC section 5. Re-running the Action must be safe after a school customises roles.
+- **Note:** Adding a new default permission later needs a separate, deliberate step to grant it
+  to existing schools' roles (re-running SeedDefaultRoles will not).
