@@ -1,6 +1,36 @@
 <?php
 
+use App\Livewire\Console\Login as ConsoleLogin;
+use App\Livewire\Console\Schools\Create as ConsoleSchoolsCreate;
+use App\Livewire\Console\Schools\Index as ConsoleSchoolsIndex;
+use App\Livewire\Invitations\AcceptInvitation;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+
+/*
+| Orange Tree console: admin.APP_BASE_DOMAIN, "platform" guard, no school.
+| Registered first so "admin" is never treated as a school subdomain.
+*/
+Route::domain('admin.'.config('app.base_domain'))
+    ->name('console.')
+    ->group(function () {
+        Route::livewire('login', ConsoleLogin::class)->middleware('guest:platform')->name('login');
+
+        Route::middleware('auth:platform')->group(function () {
+            Route::redirect('/', '/schools')->name('home');
+            Route::livewire('schools', ConsoleSchoolsIndex::class)->name('schools.index');
+            Route::livewire('schools/create', ConsoleSchoolsCreate::class)->name('schools.create');
+
+            Route::post('logout', function (Request $request) {
+                Auth::guard('platform')->logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return redirect()->route('console.login');
+            })->name('logout');
+        });
+    });
 
 /*
 | School routes: {school}.APP_BASE_DOMAIN, resolved by the IdentifySchool middleware ("school").
@@ -11,6 +41,11 @@ Route::domain('{school}.'.config('app.base_domain'))
     ->middleware(['school', 'school.member'])
     ->group(function () {
         Route::redirect('/', '/login')->name('school.home');
+
+        // Signed, single-use link from SchoolInvitation (App\Support\Invitations\InvitationLink).
+        Route::livewire('invitation/{user}/{fingerprint}', AcceptInvitation::class)
+            ->middleware('signed')
+            ->name('invitation.accept');
 
         Route::middleware(['auth', 'verified'])->group(function () {
             Route::view('dashboard', 'dashboard')->name('dashboard');
