@@ -4,6 +4,7 @@ use App\Models\AcademicYear;
 use App\Models\AdmissionSequence;
 use App\Models\ClassSubject;
 use App\Models\ClassTeacherAssignment;
+use App\Models\Enrolment;
 use App\Models\Programme;
 use App\Models\ProgrammeSubject;
 use App\Models\School;
@@ -28,6 +29,7 @@ dataset('school-owned models', [
     'SchoolClass' => [fn (School $school): Model => SchoolClass::factory()->for($school)->create()],
     'Stream' => [fn (School $school): Model => Stream::factory()->for(SchoolClass::factory()->for($school))->create()],
     'Subject' => [fn (School $school): Model => Subject::factory()->for($school)->create()],
+    'Enrolment' => [fn (School $school): Model => Enrolment::factory()->create(['school_id' => $school->id])],
     'Student' => [fn (School $school): Model => Student::factory()->for($school)->create()],
     'AdmissionSequence' => [fn (School $school): Model => AdmissionSequence::factory()->for($school)->create()],
     'Staff' => [fn (School $school): Model => Staff::factory()->for($school)->create()],

@@ -15,6 +15,7 @@ use App\Livewire\School\Profile;
 use App\Livewire\Students\Index;
 use App\Models\Activity;
 use App\Models\School;
+use App\Models\Stream;
 use App\Models\Student;
 use App\Models\Term;
 use App\Models\User;
@@ -28,11 +29,24 @@ beforeEach(function () {
     $this->school = School::factory()->active()->withLevels(SchoolLevel::Primary)
         ->create(['name' => 'Greenhill Academy', 'subdomain' => 'greenhill']);
     app(CurrentSchool::class)->set($this->school);
+    readyForStudents();
 });
+
+/**
+ * A current 2026/2027 year and the default classes, so students can be admitted.
+ */
+function readyForStudents(): void
+{
+    $calendar = DefaultCalendar::for(2026, AcademicPeriodType::Term);
+    app(CreateAcademicYear::class)->handle($calendar['name'], $calendar['starts_on'], $calendar['ends_on'], $calendar['terms']);
+    app(GenerateDefaultClasses::class)->handle();
+}
 
 function admit(array $input = []): Student
 {
-    return app(AdmitStudent::class)->handle(array_merge(['first_name' => 'Abena', 'last_name' => 'Mensah'], $input));
+    $stream = Stream::query()->orderBy('id')->firstOrFail();
+
+    return app(AdmitStudent::class)->handle(array_merge(['first_name' => 'Abena', 'last_name' => 'Mensah', 'stream_id' => $stream->id], $input));
 }
 
 it('numbers students in the default format, one after another', function () {
@@ -76,7 +90,11 @@ it('allows the same admission number in another school', function () {
     admit(['admission_number' => 'SAME-1']);
     $other = School::factory()->create();
 
-    $theirs = app(CurrentSchool::class)->runFor($other, fn () => admit(['admission_number' => 'SAME-1']));
+    $theirs = app(CurrentSchool::class)->runFor($other, function () {
+        readyForStudents();
+
+        return admit(['admission_number' => 'SAME-1']);
+    });
 
     expect($theirs->admission_number)->toBe('SAME-1');
 });
@@ -119,9 +137,6 @@ it('validates and saves the admission format', function () {
 describe('screens', function () {
     beforeEach(function () {
         app(SeedDefaultRoles::class)->handle($this->school);
-        $calendar = DefaultCalendar::for(2026, AcademicPeriodType::Term);
-        app(CreateAcademicYear::class)->handle($calendar['name'], $calendar['starts_on'], $calendar['ends_on'], $calendar['terms']);
-        app(GenerateDefaultClasses::class)->handle();
 
         $this->admin = User::factory()->for($this->school)->withTwoFactor()->create();
         $this->admin->assignRole(RoleKey::Administrator->value);
@@ -150,6 +165,7 @@ describe('screens', function () {
             ->call('startCreate')
             ->set('form.first_name', 'Esi')
             ->set('form.last_name', 'Asante')
+            ->set('form.stream_id', (string) Stream::query()->orderBy('id')->value('id'))
             ->call('save')
             ->assertHasNoErrors();
 

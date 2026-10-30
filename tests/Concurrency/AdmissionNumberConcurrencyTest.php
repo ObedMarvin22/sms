@@ -1,8 +1,12 @@
 <?php
 
+use App\Models\AcademicYear;
 use App\Models\Activity;
 use App\Models\AdmissionSequence;
+use App\Models\Enrolment;
 use App\Models\School;
+use App\Models\SchoolClass;
+use App\Models\Stream;
 use App\Models\Student;
 use Illuminate\Support\Facades\Artisan;
 use Symfony\Component\Process\Process;
@@ -28,12 +32,24 @@ beforeEach(function () {
         'subdomain' => 'concurrency-'.uniqid(),
         'settings' => ['admission_prefix' => 'CTS', 'admission_number_format' => '{PREFIX}/{YYYY}/{SEQ:4}'],
     ]);
+
+    // Admission enrols into a stream for the current year (Sprint 3 step 3).
+    $year = AcademicYear::factory()->for($this->school)->create([
+        'name' => 'CT/'.uniqid(), 'starts_on' => now()->startOfYear(), 'ends_on' => now()->endOfYear(),
+    ]);
+    $year->forceFill(['is_current' => true])->save();
+    $class = SchoolClass::factory()->for($this->school)->create();
+    $this->stream = Stream::factory()->for($class)->create(['school_id' => $this->school->id]);
 });
 
 afterEach(function () {
+    Enrolment::withoutGlobalScopes()->where('school_id', $this->school->id)->delete();
     Student::withoutGlobalScopes()->withTrashed()->where('school_id', $this->school->id)->forceDelete();
     AdmissionSequence::withoutGlobalScopes()->where('school_id', $this->school->id)->delete();
     Activity::withoutGlobalScopes()->where('school_id', $this->school->id)->delete();
+    Stream::withoutGlobalScopes()->where('school_id', $this->school->id)->delete();
+    SchoolClass::withoutGlobalScopes()->where('school_id', $this->school->id)->delete();
+    AcademicYear::withoutGlobalScopes()->where('school_id', $this->school->id)->delete();
     $this->school->delete();
 });
 
@@ -48,7 +64,7 @@ it('never gives two concurrent admissions the same number', function () {
     $processes = [];
     for ($w = 1; $w <= WORKERS; $w++) {
         $process = new Process(
-            [PHP_BINARY, base_path('tests/Concurrency/admit-worker.php'), (string) $this->school->id, (string) PER_WORKER, (string) $w],
+            [PHP_BINARY, base_path('tests/Concurrency/admit-worker.php'), (string) $this->school->id, (string) PER_WORKER, (string) $w, (string) $this->stream->id],
             base_path(),
             $env,
             null,
