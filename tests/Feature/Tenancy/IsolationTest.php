@@ -2,6 +2,8 @@
 
 use App\Models\AcademicYear;
 use App\Models\School;
+use App\Models\SchoolClass;
+use App\Models\Stream;
 use App\Models\Term;
 use App\Support\Tenancy\CurrentSchool;
 use Illuminate\Database\Eloquent\Model;
@@ -14,6 +16,8 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 dataset('school-owned models', [
     'AcademicYear' => [fn (School $school): Model => AcademicYear::factory()->for($school)->create()],
     'Term' => [fn (School $school): Model => Term::factory()->for(AcademicYear::factory()->for($school))->create()],
+    'SchoolClass' => [fn (School $school): Model => SchoolClass::factory()->for($school)->create()],
+    'Stream' => [fn (School $school): Model => Stream::factory()->for(SchoolClass::factory()->for($school))->create()],
 ]);
 
 beforeEach(function () {
