@@ -519,3 +519,14 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
 - **Found:** no unguarded routes; nothing needed fixing.
 - **Open:** whether parents may open the staff dashboard at all is decided with the parent app
   (Sprint 4).
+
+## 2026-10-30 — Staging and the scheduled queue worker
+
+- **Decision:** `routes/console.php` schedules `queue:work --stop-when-empty --max-time=50` every
+  minute with `withoutOverlapping()` (SPEC section 3), driven by one cron `schedule:run` entry.
+  `docs/DEPLOYMENT.md` is a hand-run staging checklist (Cloudflare wildcard + Origin cert + Full
+  strict, cPanel PHP 8.4 and MySQL 8, deploy key and `git clone` into `~/app`, staging `.env`
+  with test services only, first run, cron, smoke test, manual update steps).
+- **Open:** front-end assets are built locally and uploaded (`public/build` is not in Git and the
+  server has no Node). Automating this from CI is a follow-up (with the release script in Pilot
+  preparation).

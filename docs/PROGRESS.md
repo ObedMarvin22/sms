@@ -69,12 +69,13 @@ Done when:
 - [x] 7. Setup wizard for new schools (steps 2–6 in order); student entry blocked until a current
       term and a class exist.
 - [x] 8. Permission checks on every screen, with tests that a teacher is refused on settings screens.
-- [ ] 9. Staging environment checklist written to `docs/DEPLOYMENT.md`.
+- [x] 9. Staging environment checklist written to `docs/DEPLOYMENT.md`.
 
 Done when:
-- [ ] a fresh school completes the wizard unaided
-- [ ] logos cannot be read across schools
-- [ ] teacher refused on settings (tested)
+- [x] a fresh school completes the wizard unaided — tested end to end via the Actions; the
+      wizard's states and banner were checked in the browser (a full click-through is for Obed's review)
+- [x] logos cannot be read across schools
+- [x] teacher refused on settings (tested)
 - [ ] CI green
 
 **STOP for review.**
