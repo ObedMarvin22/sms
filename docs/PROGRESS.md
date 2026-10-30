@@ -64,7 +64,7 @@ Done when:
       contacts, levels offered, settings JSON).
 - [x] 3. Academic years and terms/semesters (dates, census date, one current year/term).
 - [x] 4. Levels, classes and streams with default class generation from levels offered.
-- [ ] 5. Subjects (preset list per level, editable) and SHS programmes with core/elective subjects.
+- [x] 5. Subjects (preset list per level, editable) and SHS programmes with core/elective subjects.
 - [ ] 6. Class–subject mapping.
 - [ ] 7. Setup wizard for new schools (steps 2–6 in order); student entry blocked until a current
       term and a class exist.

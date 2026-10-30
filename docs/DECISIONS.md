@@ -463,3 +463,15 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
 - **Reason:** One source of truth for levels instead of a table that duplicates an enum. Obed
   approved the "Primary 1–6" naming.
 - **Later:** from Sprint 3, enrolments will block deleting classes and streams that are in use.
+
+## 2026-10-30 — Subjects and SHS programmes
+
+- **Decision:** One `subjects` row per name per school, with a `levels` list (Obed approved), so
+  "English Language" is one subject taught at Primary, JHS and SHS. Codes optional, unique per
+  school. `programmes` (SHS only) link subjects through `programme_subject` as core or elective;
+  that pivot carries `school_id` and is a `BelongsToSchool` pivot model. Preset GES subjects and
+  six SHS programmes (approved lists in `App\Support\Academic\DefaultSubjects`) are safe to re-run.
+  Programmes have no sidebar item; the Subjects screen links to them for SHS schools, and the
+  page returns 404 otherwise.
+- **Not verified in the browser** (usage limit): the Subjects and Programmes screens are covered
+  by Livewire tests only so far.
