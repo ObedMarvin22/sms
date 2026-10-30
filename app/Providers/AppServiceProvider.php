@@ -7,6 +7,7 @@ use App\Http\Middleware\EnsureUserBelongsToSchool;
 use App\Http\Middleware\IdentifySchool;
 use App\Listeners\LogRoleChanges;
 use App\Models\User;
+use App\Support\Navigation\StaffNavigation;
 use App\Support\Tenancy\CurrentSchool;
 use App\Support\Tenancy\ReservedSubdomains;
 use App\Support\Tenancy\SchoolUserProvider;
@@ -36,6 +37,8 @@ class AppServiceProvider extends ServiceProvider
     {
         // One holder per request or queued job; Laravel resets scoped instances between them.
         $this->app->scoped(CurrentSchool::class);
+
+        $this->app->bind(StaffNavigation::class, fn () => StaffNavigation::default());
 
         // {school} never matches a reserved subdomain (e.g. "admin" is the console). Set here in
         // register(), before Fortify's provider boots and adds its {school}.domain routes.
