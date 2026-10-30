@@ -1,9 +1,12 @@
 <?php
 
 use App\Models\AcademicYear;
+use App\Models\Programme;
+use App\Models\ProgrammeSubject;
 use App\Models\School;
 use App\Models\SchoolClass;
 use App\Models\Stream;
+use App\Models\Subject;
 use App\Models\Term;
 use App\Support\Tenancy\CurrentSchool;
 use Illuminate\Database\Eloquent\Model;
@@ -18,6 +21,9 @@ dataset('school-owned models', [
     'Term' => [fn (School $school): Model => Term::factory()->for(AcademicYear::factory()->for($school))->create()],
     'SchoolClass' => [fn (School $school): Model => SchoolClass::factory()->for($school)->create()],
     'Stream' => [fn (School $school): Model => Stream::factory()->for(SchoolClass::factory()->for($school))->create()],
+    'Subject' => [fn (School $school): Model => Subject::factory()->for($school)->create()],
+    'Programme' => [fn (School $school): Model => Programme::factory()->for($school)->create()],
+    'ProgrammeSubject' => [fn (School $school): Model => ProgrammeSubject::factory()->state(['programme_id' => Programme::factory()->for($school)])->create()],
 ]);
 
 beforeEach(function () {
