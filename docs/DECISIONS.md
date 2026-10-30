@@ -355,3 +355,21 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   accurate record of who set the school up, so it is kept.
 - **Note:** `school_id` and `platform_role` are not mass-assignable on `User`; `update([...])`
   silently ignores them. Set them explicitly (a test tripped over this).
+
+## 2026-10-30 — Required two-factor for money and approval roles
+
+- **Decision:** The starter kit's Fortify two-factor is kept. `EnsureTwoFactorEnabled`
+  (`two-factor.required`) sits on the signed-in staff route group (dashboard now, staff screens
+  later) and on Livewire's persistent list. If any of the user's roles *in the current school*
+  `requiresTwoFactor()` (proprietor, headteacher, administrator, bursar) and two-factor is not
+  confirmed, the user is sent to Settings → Security, which shows a permanent "required" notice
+  until it is done. Settings, Fortify's two-factor routes and logout are in other route groups,
+  so they are never blocked; no allow-list is needed.
+- **Reason:** SPEC section 5. Roles are per school, so a bursar elsewhere who teaches here is not
+  forced to set it up here (tested).
+- **Known gap:** the flash message is used up by the password-confirmation redirect, so the
+  "Confirm password" screen does not say why it appeared. The security page notice explains it
+  right after. Revisit with the Sprint 2 app shell.
+- **Deferred:** two-factor for Orange Tree console users. The console has its own login and would
+  need its own challenge. Recommended for super admins before go-live.
+- Sprint 4 step 10 ("Staff 2FA if not done in Sprint 1") is therefore already covered.
