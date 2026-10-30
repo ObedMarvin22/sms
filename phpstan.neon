@@ -9,5 +9,7 @@ parameters:
         - config/
         - database/
         - routes/
+        # Test-only models that use app traits (e.g. BelongsToSchool) so those traits are analysed.
+        - tests/Fixtures/
 
     level: 7
