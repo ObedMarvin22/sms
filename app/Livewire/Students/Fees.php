@@ -3,12 +3,23 @@
 namespace App\Livewire\Students;
 
 use App\Actions\Fees\FeeRules;
+use App\Actions\Fees\RemoveScholarship;
+use App\Actions\Fees\SaveScholarship;
 use App\Actions\Fees\SetFeeOption;
+use App\Actions\Fees\SetInstalmentPlan;
 use App\Actions\Fees\SetResidence;
+use App\Actions\Fees\SetStudentDiscount;
+use App\Enums\DiscountKind;
+use App\Enums\DiscountType;
 use App\Enums\PermissionKey;
 use App\Enums\Residence;
+use App\Models\Discount;
 use App\Models\FeeItem;
+use App\Models\InstalmentPlan;
 use App\Models\Student;
+use App\Models\StudentDiscount;
+use App\Models\StudentInstalmentPlan;
+use App\Models\Term;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
@@ -28,10 +39,22 @@ class Fees extends Component
 
     public string $residence = '';
 
+    /** This term's instalment plan ('' = the term's default). */
+    public string $planId = '';
+
+    #[Locked]
+    public ?int $editingScholarshipId = null;
+
+    /** @var array{name: string, sponsor: string, type: string, value: string, whole_bill: bool, fee_item_ids: list<string>, ends_term_id: string} */
+    public array $form = ['name' => '', 'sponsor' => '', 'type' => 'percent', 'value' => '', 'whole_bill' => true, 'fee_item_ids' => [], 'ends_term_id' => ''];
+
     public function mount(int $studentId): void
     {
-        $this->studentId = $this->student()->id;
-        $this->residence = $this->student()->residence->value;
+        $this->studentId = $studentId;
+        $student = $this->student();
+        $this->residence = $student->residence->value;
+        $this->planId = (string) StudentInstalmentPlan::where('student_id', $student->id)
+            ->where('term_id', $this->currentTerm()->id ?? 0)->value('instalment_plan_id');
     }
 
     public function canView(): bool
@@ -104,6 +127,145 @@ class Fees extends Component
         } catch (ValidationException $e) {
             $this->setErrorBag($e->validator->errors());
         }
+    }
+
+    /**
+     * Discounts given by hand that the student has or could be given.
+     *
+     * @return Collection<int, Discount>
+     */
+    public function discounts(): Collection
+    {
+        $given = $this->givenDiscountIds();
+
+        return Discount::where('kind', '!=', DiscountKind::Sibling->value)
+            ->where(fn ($q) => $q->where('is_active', true)->orWhereIn('id', $given))
+            ->orderBy('name')->get();
+    }
+
+    /**
+     * @return list<int>
+     */
+    public function givenDiscountIds(): array
+    {
+        return array_values(array_map(intval(...), StudentDiscount::where('student_id', $this->studentId)->whereNotNull('discount_id')->pluck('discount_id')->all()));
+    }
+
+    public function toggleDiscount(int $discountId, SetStudentDiscount $setStudentDiscount): void
+    {
+        $this->authorize(PermissionKey::FeesManage->value);
+        $this->resetErrorBag();
+
+        try {
+            $setStudentDiscount->handle($this->student(), Discount::findOrFail($discountId), ! in_array($discountId, $this->givenDiscountIds(), true));
+        } catch (ValidationException $e) {
+            $this->setErrorBag($e->validator->errors());
+        }
+    }
+
+    /**
+     * @return Collection<int, StudentDiscount>
+     */
+    public function scholarships(): Collection
+    {
+        return StudentDiscount::with('endsTerm')->where('student_id', $this->studentId)->whereNull('discount_id')->orderBy('name')->get();
+    }
+
+    /**
+     * @return array<int, string> fee item id => name
+     */
+    public function itemNames(): array
+    {
+        return FeeItem::orderBy('name')->pluck('name', 'id')->all();
+    }
+
+    /**
+     * @return list<DiscountType>
+     */
+    public function types(): array
+    {
+        return DiscountType::cases();
+    }
+
+    /**
+     * @return Collection<int, Term>
+     */
+    public function terms(): Collection
+    {
+        return Term::with('academicYear')->orderBy('starts_on')->get();
+    }
+
+    public function startScholarship(?int $id = null): void
+    {
+        $this->authorize(PermissionKey::FeesManage->value);
+        $this->resetErrorBag();
+        $scholarship = $id === null ? null : StudentDiscount::where('student_id', $this->studentId)->whereNull('discount_id')->findOrFail($id);
+
+        $this->editingScholarshipId = $scholarship?->id;
+        $this->form = [
+            'name' => (string) $scholarship?->name,
+            'sponsor' => (string) $scholarship?->sponsor,
+            'type' => $scholarship->type->value ?? DiscountType::Percent->value,
+            'value' => $scholarship?->type?->plain((int) $scholarship->value) ?? '',
+            'whole_bill' => $scholarship === null || $scholarship->fee_item_ids === null,
+            'fee_item_ids' => array_map(strval(...), $scholarship->fee_item_ids ?? []),
+            'ends_term_id' => (string) $scholarship?->ends_term_id,
+        ];
+        Flux::modal('scholarship')->show();
+    }
+
+    public function saveScholarship(SaveScholarship $saveScholarship): void
+    {
+        $this->authorize(PermissionKey::FeesManage->value);
+        $this->resetErrorBag();
+        $existing = $this->editingScholarshipId === null ? null : StudentDiscount::findOrFail($this->editingScholarshipId);
+
+        try {
+            $saveScholarship->handle($this->student(), $existing, $this->form);
+        } catch (ValidationException $e) {
+            $this->setErrorBag($e->validator->errors());
+
+            return;
+        }
+
+        Flux::modal('scholarship')->close();
+        Flux::toast(variant: 'success', text: __('Scholarship saved.'));
+    }
+
+    public function removeScholarship(int $id, RemoveScholarship $removeScholarship): void
+    {
+        $this->authorize(PermissionKey::FeesManage->value);
+        $removeScholarship->handle(StudentDiscount::where('student_id', $this->studentId)->whereNull('discount_id')->findOrFail($id));
+    }
+
+    public function currentTerm(): ?Term
+    {
+        return Term::current()->first();
+    }
+
+    /**
+     * @return Collection<int, InstalmentPlan>
+     */
+    public function plans(): Collection
+    {
+        return InstalmentPlan::where('term_id', $this->currentTerm()->id ?? 0)->orderByDesc('is_default')->orderBy('name')->get();
+    }
+
+    public function updatedPlanId(SetInstalmentPlan $setInstalmentPlan): void
+    {
+        $this->authorize(PermissionKey::FeesManage->value);
+        $this->resetErrorBag();
+        $term = $this->currentTerm() ?? abort(404);
+
+        try {
+            $setInstalmentPlan->handle($this->student(), $term, $this->planId === '' ? null : InstalmentPlan::findOrFail((int) $this->planId));
+        } catch (ValidationException $e) {
+            $this->setErrorBag($e->validator->errors());
+
+            return;
+        }
+
+        Flux::toast(variant: 'success', text: __('Instalment plan saved.'));
     }
 
     public function render(): View

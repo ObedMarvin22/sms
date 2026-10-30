@@ -37,6 +37,8 @@ final class StaffNavigation
             // Sprint 4: fees.
             new NavItem('Fee structures', 'table-cells', 'fees.structures', PermissionKey::FinanceView, 'Fees'),
             new NavItem('Fee items', 'tag', 'fees.items', PermissionKey::FinanceView, 'Fees'),
+            new NavItem('Discounts', 'receipt-percent', 'fees.discounts', PermissionKey::FinanceView, 'Fees'),
+            new NavItem('Instalment plans', 'calendar', 'fees.plans', PermissionKey::FinanceView, 'Fees'),
 
             // Sprint 2: school setup (route names fixed as each screen is built).
             new NavItem('Setup checklist', 'clipboard-document-check', 'setup', PermissionKey::SettingsManage, 'School setup'),
