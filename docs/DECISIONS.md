@@ -695,3 +695,20 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   `storage/logs/notifications.log`. Sprint 4 step 5 replaces it with the SMS channel.
 - **Deferred:** a correction notice when an absence is reversed after notifying; a school
   setting to switch notices off; web push and SMS (Sprint 4).
+
+## 2026-10-30 — Search, class lists and class-list PDF (Sprint 3 step 8)
+
+- **Student search matches each word**, so "ama mensah" finds Ama Mensah. Phone-shaped input
+  (3+ digits and nothing else) also finds students through any guardian's phone or alternative
+  phone, so the front desk can find a child from a parent's number. Digits inside admission
+  numbers do not count as a phone.
+- **The student list shows Active students by default**; "All" shows every status. Filters
+  (class, status, gender) live in the URL so a filtered list can be bookmarked.
+- **Class lists use the register's rule** (`AttendanceRules::enrolmentsOn`) for who is in a
+  stream on a day, so the list and the register never disagree. Anyone with `students.view`
+  may open any stream's list; a class teacher starts on their own.
+- **PDF:** dompdf with a plain Blade template and inline CSS 2.1 (dompdf has no flexbox or
+  Tailwind). The private logo is embedded as a data URI because `enable_remote` stays off.
+  **Font subsetting turned on** in `config/dompdf.php`: without it, every PDF embeds the whole
+  DejaVu font (~1.1 MB for a one-page list).
+- **Guardian phones are shown as stored** (+233…). *Deferred:* a local display format (024…).
