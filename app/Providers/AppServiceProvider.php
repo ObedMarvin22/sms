@@ -8,6 +8,7 @@ use App\Http\Middleware\EnsureUserBelongsToSchool;
 use App\Http\Middleware\IdentifySchool;
 use App\Listeners\LogRoleChanges;
 use App\Models\User;
+use App\Services\Paystack\PaystackClient;
 use App\Support\Navigation\StaffNavigation;
 use App\Support\Tenancy\CurrentSchool;
 use App\Support\Tenancy\ReservedSubdomains;
@@ -40,6 +41,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(CurrentSchool::class);
 
         $this->app->bind(StaffNavigation::class, fn () => StaffNavigation::default());
+
+        // Keys come from config/services.php (.env); tests replace the HTTP calls with Http::fake().
+        $this->app->bind(PaystackClient::class, fn () => PaystackClient::fromConfig());
 
         // {school} never matches a reserved subdomain (e.g. "admin" is the console). Set here in
         // register(), before Fortify's provider boots and adds its {school}.domain routes.
