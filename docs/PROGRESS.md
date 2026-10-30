@@ -118,8 +118,9 @@ Done when:
       - [x] Part B: discounts, scholarships, instalment plans (applied to bills in step 2).
 - [x] 2. `GenerateTermBills` queued, chunked job; arrears carried forward. (Built as
       `StartTermBilling` + `BillStudentsChunk`; the ledger table and bill debits came forward from step 3.)
-- [ ] 3. Append-only ledger, `Money` cast, balance calculation, `RecordPayment` Action, receipt
-      numbers under row lock, receipt PDF.
+- [x] 3. Append-only ledger, `Money` cast, balance calculation, `RecordPayment` Action, receipt
+      numbers under row lock, receipt PDF. (Plus reversals, balance adjustments, statement and
+      the guardian payment notice.)
 - [ ] 4. Paystack: `PaystackClient`; subaccount creation from the console; transaction
       initialisation; webhook with signature check, verify call and idempotency; nightly
       reconciliation command. All tested with `Http::fake()`.

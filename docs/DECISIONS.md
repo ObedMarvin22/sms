@@ -815,3 +815,29 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
 - **Preview is an estimate** (compulsory items × students per class, before discounts and optional
   items), so it stays fast for 600 students on shared hosting.
 - The generic isolation test now touches `created_at` for models without `updated_at`.
+
+## 2026-10-30 — Payments and receipts (Sprint 4 step 3)
+
+- **Receipt numbers:** `{PREFIX}/R/{year}/{00001}`, the prefix admission numbers use, counted per
+  school and per **year of issue** in `receipt_sequences` under a row lock (as admission numbers).
+  Never reused: a reversed payment keeps its number.
+- **Payments go to the student's account** (ledger balance), not to one bill. Overpaying is
+  allowed (the screen warns); the credit shows as negative arrears on the next bill.
+- **Methods:** cash, bank deposit, mobile money (Paystack is step 4). Bank and MoMo need a
+  reference (spaces removed, upper-cased), unique per school and method, and proof (JPG, PNG or
+  PDF up to 5 MB, private disk). Cash needs neither. If saving fails, the uploaded proof is
+  deleted again.
+- **Payment date:** today or up to 30 days back, never in the future (late-reported deposits).
+- **Never edit, never delete.** `Payment` throws on any change other than the reversal columns
+  and on delete. A mistake is reversed: a `reversal` ledger entry for the amount, the payment
+  marked with who, when and why; the receipt reprints with a REVERSED stamp.
+- **Adjustments:** a manual charge or credit with a reason (`adjustment` ledger entry), for
+  things like a uniform added or fees waived. Logged under `payments`.
+- **Permissions:** recording needs `payments.record`; reversing and adjusting need `fees.manage`,
+  so a clerk can record without being able to undo. Payments and receipts are visible with
+  `finance.view` or `payments.record` (Gate `view-payments`). `NavItem` now accepts a Gate
+  ability name as well as a permission.
+- **Guardians are told** (`PaymentReceived`: in-app plus the log stand-in for SMS) with the new
+  balance; "contact only" guardians are skipped, as with absences.
+- **Amount in words** on receipts is our own small class (`AmountInWords`, British "and"), no
+  package.
