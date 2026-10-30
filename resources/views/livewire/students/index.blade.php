@@ -12,7 +12,27 @@
         @endif
     </div>
 
-    <flux:input wire:model.live.debounce.300ms="search" :label="__('Search')" icon="magnifying-glass" placeholder="Name or admission number" class="max-w-80" />
+    <div class="grid gap-3 sm:grid-cols-[1fr_10rem_10rem_8rem]">
+        <flux:input wire:model.live.debounce.300ms="search" :label="__('Search')" icon="magnifying-glass" :placeholder="__('Name, admission number or parent\'s phone')" />
+        <flux:select wire:model.live="streamFilter" :label="__('Class')" data-test="filter-stream">
+            <flux:select.option value="">{{ __('All classes') }}</flux:select.option>
+            @foreach ($this->streamOptions as $id => $label)
+                <flux:select.option :value="$id">{{ $label }}</flux:select.option>
+            @endforeach
+        </flux:select>
+        <flux:select wire:model.live="statusFilter" :label="__('Status')" data-test="filter-status">
+            <flux:select.option value="">{{ __('All') }}</flux:select.option>
+            @foreach ($this->statuses() as $status)
+                <flux:select.option :value="$status->value">{{ $status->label() }}</flux:select.option>
+            @endforeach
+        </flux:select>
+        <flux:select wire:model.live="genderFilter" :label="__('Gender')">
+            <flux:select.option value="">{{ __('All') }}</flux:select.option>
+            @foreach ($this->genders() as $gender)
+                <flux:select.option :value="$gender->value">{{ $gender->label() }}</flux:select.option>
+            @endforeach
+        </flux:select>
+    </div>
 
     <flux:table :paginate="$this->students">
         <flux:table.columns>

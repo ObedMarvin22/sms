@@ -3,10 +3,12 @@
 namespace App\Livewire\Students;
 
 use App\Actions\Students\AdmitStudent;
+use App\Actions\Students\SearchStudents;
 use App\Actions\Students\UpdateStudent;
 use App\Enums\Gender;
 use App\Enums\PermissionKey;
 use App\Enums\SchoolLevel;
+use App\Enums\StudentStatus;
 use App\Models\Programme;
 use App\Models\Stream;
 use App\Models\Student;
@@ -30,6 +32,16 @@ class Index extends Component
     #[Url]
     public string $search = '';
 
+    #[Url(as: 'stream')]
+    public string $streamFilter = '';
+
+    /** Active by default; '' shows every status. */
+    #[Url(as: 'status', except: 'active')]
+    public string $statusFilter = 'active';
+
+    #[Url(as: 'gender')]
+    public string $genderFilter = '';
+
     #[Locked]
     public ?int $editingId = null;
 
@@ -42,9 +54,14 @@ class Index extends Component
         $this->resetForm();
     }
 
-    public function updatingSearch(): void
+    /**
+     * Any search or filter change goes back to page 1.
+     */
+    public function updating(string $property): void
     {
-        $this->resetPage();
+        if (in_array($property, ['search', 'streamFilter', 'statusFilter', 'genderFilter'], true)) {
+            $this->resetPage();
+        }
     }
 
     public function canManage(): bool
@@ -58,16 +75,20 @@ class Index extends Component
     #[Computed]
     public function students(): LengthAwarePaginator
     {
-        $term = trim($this->search);
+        return app(SearchStudents::class)->handle([
+            'search' => $this->search,
+            'stream_id' => $this->streamFilter,
+            'status' => $this->statusFilter,
+            'gender' => $this->genderFilter,
+        ])->with('currentEnrolment.stream.schoolClass')->paginate(25);
+    }
 
-        return Student::query()
-            ->with('currentEnrolment.stream.schoolClass')
-            ->when($term !== '', fn ($q) => $q->where(fn ($q) => $q
-                ->where('admission_number', 'like', "%{$term}%")
-                ->orWhere('first_name', 'like', "%{$term}%")
-                ->orWhere('last_name', 'like', "%{$term}%")))
-            ->orderBy('last_name')->orderBy('first_name')
-            ->paginate(25);
+    /**
+     * @return list<StudentStatus>
+     */
+    public function statuses(): array
+    {
+        return StudentStatus::cases();
     }
 
     public function startCreate(): void
