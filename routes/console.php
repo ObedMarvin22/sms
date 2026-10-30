@@ -16,3 +16,8 @@ Schedule::command('attendance:notify-absences')
     ->everyMinute()
     ->weekdays()
     ->withoutOverlapping();
+
+// Nightly Paystack check: records payments a webhook missed, flags mismatches (ReconcilePaystack).
+Schedule::command('paystack:reconcile')
+    ->dailyAt('02:00')
+    ->withoutOverlapping();

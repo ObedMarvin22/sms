@@ -36,6 +36,9 @@ return Application::configure(basePath: dirname(__DIR__))
             append: EnsureUserBelongsToSchool::class,
         );
 
+        // Webhooks come from Paystack's servers, not a browser form; their signature is checked instead.
+        $middleware->validateCsrfTokens(except: ['webhooks/*']);
+
         // The console has its own login page; "login" only exists on school subdomains.
         $isConsole = fn (Request $request): bool => str_starts_with($request->getHost(), 'admin.');
         $middleware->redirectGuestsTo(fn (Request $request) => $isConsole($request) ? route('console.login') : route('login'));

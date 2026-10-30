@@ -41,12 +41,18 @@ class RecordPayment
     public function __construct(private CurrentSchool $currentSchool, private NextReceiptNumber $nextReceiptNumber) {}
 
     /**
+     * @param  User|null  $user  who received it; null only for Paystack payments the system records
      * @param  array{amount?: string, method?: string, reference?: string|null, paid_on?: string, note?: string|null}  $input
      */
-    public function handle(User $user, Student $student, array $input, ?UploadedFile $proof = null): Payment
+    public function handle(?User $user, Student $student, array $input, ?UploadedFile $proof = null): Payment
     {
         $amount = FeeRules::amount((string) ($input['amount'] ?? ''), 'amount');
         $method = PaymentMethod::tryFrom((string) ($input['method'] ?? '')) ?? throw ValidationException::withMessages(['method' => 'Choose how it was paid.']);
+        if (($method === PaymentMethod::Paystack) !== ($user === null)) {
+            throw ValidationException::withMessages(['method' => $method === PaymentMethod::Paystack
+                ? 'Online payments are recorded automatically when Paystack confirms them.'
+                : 'Choose how it was paid.']);
+        }
         $reference = $this->reference($method, (string) ($input['reference'] ?? ''));
         $paidOn = $this->paidOn((string) ($input['paid_on'] ?? ''));
         $note = trim((string) ($input['note'] ?? ''));
@@ -75,7 +81,7 @@ class RecordPayment
                     'paid_on' => $paidOn,
                     'proof_path' => $proofPath,
                     'note' => $note === '' ? null : $note,
-                    'recorded_by' => $user->id,
+                    'recorded_by' => $user?->id,
                 ]);
 
                 LedgerEntry::create([
@@ -85,7 +91,7 @@ class RecordPayment
                     'payment_id' => $payment->id,
                     'description' => "Payment, receipt {$payment->receipt_number} ({$method->label()})",
                     'entry_date' => $paidOn,
-                    'created_by' => $user->id,
+                    'created_by' => $user?->id,
                 ]);
 
                 return $payment;

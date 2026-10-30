@@ -3,6 +3,8 @@
 use App\Enums\PermissionKey;
 use App\Http\Controllers\ClassListPdfController;
 use App\Http\Controllers\PaymentProofController;
+use App\Http\Controllers\PaystackReturnController;
+use App\Http\Controllers\PaystackWebhookController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\SchoolLogoController;
 use App\Http\Controllers\StudentImportTemplateController;
@@ -15,6 +17,7 @@ use App\Livewire\Classes\Subjects as ClassSubjects;
 use App\Livewire\Console\Login as ConsoleLogin;
 use App\Livewire\Console\Schools\Create as ConsoleSchoolsCreate;
 use App\Livewire\Console\Schools\Index as ConsoleSchoolsIndex;
+use App\Livewire\Console\Schools\Payments as ConsoleSchoolPayments;
 use App\Livewire\Fees\Billing as FeeBilling;
 use App\Livewire\Fees\Discounts as FeeDiscounts;
 use App\Livewire\Fees\InstalmentPlans as FeeInstalmentPlans;
@@ -51,6 +54,7 @@ Route::domain('admin.'.config('app.base_domain'))
             Route::redirect('/', '/schools')->name('home');
             Route::livewire('schools', ConsoleSchoolsIndex::class)->name('schools.index');
             Route::livewire('schools/create', ConsoleSchoolsCreate::class)->name('schools.create');
+            Route::livewire('schools/{school}/payments', ConsoleSchoolPayments::class)->name('schools.payments');
 
             Route::post('logout', function (Request $request) {
                 Auth::guard('platform')->logout();
@@ -74,6 +78,9 @@ Route::domain('{school}.'.config('app.base_domain'))
 
         // This school's logo only (private disk). Public: the login page shows it.
         Route::get('branding/logo', SchoolLogoController::class)->name('school.logo');
+
+        // Where Paystack sends a parent back after paying (public: parents may not be signed in).
+        Route::get('pay/return', PaystackReturnController::class)->name('paystack.return');
 
         // Signed, single-use link from SchoolInvitation (App\Support\Invitations\InvitationLink).
         Route::livewire('invitation/{user}/{fingerprint}', AcceptInvitation::class)
@@ -147,4 +154,7 @@ Route::domain('{school}.'.config('app.base_domain'))
 // Bare domain: public landing page (no school).
 Route::domain(config('app.base_domain'))->group(function () {
     Route::view('/', 'welcome')->name('home');
+
+    // One webhook for every school; the school is found from our own transaction reference.
+    Route::post('webhooks/paystack', PaystackWebhookController::class)->name('webhooks.paystack');
 });

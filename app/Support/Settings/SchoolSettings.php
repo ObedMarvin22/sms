@@ -23,6 +23,8 @@ final class SchoolSettings
         'attendance_lock_time' => '10:00',
         // Takes boarders: shows boarding fee structures and the residence switch (App\Actions\Fees).
         'offers_boarding' => false,
+        // Who pays Paystack's charge: "school" (absorbs it) or "parent" (amount grossed up).
+        'paystack_charge_payer' => 'school',
     ];
 
     /**
