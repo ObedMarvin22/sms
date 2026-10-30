@@ -758,3 +758,27 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   in each component), so the headteacher sees fees read-only. Every change is in the activity
   log under `fees` (items, structures, lines, student options) or `students` (residence).
 - **Amounts:** more than GH₵0 and at most GH₵1,000,000 per line, at most two decimal places.
+
+## 2026-10-30 — Fee setup, part B: discounts, scholarships, instalment plans (Sprint 4 step 1)
+
+- **Stored now, applied in step 2.** This part only records who gets what; `GenerateTermBills`
+  turns it into bill lines and due dates.
+- **Percentages are basis points** (`App\Support\Money\Percent`: 1250 = 12.5%), parsed from text
+  like money, so no floats anywhere in fees. Discounts and scholarships take a percentage
+  (0.01–100%) or a fixed amount, off the whole bill or off chosen fee items.
+- **Discount kinds:** sibling (automatic: billing gives it to the 2nd and later children who share
+  a guardian, ordered by admission date; never given by hand; only one in use), staff child and
+  custom (given on the student's page). A discount given by hand cannot become the sibling kind.
+- **Scholarships share `student_discounts`** with hand-given discounts: `discount_id` NULL means a
+  scholarship with its own name, optional sponsor, size, items and optional last term. One table
+  keeps billing simple (every reduction for a student is one query). The unique index
+  (school, student, discount_id) still stops a discount being given twice, while NULLs let a
+  student hold several scholarships.
+- **Instalment plans are per term:** 1–6 steps, due dates inside the term and strictly in order,
+  shares adding up to exactly 100%. One default plan per term (true-or-NULL unique index, as with
+  `is_current`); a term's first plan starts as the default. Students follow the default unless
+  given another; **with no plans, the whole bill is due on the first day of term.** A plan with
+  students on it cannot be deleted.
+- **Stacking** (how a sibling discount, a staff-child discount and a scholarship combine on one
+  bill) is decided in step 2, where it can be tested against real bills.
+- Every change is logged under `fees`.

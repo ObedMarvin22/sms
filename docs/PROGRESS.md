@@ -112,10 +112,10 @@ Done when:
 
 ## Sprint 4 — fees, payments, parent PWA, SMS
 
-- [ ] 1. Fee items, fee structures (class × day/boarding), optional items, discounts,
+- [x] 1. Fee items, fee structures (class × day/boarding), optional items, discounts,
       scholarships, instalment plans.
       - [x] Part A: Money, fee items, fee structures per term, residence, optional items.
-      - [ ] Part B: discounts, scholarships, instalment plans.
+      - [x] Part B: discounts, scholarships, instalment plans (applied to bills in step 2).
 - [ ] 2. `GenerateTermBills` queued, chunked job; arrears carried forward.
 - [ ] 3. Append-only ledger, `Money` cast, balance calculation, `RecordPayment` Action, receipt
       numbers under row lock, receipt PDF.
