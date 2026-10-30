@@ -879,3 +879,31 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   later) and tells the parent the outcome. Staff can create a payment link on the student page
   (useful before the parent app exists).
 - `PaystackEvent` is a platform model (no `school_id`), listed in the architecture test.
+
+## 2026-10-30 — SMS through Arkesel (Sprint 4 step 5)
+
+- **Provider: Arkesel** (Obed's choice), API v2 `POST /api/v2/sms/send` with the `api-key` header;
+  numbers sent as `233…` without the plus. Behind our `SmsGateway` interface, so another provider
+  is one class. **The `log` driver is the default** (local, tests, staging); `SMS_DRIVER=arkesel`
+  only on production, set by Obed. Tests fake HTTP and block stray requests.
+- **Credit in SMS units** (one unit = one segment), sold by Orange Tree outside the app; the console
+  records top-ups with a note. `message_credit_ledger` is append-only (top_up +, message −,
+  refund +). The SPEC lists it as a platform table; it has `school_id` and the school scope so a
+  school sees only its own balance, and Orange Tree reads it through `runFor`.
+- **Never send on credit.** `QueueSms` locks the school row, checks the balance and takes the
+  units in one transaction, so concurrent messages cannot overdraw. Too few units: the SMS is
+  kept as "not sent" (nothing taken); the in-app notice still goes.
+- **Each SMS is a queued job** (`SendSms`, 3 tries at 0, 1 and 5 minutes). After the last try
+  the units are returned once (`FailSms`). A sent message is never sent again.
+- **Segments:** GSM-7 160/153 (extension characters count twice), otherwise UCS-2 70/67. The
+  payment SMS writes "GHS" instead of "₵", because one "₵" makes the whole SMS Unicode and
+  roughly doubles the cost.
+- **Each notice is opt-in per school** (School profile → SMS: absence, payment); none by default.
+  In-app notices always go. `SmsChannel` replaced the temporary `LogChannel`.
+- **Low-credit warning:** finance staff (`fees.manage`) get one in-app warning when credit falls
+  below the school's threshold (default 100 units); it re-arms once credit is back above it.
+  `User::notifications()` now uses the school-owned `Notification` model, like guardians.
+- **Sender ID per school**, set in the console once Arkesel approves it (3–11 letters, digits or
+  spaces); until then `SMS_DEFAULT_SENDER` (OrangeTree).
+- **Deferred:** delivery reports from Arkesel (we record "sent" when Arkesel accepts the message),
+  and sending to a guardian's alternative phone.

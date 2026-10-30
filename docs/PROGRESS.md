@@ -125,9 +125,10 @@ Done when:
       initialisation; webhook with signature check, verify call and idempotency; nightly
       reconciliation command. All tested with `Http::fake()`. (Not yet tried against Paystack's
       test mode with real test keys: needs Obed's test account.)
-- [ ] 5. SMS: `SmsGateway` interface, `log` driver, one provider driver (ask Obed which),
+- [x] 5. SMS: `SmsGateway` interface, `log` driver, one provider driver (ask Obed which),
       notification channel, per-school credit wallet with low-credit warning; absence and
-      payment notifications via SMS where enabled.
+      payment notifications via SMS where enabled. (Arkesel, Obed's choice. Not yet sent for
+      real: needs Obed's Arkesel key and an approved sender ID.)
 - [ ] 6. Parent API v1: phone OTP activation, password, Sanctum tokens, endpoints for children,
       attendance, bills, payment initialisation, announcements, notifications (scoped strictly
       to the guardian's own children — tested).
