@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\AcademicYear;
+use App\Models\AdmissionSequence;
 use App\Models\ClassSubject;
 use App\Models\ClassTeacherAssignment;
 use App\Models\Programme;
@@ -9,6 +10,7 @@ use App\Models\School;
 use App\Models\SchoolClass;
 use App\Models\Staff;
 use App\Models\Stream;
+use App\Models\Student;
 use App\Models\Subject;
 use App\Models\TeachingAssignment;
 use App\Models\Term;
@@ -26,6 +28,8 @@ dataset('school-owned models', [
     'SchoolClass' => [fn (School $school): Model => SchoolClass::factory()->for($school)->create()],
     'Stream' => [fn (School $school): Model => Stream::factory()->for(SchoolClass::factory()->for($school))->create()],
     'Subject' => [fn (School $school): Model => Subject::factory()->for($school)->create()],
+    'Student' => [fn (School $school): Model => Student::factory()->for($school)->create()],
+    'AdmissionSequence' => [fn (School $school): Model => AdmissionSequence::factory()->for($school)->create()],
     'Staff' => [fn (School $school): Model => Staff::factory()->for($school)->create()],
     'TeachingAssignment' => [fn (School $school): Model => TeachingAssignment::factory()->create(['school_id' => $school->id])],
     'ClassTeacherAssignment' => [fn (School $school): Model => ClassTeacherAssignment::factory()->create(['school_id' => $school->id])],
