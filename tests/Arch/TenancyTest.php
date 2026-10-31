@@ -3,6 +3,10 @@
 use App\Models\Activity;
 use App\Models\Concerns\BelongsToSchool;
 use App\Models\PaystackEvent;
+use App\Models\Plan;
+use App\Models\SaasInvoice;
+use App\Models\SaasInvoiceSequence;
+use App\Models\SaasPayment;
 use App\Models\School;
 use App\Models\User;
 
@@ -19,6 +23,12 @@ const PLATFORM_MODELS = [
     // Paystack webhook events: Paystack does not know our schools; the school comes from our
     // own transaction reference when the event is processed (Sprint 4 step 4).
     PaystackEvent::class,
+    // Orange Tree's billing of schools (Sprint 4 step 9): read only by the console. Invoices and
+    // payments carry school_id but no school scope.
+    Plan::class,
+    SaasInvoice::class,
+    SaasInvoiceSequence::class,
+    SaasPayment::class,
 ];
 
 arch('school-owned models use BelongsToSchool')

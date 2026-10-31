@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\AsEnumCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
@@ -28,7 +30,9 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property string|null $email
  * @property string|null $address
  * @property Collection<int, SchoolLevel> $levels_offered
- * @property string|null $plan
+ * @property string|null $plan Unused (free text from Sprint 1); the plan is plan_id.
+ * @property int|null $plan_id Orange Tree's price plan (SaaS billing)
+ * @property-read Plan|null $planModel
  * @property string|null $paystack_subaccount_code
  * @property string|null $paystack_settlement e.g. "GCB Bank · ****1234 · Greenhill Academy Ltd"
  * @property string|null $sms_sender_id
@@ -59,7 +63,25 @@ class School extends Model
     use HasFactory, LogsActivity;
 
     /**
-     * Audit trail for the profile and status (not billing or internal settings).
+     * Orange Tree's price plan. (Named planModel: the old text column is called plan.)
+     *
+     * @return BelongsTo<Plan, $this>
+     */
+    public function planModel(): BelongsTo
+    {
+        return $this->belongsTo(Plan::class, 'plan_id');
+    }
+
+    /**
+     * @return HasMany<SaasInvoice, $this>
+     */
+    public function saasInvoices(): HasMany
+    {
+        return $this->hasMany(SaasInvoice::class);
+    }
+
+    /**
+     * Audit trail for the profile, status and price plan (not internal settings).
      */
     public function getActivitylogOptions(): LogOptions
     {
@@ -67,7 +89,7 @@ class School extends Model
             ->useLogName('schools')
             ->logOnly([
                 'name', 'status', 'logo_path', 'primary_colour', 'secondary_colour',
-                'phone', 'email', 'address', 'levels_offered',
+                'phone', 'email', 'address', 'levels_offered', 'plan_id',
             ])
             ->logOnlyDirty()
             ->dontLogEmptyChanges();
