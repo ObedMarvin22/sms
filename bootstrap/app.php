@@ -5,6 +5,7 @@ use App\Http\Middleware\EnsureSchoolReadyForStudents;
 use App\Http\Middleware\EnsureTwoFactorEnabled;
 use App\Http\Middleware\EnsureUserBelongsToSchool;
 use App\Http\Middleware\IdentifySchool;
+use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -26,6 +27,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'school.ready' => EnsureSchoolReadyForStudents::class,
             'parent' => EnsureParent::class,
         ]);
+
+        // HSTS and friends on every response (production and staging only).
+        $middleware->append(SecurityHeaders::class);
 
         // Resolve the school before authentication, and check membership after it
         // (so the user from an API token is known).
