@@ -30,6 +30,8 @@ final class StaffNavigation
             new NavItem('Promotion', 'arrow-trending-up', 'students.promotion', PermissionKey::StudentsManage, 'People'),
             new NavItem('Staff', 'users', 'staff.index', PermissionKey::StaffManage, 'People'),
 
+            new NavItem('Announcements', 'megaphone', 'announcements.index', PermissionKey::AnnouncementsSend, 'Parents'),
+
             new NavItem('Register', 'check-circle', 'attendance.register', PermissionKey::AttendanceTake, 'Attendance'),
             new NavItem("Today's attendance", 'chart-bar', 'attendance.today', PermissionKey::AttendanceEditLocked, 'Attendance'),
             new NavItem('Teaching assignments', 'clipboard-document-list', 'staff.assignments', PermissionKey::StaffManage, 'People'),

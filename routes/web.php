@@ -11,6 +11,7 @@ use App\Http\Controllers\SchoolLogoController;
 use App\Http\Controllers\StudentImportTemplateController;
 use App\Livewire\Academic\CreateYear as CreateAcademicYear;
 use App\Livewire\Academic\Years as AcademicYears;
+use App\Livewire\Announcements\Index as AnnouncementsIndex;
 use App\Livewire\Attendance\Register as AttendanceRegister;
 use App\Livewire\Attendance\Today as AttendanceToday;
 use App\Livewire\Classes\Index as ClassesIndex;
@@ -135,6 +136,11 @@ Route::domain('{school}.'.config('app.base_domain'))
                 Route::livewire('fees/billing', FeeBilling::class)->name('fees.billing');
                 Route::livewire('fees/messages', FeeMessages::class)->name('fees.messages');
             });
+
+            // Announcements to parents. Who may send to whom: AnnouncementRules.
+            Route::livewire('announcements', AnnouncementsIndex::class)
+                ->middleware(['can:'.PermissionKey::AnnouncementsSend->value, 'school.ready'])
+                ->name('announcements.index');
 
             // Payments and receipts: finance.view or payments.record (Gate in AppServiceProvider).
             Route::middleware(['can:view-payments', 'school.ready'])->group(function () {
