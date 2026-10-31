@@ -7,6 +7,7 @@ use App\Http\Controllers\PaymentProofController;
 use App\Http\Controllers\PaystackReturnController;
 use App\Http\Controllers\PaystackWebhookController;
 use App\Http\Controllers\ReceiptController;
+use App\Http\Controllers\SaasInvoicePdfController;
 use App\Http\Controllers\SchoolLogoController;
 use App\Http\Controllers\StudentImportTemplateController;
 use App\Livewire\Academic\CreateYear as CreateAcademicYear;
@@ -16,7 +17,10 @@ use App\Livewire\Attendance\Register as AttendanceRegister;
 use App\Livewire\Attendance\Today as AttendanceToday;
 use App\Livewire\Classes\Index as ClassesIndex;
 use App\Livewire\Classes\Subjects as ClassSubjects;
+use App\Livewire\Console\Invoices as ConsoleInvoices;
 use App\Livewire\Console\Login as ConsoleLogin;
+use App\Livewire\Console\Plans as ConsolePlans;
+use App\Livewire\Console\Schools\Billing as ConsoleSchoolBilling;
 use App\Livewire\Console\Schools\Create as ConsoleSchoolsCreate;
 use App\Livewire\Console\Schools\Index as ConsoleSchoolsIndex;
 use App\Livewire\Console\Schools\Payments as ConsoleSchoolPayments;
@@ -60,6 +64,12 @@ Route::domain('admin.'.config('app.base_domain'))
             Route::livewire('schools/create', ConsoleSchoolsCreate::class)->name('schools.create');
             Route::livewire('schools/{school}/payments', ConsoleSchoolPayments::class)->name('schools.payments');
             Route::livewire('schools/{school}/sms', ConsoleSchoolSms::class)->name('schools.sms');
+
+            // Orange Tree's billing of schools: view-billing to look, manage-billing to change.
+            Route::livewire('schools/{school}/billing', ConsoleSchoolBilling::class)->name('schools.billing');
+            Route::livewire('plans', ConsolePlans::class)->name('plans');
+            Route::livewire('invoices', ConsoleInvoices::class)->name('invoices');
+            Route::get('invoices/{invoice}/pdf', SaasInvoicePdfController::class)->name('invoices.pdf');
 
             Route::post('logout', function (Request $request) {
                 Auth::guard('platform')->logout();

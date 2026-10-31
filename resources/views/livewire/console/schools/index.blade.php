@@ -33,6 +33,8 @@
                         </flux:link>
                         ·
                         <flux:link :href="route('console.schools.sms', $school)" wire:navigate data-test="sms-link">{{ __('SMS') }}</flux:link>
+                        ·
+                        <flux:link :href="route('console.schools.billing', $school)" wire:navigate data-test="billing-link">{{ __('Billing') }}</flux:link>
                     </flux:table.cell>
                 </flux:table.row>
             @empty

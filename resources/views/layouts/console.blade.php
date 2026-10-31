@@ -12,6 +12,12 @@
                 <flux:navbar.item icon="building-library" :href="route('console.schools.index')" :current="request()->routeIs('console.schools.*')" wire:navigate>
                     {{ __('Schools') }}
                 </flux:navbar.item>
+                <flux:navbar.item icon="document-text" :href="route('console.invoices')" :current="request()->routeIs('console.invoices')" wire:navigate>
+                    {{ __('Invoices') }}
+                </flux:navbar.item>
+                <flux:navbar.item icon="tag" :href="route('console.plans')" :current="request()->routeIs('console.plans')" wire:navigate>
+                    {{ __('Plans') }}
+                </flux:navbar.item>
             </flux:navbar>
 
             <flux:spacer />
