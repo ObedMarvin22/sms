@@ -998,3 +998,32 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
 - **Not checked in the browser:** the install prompt (Chrome only offers it on a real
   installable visit, not in the preview pane), offline mode, and fee screens with real bills
   (local demo data has none). The API behind the fee screens is covered by tests.
+
+## 2026-10-31 — Announcements (Sprint 4 step 8)
+
+- **Who sends to whom (Obed's choice):** the whole school or any class needs
+  `announcements.send` **and** `students.manage` (heads, administrators, proprietor). A class
+  teacher sends only to the streams they are class teacher of this year (the register's rule).
+  No new permission, so existing schools need no grant step.
+- **In-app only (Obed's choice):** each family gets an `AnnouncementPosted` notice (badge) and
+  the announcement in the app's News tab. No SMS: a school-wide one would cost about one unit per
+  family. Can be added later as a per-announcement choice with the cost shown first.
+- **Never edited once sent (Obed's choice):** withdraw (hidden from parents, kept, logged with
+  who and when) and send a corrected one. Withdrawing also deletes its notices, so the badge
+  does not point at something parents can no longer open. Senders withdraw their own; heads any.
+- **Text only (Obed's choice):** attachments come with chat (Sprint 7).
+- **Who receives it:** guardians with full **or limited** access (notices are part of limited)
+  to a child currently in a target stream, or every such guardian for the whole school. Notices
+  are worked out when sent; the News list is worked out when read, from the children's current
+  streams, so a child who moves class sees the new class's announcements from then on.
+- **Sent in chunks of 200 families** (`SendAnnouncementNotices` job via the cron-run queue), so
+  sending never waits on hundreds of rows. Safe to run twice: a family that has the notice is
+  skipped, and nothing goes out after a withdrawal.
+- **"Seen by N of M families"** counts the notices opened (opening the announcement, or tapping
+  its notice, marks it read). It reads the notices' JSON column without an index; fine at today's
+  sizes (689 families locally), to revisit if schools grow far larger.
+- **API:** `GET /api/v1/announcements` and `/{id}`, newest first, each with the names of the
+  family's children it concerns. Another class's or a withdrawn announcement is 404. The sender's
+  name is not shown to parents: it comes from the school.
+- **Different from Sprint 7's class broadcasts**, which are part of chat (parents can reply
+  privately). Announcements are one-way.

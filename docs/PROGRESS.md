@@ -137,9 +137,10 @@ Done when:
       - [x] Part B: children, attendance, bills, statement, payment initialisation, notifications.
             (Announcements endpoint moved to step 8, Obed's OK.)
 - [x] 7. Parent PWA v1 (Vue 3): login, children list, child dashboard, announcements,
-      notifications; manifest + service worker; installable. (Announcements screen comes with
-      step 8. Install prompt not tried on a real phone yet.)
-- [ ] 8. Announcements: school-wide and class broadcasts.
+      notifications; manifest + service worker; installable. (News screen added in step 8.
+      Install prompt not tried on a real phone yet.)
+- [x] 8. Announcements: school-wide and class broadcasts. (In-app only; staff screen, API and
+      the parent app's News tab.)
 - [ ] 9. SaaS census command and invoices in the console. (Cut line: 8 and 9 may slip a week.)
 - [ ] 10. Staff 2FA if not done in Sprint 1.
 
