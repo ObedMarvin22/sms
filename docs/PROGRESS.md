@@ -129,12 +129,12 @@ Done when:
       notification channel, per-school credit wallet with low-credit warning; absence and
       payment notifications via SMS where enabled. (Arkesel, Obed's choice. Not yet sent for
       real: needs Obed's Arkesel key and an approved sender ID.)
-- [ ] 6. Parent API v1: phone OTP activation, password, Sanctum tokens, endpoints for children,
+- [x] 6. Parent API v1: phone OTP activation, password, Sanctum tokens, endpoints for children,
       attendance, bills, payment initialisation, announcements, notifications (scoped strictly
       to the guardian's own children — tested).
       - [x] Part A: phone code (activation and new password), password login, tokens, rate limits,
             parent-only users refused on the staff login.
-      - [ ] Part B: children, attendance, bills, statement, payment initialisation, notifications.
+      - [x] Part B: children, attendance, bills, statement, payment initialisation, notifications.
             (Announcements endpoint moved to step 8, Obed's OK.)
 - [ ] 7. Parent PWA v1 (Vue 3): login, children list, child dashboard, announcements,
       notifications; manifest + service worker; installable.
@@ -146,7 +146,7 @@ Done when:
 - [ ] term bills correct for day and boarding students
 - [ ] Paystack test payment updates balance, issues receipt and SMS
 - [ ] duplicate webhook recorded once and bad signature rejected (tested)
-- [ ] a parent sees only their own children (tested)
+- [x] a parent sees only their own children (tested)
 - [ ] SMS stops when credit runs out
 - [ ] CI green
 

@@ -940,3 +940,29 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
 - **Switched-off users lose their tokens too:** `EnsureUserBelongsToSchool` now refuses a token
   whose user is deactivated (401), since Sanctum loads token users without the scoped provider.
 - **Moved to step 8 (Obed's OK):** `GET /api/v1/announcements`, built with its table.
+
+## 2026-10-31 — Parent API data (Sprint 4 step 6, part B)
+
+- **Endpoints** (all need a parent token): `GET children`, `GET children/{id}`,
+  `GET children/{id}/attendance?month=YYYY-MM`, `GET children/{id}/bills`,
+  `GET children/{id}/statement`, `POST children/{id}/payments` (amount),
+  `GET notifications`, `POST notifications/{id}/read`, `POST notifications/read-all`.
+  Money is sent as `{pesewas, display}`.
+- **A child is only reached through the guardian's own link** (`FindParentChild`). Another
+  family's child, a contact-only child, or a deleted child answers **404, not 403**, so the API
+  never confirms that a child exists. Bills, statement and payments need full access: limited
+  gets **403** (the parent can see the child, just not the fees).
+- **What limited access means, now applied everywhere:** attendance and notices, but no amounts.
+  The children list sends `balance: null` for them, the notifications list leaves out payment
+  notices for them, and **`RecordPayment` now sends payment notices (in-app and SMS) only to
+  full-access guardians.** Before this, limited guardians got the payment notice with the balance
+  (Sprint 4 step 3); that contradicted the access level's meaning.
+- **Teachers' attendance notes are not sent to parents**: they are written for staff.
+- **Notifications are filtered at the database**: the guardian's own, about a child they can
+  still see. Marking read works on the same filter, so another guardian's notice is a 404.
+- **Paying:** `StartParentPayment` calls the existing `InitialisePaystackPayment` with the
+  guardian as payer and the parent's login as `initiated_by`; Paystack returns them to the
+  school's `/pay/return` page. Limited to 10 starts a minute per parent.
+- **The statement moved into an Action** (`BuildStatement`) so the staff fees panel and the API
+  show the same lines.
+- **Children list is a fixed number of queries** (9) however many children the parent has.
