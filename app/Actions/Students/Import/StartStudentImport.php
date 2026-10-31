@@ -27,7 +27,7 @@ class StartStudentImport
      */
     public function handle(User $user, string $path, string $fileName): StudentImport
     {
-        $preview = $this->preview->handle($path);
+        $preview = $this->preview->handle($path, $user);
 
         if (! $preview->isClean()) {
             throw ValidationException::withMessages(['file' => 'The file has errors. Fix them and upload it again; nothing was imported.']);
@@ -42,7 +42,12 @@ class StartStudentImport
                     StudentImportRow::create([
                         'student_import_id' => $import->id,
                         'row_number' => $row['row_number'],
-                        'data' => ['student' => $row['student'], 'guardians' => $row['guardians']],
+                        'data' => [
+                            'student' => $row['student'],
+                            'guardians' => $row['guardians'],
+                            'residence' => $row['residence'],
+                            'opening_balance' => $row['opening_balance'],
+                        ],
                     ]);
                 }
             }

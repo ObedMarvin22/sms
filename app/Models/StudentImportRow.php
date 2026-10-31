@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $id
  * @property int $student_import_id
  * @property int $row_number
- * @property array{student: array<string, string>, guardians: list<array<string, string>>} $data
+ * @property array{student: array<string, string>, guardians: list<array<string, string>>, residence?: string, opening_balance?: int} $data (residence and opening_balance from Pilot step 2)
  * @property ImportRowStatus $status
  * @property string|null $error
  * @property int|null $student_id
