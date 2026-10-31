@@ -162,7 +162,9 @@ Done when:
 
 ## Pilot preparation (no new features)
 
-- [ ] 1. `docs/DEPLOYMENT.md`: first-time server setup and the release script.
+- [x] 1. `docs/DEPLOYMENT.md`: first-time server setup and the release script. (Plus
+      `scripts/release.sh`, `app:preflight`, security headers and R2 backups. Tried against a
+      local clone; not yet run on Stellar Plus.)
 - [ ] 2. Import tooling hardened for the pilot school's real data.
 - [ ] 3. Fix bugs found during pilot testing on staging.
 - [ ] 4. Read-only lock for schools past the SaaS grace period: staff can view but not change;

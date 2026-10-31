@@ -1066,3 +1066,38 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   (`manage-billing`). Plans, invoices, payments and school plan changes are in the activity log.
 - **Invoice PDF** (A4, dompdf) with Orange Tree's details from `.env` (`SAAS_INVOICE_*`, blank
   until Obed fills them) and a "How to pay" box. Not yet looked at by eye.
+
+## 2026-10-31 — Production setup and releases (Pilot preparation step 1)
+
+- **One-command releases (Obed's choice):** `scripts/release.sh` on Obed's machine checks that
+  `main` is clean and pushed, builds the front-end, uploads it over SSH, runs
+  `scripts/deploy.sh` on the server and checks `/up`. The server never needs Node, and nothing
+  connects to the server unless Obed runs the script.
+- **`deploy.sh`:** pre-flight while still up → maintenance mode with a bypass secret → note the
+  previous commit → pull → composer → migrate → swap in the uploaded build → optimize →
+  queue:restart → up. On failure the site stays down with instructions. `--rollback` returns code
+  and front-end one release back (migrations are never undone; they only ever add). Everything
+  sits inside `main()` so the `git pull` can replace the script while it runs.
+- **Tried for real against a throwaway clone** on the test database: a release (two commits
+  forward, build swapped), a rollback, a refused second rollback, and a release failing after
+  maintenance mode (stays down; rollback then works). That trial found that the previous commit
+  was recorded only at the end, so a failed release could not be rolled back; it is now recorded
+  before anything changes. Not yet run on Stellar Plus itself.
+- **Security headers in the app (Obed's choice):** `SecurityHeaders` middleware in production and
+  staging: HSTS 6 months with subdomains, no preload yet (hard to undo); `nosniff`;
+  `X-Frame-Options: SAMEORIGIN`; `Referrer-Policy: strict-origin-when-cross-origin`. Cloudflare's
+  own HSTS stays off to avoid two sources of truth; "Always use HTTPS" on.
+- **Backups to Cloudflare R2 (Obed's choice):** `league/flysystem-aws-s3-v3` added (R2 is
+  S3-compatible; Obed's OK). Nightly: the database and `storage/app/private` only (code is in
+  Git; `.env` is kept by hand and never backed up). Encrypted with `BACKUP_ARCHIVE_PASSWORD`,
+  verified after zipping, kept 7 days / 7 dailies / 4 weeklies / 6 monthlies, only problems
+  emailed. The local backup folder is excluded so backups never contain older backups. A
+  monthly test restore on staging is a checklist in DEPLOYMENT.md.
+- **`app:preflight` (Obed's choice):** read-only checks run by `deploy.sh` before the site goes
+  down. Errors stop the release (debug on, no key, http, base domain mismatch, non-database
+  drivers, insecure cookies, test mail in production, test Paystack key in production, live
+  Paystack key or real SMS on staging, incomplete R2 settings, unwritable folders). Warnings for
+  things Obed switches on later (no Paystack yet, SMS still logged, backups not off-site or not
+  encrypted).
+- **Idle timeout:** `SESSION_LIFETIME=60` in production (Laravel's session lifetime counts from
+  the last request, so it is an idle timeout).
