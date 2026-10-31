@@ -966,3 +966,35 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
 - **The statement moved into an Action** (`BuildStatement`) so the staff fees panel and the API
   show the same lines.
 - **Children list is a fixed number of queries** (9) however many children the parent has.
+
+## 2026-10-31 — Parent PWA (Sprint 4 step 7)
+
+- **npm packages (Obed's OK):** `vue` 3.5, `@vitejs/plugin-vue` 6 and `vue-router` 5. No Pinia,
+  Axios or PWA plugin: Vue's `reactive()` holds the little shared state, and `api.js` wraps
+  `fetch`. **No JS test runner yet** (Obed's choice); Pest covers the Laravel side and the screens
+  were clicked through at phone size.
+- **One page, hash URLs** (`/parent#/children/5`): Laravel serves only `/parent`, so every screen
+  works from the one cached page, offline too, with no catch-all route.
+- **Hand-written service worker** (`resources/js/parent/sw.js`, served by Laravel with a
+  `VERSION` from the build manifest). It caches the app page and the built files only. **API
+  answers are never cached** (Obed's choice), so a shared or lost phone holds no children, fees or
+  notices; offline shows "You're offline" over the cached app. Signing out clears the token and
+  the cache.
+- **Scope is `/parent`, not `/parent/`.** The browser check found that a `/parent/` scope leaves
+  out the app page itself (`/parent`), so the worker never controlled it and the manifest's start
+  page was outside its own scope. The worker is served with `Service-Worker-Allowed: /parent`.
+- **Per-school manifest and icons:** the school's name and colour; icons are its initials drawn
+  with GD (DejaVu Sans Bold from dompdf), because logos are private files. 192 and 512 px,
+  "any maskable".
+- **The token lives in `localStorage`.** Simple and survives app restarts. The risk is script
+  injection on the page, so the app shows only text from our own API through Vue's escaping
+  (no `v-html`).
+- **Unread badge:** polled every 60 seconds while the app is on screen, and on returning to it.
+  Web push comes with chat (Sprint 7).
+- **Paying:** the app starts the payment, shows fees, Paystack charge and total, then opens
+  Paystack. The return page now has "Back to the parent app" (to that child).
+- **Own small CSS bundle:** the parent app's Tailwind scans only its own files (3.6 kB gzipped,
+  44 kB JS gzipped), so it loads quickly on mobile data.
+- **Not checked in the browser:** the install prompt (Chrome only offers it on a real
+  installable visit, not in the preview pane), offline mode, and fee screens with real bills
+  (local demo data has none). The API behind the fee screens is covered by tests.

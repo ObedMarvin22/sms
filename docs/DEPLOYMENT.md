@@ -65,6 +65,9 @@ scp -r public/build <cpanel-user>@<server>:~/app/public/
 
 (Or upload the `public/build` folder with cPanel File Manager.) Repeat after every change that
 touches CSS, JS or Blade classes. A later step can have CI build and ship this automatically.
+The same build includes the parent app (`resources/js/parent`); after uploading it, parents'
+phones pick up the new version the next time they open the app (the service worker's cache
+name follows the build).
 
 ## 5. `.env` for staging
 
