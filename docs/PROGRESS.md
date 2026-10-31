@@ -132,6 +132,10 @@ Done when:
 - [ ] 6. Parent API v1: phone OTP activation, password, Sanctum tokens, endpoints for children,
       attendance, bills, payment initialisation, announcements, notifications (scoped strictly
       to the guardian's own children — tested).
+      - [x] Part A: phone code (activation and new password), password login, tokens, rate limits,
+            parent-only users refused on the staff login.
+      - [ ] Part B: children, attendance, bills, statement, payment initialisation, notifications.
+            (Announcements endpoint moved to step 8, Obed's OK.)
 - [ ] 7. Parent PWA v1 (Vue 3): login, children list, child dashboard, announcements,
       notifications; manifest + service worker; installable.
 - [ ] 8. Announcements: school-wide and class broadcasts.

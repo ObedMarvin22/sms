@@ -907,3 +907,36 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   spaces); until then `SMS_DEFAULT_SENDER` (OrangeTree).
 - **Deferred:** delivery reports from Arkesel (we record "sent" when Arkesel accepts the message),
   and sending to a guardian's alternative phone.
+
+## 2026-10-30 — Parent app sign-in (Sprint 4 step 6, part A)
+
+- **Parent logins are rows in `users`** (Obed's choice), with the Parent role and
+  `guardians.user_id` pointing to them. `users.phone` is new (unique per school, like the email)
+  and `users.email` is now nullable: parents have a phone and no email.
+- **One code flow for activation and forgotten passwords.** `POST /api/v1/auth/otp` texts a code;
+  `POST /api/v1/auth/set-password` (phone, code, password twice) creates the login on first use,
+  or sets a new password later. This replaced separate "activate" and "reset" endpoints from the
+  plan: with one flow the API never says whether a number is already activated.
+- **The API never reveals who is registered.** "Send code" gives the same answer for any number.
+  The no-credit message and the 60-second wait apply to every number; a number with no guardian
+  (or only contact-only links) simply gets no text. "No access to the parent app" is only said
+  after a right code or password.
+- **Codes:** 6 digits, only a hash stored (`parent_otps`, school-owned), 10 minutes, 5 wrong tries,
+  only the newest works, each works once.
+- **Codes are paid from the school's SMS credit** (Obed's choice) and always sent, whatever the
+  school chose under School profile → SMS. They go through the same queued `SendSms`, so a code
+  can take up to a minute on shared hosting (cron). **Staff never see a code:** Fees → Messages
+  shows it as `******`, and the stored message has the code removed once sent or failed.
+- **Tokens:** one Sanctum token per device with the `parent` ability, ending 90 days after it was
+  issued (Obed's choice). Signing out ends that device's token; setting a new password ends all.
+  Expired rows are pruned nightly (`sanctum:prune-expired`). Parent routes need a bearer token
+  with the `parent` ability and a linked guardian (`parent` middleware), plus `portal.children`
+  (the Parent role's permission), so a school can switch the app off by editing the role.
+- **Rate limits** (per school host): codes 3 per phone per 10 minutes and 10 per IP an hour;
+  code checks 5 per phone a minute; logins 5 per phone and IP a minute. Phones are normalised
+  first, so "024…" and "+233 24…" count as one number.
+- **Parent-only users are refused on the staff login** (settles the open item from Sprint 2).
+  Staff who are also parents still sign in.
+- **Switched-off users lose their tokens too:** `EnsureUserBelongsToSchool` now refuses a token
+  whose user is deactivated (401), since Sanctum loads token users without the scoped provider.
+- **Moved to step 8 (Obed's OK):** `GET /api/v1/announcements`, built with its table.
