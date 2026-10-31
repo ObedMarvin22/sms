@@ -29,7 +29,7 @@
                 <flux:table.row :key="'sms-'.$sms->id" data-test="sms-row">
                     <flux:table.cell class="whitespace-nowrap">{{ $sms->created_at->format('j M H:i') }}</flux:table.cell>
                     <flux:table.cell class="font-mono text-sm">{{ $sms->to }}</flux:table.cell>
-                    <flux:table.cell class="whitespace-normal text-sm">{{ $sms->message }}</flux:table.cell>
+                    <flux:table.cell class="whitespace-normal text-sm">{{ $sms->displayMessage() }}</flux:table.cell>
                     <flux:table.cell>{{ $sms->segments }}</flux:table.cell>
                     <flux:table.cell>
                         <flux:badge size="sm" :color="match ($sms->status) { \App\Enums\SmsStatus::Sent => 'green', \App\Enums\SmsStatus::Queued => 'zinc', default => 'red' }" :title="$sms->error">

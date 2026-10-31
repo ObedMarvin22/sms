@@ -2,6 +2,7 @@
 
 namespace App\Actions\Sms;
 
+use App\Enums\SmsEvent;
 use App\Enums\SmsStatus;
 use App\Models\SmsMessage;
 use App\Services\Sms\SmsGateway;
@@ -23,6 +24,11 @@ class DeliverSms
 
         $providerId = $this->gateway->send($sms->to, $sms->message, $sms->sender);
 
-        $sms->forceFill(['status' => SmsStatus::Sent, 'provider_id' => mb_substr($providerId, 0, 100), 'sent_at' => now(), 'error' => null])->save();
+        $sms->forceFill(['status' => SmsStatus::Sent, 'provider_id' => mb_substr($providerId, 0, 100), 'sent_at' => now(), 'error' => null]);
+        // A sent code is no longer needed; keep the record without it.
+        if ($sms->event === SmsEvent::Otp->value) {
+            $sms->message = SmsMessage::hideCodes($sms->message);
+        }
+        $sms->save();
     }
 }

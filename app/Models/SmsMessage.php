@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\SmsEvent;
 use App\Enums\SmsStatus;
 use App\Models\Concerns\BelongsToSchool;
 use Carbon\CarbonImmutable;
@@ -35,6 +36,20 @@ class SmsMessage extends Model
 
     /** @var array<string, mixed> */
     protected $attributes = ['status' => 'queued'];
+
+    /**
+     * What staff screens show. A parent-app code is never shown, even while it is waiting to
+     * go: anyone who read it could take over the parent's account.
+     */
+    public function displayMessage(): string
+    {
+        return $this->event === SmsEvent::Otp->value ? self::hideCodes($this->message) : $this->message;
+    }
+
+    public static function hideCodes(string $message): string
+    {
+        return (string) preg_replace('/\d{4,}/', '******', $message);
+    }
 
     /**
      * @return array<string, string>

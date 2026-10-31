@@ -109,7 +109,7 @@
             </flux:text>
         </div>
         <flux:checkbox.group wire:model="sms_events">
-            @foreach (\App\Enums\SmsEvent::cases() as $event)
+            @foreach (\App\Enums\SmsEvent::optional() as $event)
                 <flux:checkbox :value="$event->value" :label="$event->label()" />
             @endforeach
         </flux:checkbox.group>

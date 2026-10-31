@@ -18,7 +18,7 @@ class SetSmsSettings
     {
         $chosen = [];
         foreach (array_unique($events) as $value) {
-            $chosen[] = (SmsEvent::tryFrom($value) ?? throw ValidationException::withMessages(['sms_events' => 'Choose from the listed notices.']))->value;
+            $chosen[] = (SmsEvent::tryOptional($value) ?? throw ValidationException::withMessages(['sms_events' => 'Choose from the listed notices.']))->value;
         }
 
         if (preg_match('/^\d{1,6}$/', trim($threshold)) !== 1) {

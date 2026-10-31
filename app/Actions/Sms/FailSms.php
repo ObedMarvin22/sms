@@ -3,6 +3,7 @@
 namespace App\Actions\Sms;
 
 use App\Enums\CreditEntryType;
+use App\Enums\SmsEvent;
 use App\Enums\SmsStatus;
 use App\Models\MessageCreditEntry;
 use App\Models\SmsMessage;
@@ -21,7 +22,11 @@ class FailSms
                 return;
             }
 
-            $sms->forceFill(['status' => SmsStatus::Failed, 'error' => mb_substr($error, 0, 255)])->save();
+            $sms->forceFill(['status' => SmsStatus::Failed, 'error' => mb_substr($error, 0, 255)]);
+            if ($sms->event === SmsEvent::Otp->value) {
+                $sms->message = SmsMessage::hideCodes($sms->message);
+            }
+            $sms->save();
             MessageCreditEntry::create(['type' => CreditEntryType::Refund, 'units' => $sms->segments, 'sms_message_id' => $sms->id]);
         });
     }
