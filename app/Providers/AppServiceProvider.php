@@ -121,6 +121,9 @@ class AppServiceProvider extends ServiceProvider
             Limit::perMinute(20)->by('code-ip|'.$request->ip()),
         ]);
 
+        // Each payment start calls Paystack and stores an attempt.
+        RateLimiter::for('parent-payment', fn (Request $request) => Limit::perMinute(10)->by('pay|'.$request->user()?->getAuthIdentifier()));
+
         RateLimiter::for('parent-login', fn (Request $request) => [
             Limit::perMinute(5)->by('login|'.$phone($request).'|'.$request->ip()),
             Limit::perMinute(30)->by('login-ip|'.$request->ip()),
