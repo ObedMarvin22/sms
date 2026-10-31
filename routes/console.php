@@ -25,3 +25,8 @@ Schedule::command('paystack:reconcile')
 // Parent-app tokens end after 90 days (IssueParentToken); clear the dead rows nightly.
 Schedule::command('sanctum:prune-expired --hours=24')
     ->dailyAt('03:00');
+
+// Orange Tree's billing: invoices schools whose current term's census date has passed (RunSaasCensus).
+Schedule::command('saas:census')
+    ->dailyAt('01:00')
+    ->withoutOverlapping();

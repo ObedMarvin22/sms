@@ -84,6 +84,10 @@ class AppServiceProvider extends ServiceProvider
         // Console: only super admins create schools.
         Gate::define('create-schools', fn (User $user): bool => $user->platform_role?->canCreateSchools() ?? false);
 
+        // Console billing: every Orange Tree user may look; super admins issue, record and void.
+        Gate::define('view-billing', fn (User $user): bool => $user->school_id === null && $user->platform_role !== null);
+        Gate::define('manage-billing', fn (User $user): bool => $user->platform_role?->canCreateSchools() ?? false);
+
         // The register screen: class teachers (attendance.take) and heads/administrators
         // (attendance.edit_locked). Which streams each may open is decided by AttendanceRules.
         Gate::define('take-attendance', fn (User $user): bool => $user->can(PermissionKey::AttendanceTake->value)
