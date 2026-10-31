@@ -2,6 +2,8 @@
 
 use App\Models\AcademicYear;
 use App\Models\AdmissionSequence;
+use App\Models\Announcement;
+use App\Models\AnnouncementStream;
 use App\Models\AttendanceRecord;
 use App\Models\AttendanceSession;
 use App\Models\Bill;
@@ -68,6 +70,8 @@ dataset('school-owned models', [
     'FeeItem' => [fn (School $school): Model => FeeItem::factory()->for($school)->create()],
     'Discount' => [fn (School $school): Model => Discount::factory()->for($school)->create()],
     'Payment' => [fn (School $school): Model => Payment::factory()->create(['school_id' => $school->id])],
+    'Announcement' => [fn (School $school): Model => Announcement::factory()->for($school)->create()],
+    'AnnouncementStream' => [fn (School $school): Model => AnnouncementStream::factory()->create(['school_id' => $school->id])],
     'ParentOtp' => [fn (School $school): Model => ParentOtp::factory()->for($school)->create()],
     'SmsMessage' => [fn (School $school): Model => SmsMessage::factory()->for($school)->create()],
     'MessageCreditEntry' => [fn (School $school): Model => MessageCreditEntry::factory()->for($school)->create()],
