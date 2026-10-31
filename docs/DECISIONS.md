@@ -1027,3 +1027,42 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   name is not shown to parents: it comes from the school.
 - **Different from Sprint 7's class broadcasts**, which are part of chat (parents can reply
   privately). Announcements are one-way.
+
+## 2026-10-31 — SaaS census and invoices (Sprint 4 step 9)
+
+- **Plans table (Obed's choice):** `plans` holds Orange Tree's rate per active student per term;
+  each school has `plan_id`. The rate and plan name are **copied onto every invoice**, so a later
+  price change never alters an invoice. The old free-text `schools.plan` column (empty on every
+  school) is left in place; dropping it is a later clean-up, with Obed's OK.
+- **Only active schools are billed (Obed's choice):** trial and suspended schools get no
+  invoice; the census run still shows a trial school's count.
+- **Census count:** students enrolled on the census date by the register's rule (started on or
+  before it; not ended before it; a leaver counts on their last day; a student moved that day
+  counts once). Each student counts once, even when an old enrolment ends and a new one starts
+  that day (e.g. promotion). Deleted student records do not count.
+- **`saas:census` runs daily at 01:00** and bills each active school whose **current** term's
+  census date has passed with no live invoice, so a missed night is caught up the next. It does
+  not go back to earlier terms (a school joining mid-year is not billed for terms it did not use).
+  `--school=` and `--dry-run` for checking. Staff can also issue the invoice from the school's
+  Billing page.
+- **One invoice per school per term:** a `live` column that is true, or NULL once voided, under a
+  unique index with school and term (the true-or-NULL pattern from `is_default`). A voided term
+  can be invoiced again.
+- **Invoice numbers `OT/INV/{year}/{0001}`, one series for all schools**, from
+  `saas_invoice_sequences` under a row lock; tested with five real processes taking 100 numbers
+  at once (no gaps, no repeats). Numbers are never reused, even after a void.
+- **Payments recorded by hand (Obed's choice):** amount, date, method, reference. Part payments
+  allowed; more than the balance refused; the invoice is Paid once covered. Payments are never
+  changed or deleted (the model refuses). An invoice with payments cannot be voided. Online
+  payment to Orange Tree (Paystack) is a later step.
+- **Status is worked out, not stored:** void, paid, overdue (past due with a balance) or unpaid.
+  `SaasInvoice::whereStatus()` does the same in SQL for the list filters.
+- **Due 30 days after issue** (`SAAS_DUE_DAYS`). Overdue invoices are shown in red in the
+  console; **nothing in the school changes yet**. The read-only lock after the grace period (SPEC
+  section 8) is its own step, added as Pilot preparation step 4 (Obed's choice).
+- **Platform tables, console only:** `plans`, `saas_invoices`, `saas_invoice_sequences`,
+  `saas_payments` have no school scope and are listed in the architecture test. Every Orange Tree
+  user can view billing (`view-billing`); only super admins issue, record and void
+  (`manage-billing`). Plans, invoices, payments and school plan changes are in the activity log.
+- **Invoice PDF** (A4, dompdf) with Orange Tree's details from `.env` (`SAAS_INVOICE_*`, blank
+  until Obed fills them) and a "How to pay" box. Not yet looked at by eye.

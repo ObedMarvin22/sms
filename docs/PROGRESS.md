@@ -141,7 +141,9 @@ Done when:
       Install prompt not tried on a real phone yet.)
 - [x] 8. Announcements: school-wide and class broadcasts. (In-app only; staff screen, API and
       the parent app's News tab.)
-- [ ] 9. SaaS census command and invoices in the console. (Cut line: 8 and 9 may slip a week.)
+- [x] 9. SaaS census command and invoices in the console. (Cut line: 8 and 9 may slip a week.)
+      (Plans, daily `saas:census`, Billing page per school, Invoices list, PDF. Read-only lock
+      for overdue schools moved to Pilot preparation step 4.)
 - [ ] 10. Staff 2FA if not done in Sprint 1.
 
 Done when:
@@ -161,6 +163,8 @@ Done when:
 - [ ] 1. `docs/DEPLOYMENT.md`: first-time server setup and the release script.
 - [ ] 2. Import tooling hardened for the pilot school's real data.
 - [ ] 3. Fix bugs found during pilot testing on staging.
+- [ ] 4. Read-only lock for schools past the SaaS grace period: staff can view but not change;
+      parents keep access (SPEC section 8). (Added in Sprint 4 step 9, Obed's OK.)
 
 ---
 

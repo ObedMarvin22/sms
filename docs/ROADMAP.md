@@ -128,6 +128,9 @@ CI green. **STOP for review — Phase 1 complete.**
 1. `docs/DEPLOYMENT.md`: first-time server setup and the release script (see below).
 2. Import tooling hardened for the pilot school's real data.
 3. Fix bugs found during pilot testing on staging.
+4. Read-only lock for schools past the SaaS grace period (SPEC section 8: staff can view but not
+   change, parents keep access). Added in Sprint 4 step 9 with Obed's OK: it is in the SPEC but
+   had no roadmap step, so it is not new scope.
 
 Release script (`deploy.sh` on the server):
 
