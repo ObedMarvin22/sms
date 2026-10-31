@@ -21,3 +21,7 @@ Schedule::command('attendance:notify-absences')
 Schedule::command('paystack:reconcile')
     ->dailyAt('02:00')
     ->withoutOverlapping();
+
+// Parent-app tokens end after 90 days (IssueParentToken); clear the dead rows nightly.
+Schedule::command('sanctum:prune-expired --hours=24')
+    ->dailyAt('03:00');

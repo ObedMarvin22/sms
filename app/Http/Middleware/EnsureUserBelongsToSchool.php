@@ -26,12 +26,15 @@ class EnsureUserBelongsToSchool
     {
         $user = $request->user();
 
-        if (! $user instanceof User || $user->school_id === $this->currentSchool->id()) {
+        // A token outlives a deactivation (Sanctum loads its user directly), so check that too.
+        if (! $user instanceof User || ($user->school_id === $this->currentSchool->id() && $user->deactivated_at === null)) {
             return $next($request);
         }
 
         if ($request->expectsJson() || $request->is('api/*')) {
-            return response()->json(['message' => 'This account does not belong to this school.'], 403);
+            return $user->deactivated_at !== null
+                ? response()->json(['message' => 'This account has been switched off.'], 401)
+                : response()->json(['message' => 'This account does not belong to this school.'], 403);
         }
 
         Auth::guard('web')->logout();

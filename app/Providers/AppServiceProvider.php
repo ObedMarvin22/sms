@@ -13,18 +13,22 @@ use App\Services\Sms\ArkeselSmsGateway;
 use App\Services\Sms\LogSmsGateway;
 use App\Services\Sms\SmsGateway;
 use App\Support\Navigation\StaffNavigation;
+use App\Support\Phone;
 use App\Support\Tenancy\CurrentSchool;
 use App\Support\Tenancy\ReservedSubdomains;
 use App\Support\Tenancy\SchoolUserProvider;
 use Carbon\CarbonImmutable;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Hashing\Hasher;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Livewire;
@@ -65,6 +69,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->configureRateLimiting();
 
         // Livewire updates post to its own endpoint; re-run these there using the
         // original page's route, so components always have the current school and user.
@@ -94,6 +99,32 @@ class AppServiceProvider extends ServiceProvider
             $app->make(Hasher::class),
             $config['model'],
         ));
+    }
+
+    /**
+     * Parent app sign-in (SPEC section 14: rate limits on login and OTP). Keys include the host,
+     * so each school counts separately, and the phone as typed is normalised first.
+     */
+    protected function configureRateLimiting(): void
+    {
+        $phone = fn (Request $request): string => $request->getHost().'|'.(Phone::normalise($request->string('phone')->toString()) ?? $request->string('phone')->toString());
+
+        // Texts cost the school credit: 3 per phone per 10 minutes, 10 per IP an hour.
+        RateLimiter::for('parent-otp', fn (Request $request) => [
+            Limit::perMinutes(10, 3)->by('otp-phone|'.$phone($request)),
+            Limit::perHour(10)->by('otp-ip|'.$request->ip()),
+        ]);
+
+        // Each code allows 5 wrong tries; this stops guessing across many codes.
+        RateLimiter::for('parent-code', fn (Request $request) => [
+            Limit::perMinute(5)->by('code-phone|'.$phone($request)),
+            Limit::perMinute(20)->by('code-ip|'.$request->ip()),
+        ]);
+
+        RateLimiter::for('parent-login', fn (Request $request) => [
+            Limit::perMinute(5)->by('login|'.$phone($request).'|'.$request->ip()),
+            Limit::perMinute(30)->by('login-ip|'.$request->ip()),
+        ]);
     }
 
     /**
