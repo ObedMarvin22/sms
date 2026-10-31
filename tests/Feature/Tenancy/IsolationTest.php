@@ -22,6 +22,7 @@ use App\Models\InstalmentPlanStep;
 use App\Models\LedgerEntry;
 use App\Models\MessageCreditEntry;
 use App\Models\Notification;
+use App\Models\ParentOtp;
 use App\Models\Payment;
 use App\Models\PaystackTransaction;
 use App\Models\Programme;
@@ -67,6 +68,7 @@ dataset('school-owned models', [
     'FeeItem' => [fn (School $school): Model => FeeItem::factory()->for($school)->create()],
     'Discount' => [fn (School $school): Model => Discount::factory()->for($school)->create()],
     'Payment' => [fn (School $school): Model => Payment::factory()->create(['school_id' => $school->id])],
+    'ParentOtp' => [fn (School $school): Model => ParentOtp::factory()->for($school)->create()],
     'SmsMessage' => [fn (School $school): Model => SmsMessage::factory()->for($school)->create()],
     'MessageCreditEntry' => [fn (School $school): Model => MessageCreditEntry::factory()->for($school)->create()],
     'PaystackTransaction' => [fn (School $school): Model => PaystackTransaction::factory()->create(['school_id' => $school->id])],

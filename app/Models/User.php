@@ -29,7 +29,8 @@ use Spatie\Permission\Traits\HasRoles;
  * @property PlatformRoleKey|null $platform_role Only for platform users.
  * @property CarbonImmutable|null $deactivated_at Set when the user may no longer sign in.
  * @property string $name
- * @property string $email
+ * @property string|null $email Null for parents, who sign in with their phone.
+ * @property string|null $phone Parents only, as +233XXXXXXXXX.
  * @property CarbonImmutable|null $email_verified_at
  * @property string $password
  * @property string|null $two_factor_secret
@@ -81,7 +82,7 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     {
         return LogOptions::defaults()
             ->useLogName('users')
-            ->logOnly(['name', 'email', 'platform_role', 'two_factor_confirmed_at'])
+            ->logOnly(['name', 'email', 'phone', 'platform_role', 'two_factor_confirmed_at'])
             ->logOnlyDirty()
             ->dontLogEmptyChanges();
     }
@@ -108,6 +109,16 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     {
         return $this->getRoleNames()
             ->contains(fn (string $name) => RoleKey::tryFrom($name)?->requiresTwoFactor() ?? false);
+    }
+
+    /**
+     * A parent-app user with no staff role: refused on the staff screens.
+     */
+    public function isParentOnly(): bool
+    {
+        $roles = $this->getRoleNames();
+
+        return $roles->count() === 1 && $roles->first() === RoleKey::Parent->value;
     }
 
     public function hasConfirmedTwoFactor(): bool
