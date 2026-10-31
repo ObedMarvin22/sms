@@ -15,7 +15,9 @@ class NotificationsController extends ParentController
     {
         $guardian = $this->guardian($request);
 
-        return NotificationResource::collection($list->handle($guardian))
+        $perPage = min(50, max(1, $request->integer('per_page', 20)));
+
+        return NotificationResource::collection($list->handle($guardian, $perPage))
             ->additional(['unread' => ListParentNotifications::visible($guardian)->whereNull('read_at')->count()]);
     }
 

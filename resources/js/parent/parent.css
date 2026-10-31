@@ -1,0 +1,11 @@
+/* Only the parent app's own files: keeps its CSS small on parents' data bundles. */
+@import 'tailwindcss' source(none);
+
+@source './**/*.vue';
+@source '../../views/parent';
+
+/* The school's colour comes from the page (resources/views/parent/app.blade.php). */
+@theme inline {
+    --color-school: var(--school);
+    --color-school-text: var(--school-text);
+}
