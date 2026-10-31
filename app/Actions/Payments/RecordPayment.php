@@ -103,8 +103,9 @@ class RecordPayment
             throw $e;
         }
 
+        // Fee amounts are for full-access guardians only (limited: attendance and notices).
         $guardians = Guardian::whereHas('links', fn ($q) => $q->where('student_id', $student->id)
-            ->where('access_level', '!=', GuardianAccess::None->value))->get();
+            ->where('access_level', GuardianAccess::Full->value))->get();
         if ($guardians->isNotEmpty()) {
             Notification::send($guardians, new PaymentReceived($payment, LedgerEntry::balanceFor($student->id), $school));
         }
