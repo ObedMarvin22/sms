@@ -1,7 +1,7 @@
 <?php
 
-use App\Actions\Academic\CreateAcademicYear;
-use App\Actions\Classes\GenerateDefaultClasses;
+require_once __DIR__.'/import-helpers.php';
+
 use App\Actions\Guardians\AddGuardian;
 use App\Actions\Roles\SeedDefaultRoles;
 use App\Actions\Students\AdmitStudent;
@@ -10,7 +10,6 @@ use App\Actions\Students\Import\PreviewStudentImport;
 use App\Actions\Students\Import\StartStudentImport;
 use App\Actions\Students\Import\StudentImportColumns;
 use App\Actions\Subjects\CreateProgramme;
-use App\Enums\AcademicPeriodType;
 use App\Enums\GuardianRelationship;
 use App\Enums\ImportRowStatus;
 use App\Enums\RoleKey;
@@ -30,7 +29,6 @@ use App\Models\Student;
 use App\Models\StudentImport;
 use App\Models\StudentImportRow;
 use App\Models\User;
-use App\Support\Academic\DefaultCalendar;
 use App\Support\Tenancy\CurrentSchool;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Queue;
@@ -49,67 +47,6 @@ beforeEach(function () {
     app(CurrentSchool::class)->set($this->school);
     importReady();
 });
-
-function importReady(): void
-{
-    $calendar = DefaultCalendar::for(2026, AcademicPeriodType::Term);
-    app(CreateAcademicYear::class)->handle($calendar['name'], $calendar['starts_on'], $calendar['ends_on'], $calendar['terms']);
-    app(GenerateDefaultClasses::class)->handle();
-}
-
-/**
- * One spreadsheet row in template column order; override cells by heading.
- *
- * @return list<mixed>
- */
-function sheetRow(array $cells = []): array
-{
-    $row = array_merge([
-        'admission_number' => '', 'first_name' => 'Kofi', 'last_name' => 'Mensah', 'other_names' => '',
-        'gender' => 'male', 'date_of_birth' => '2015-03-14', 'admitted_on' => '2026-09-08', 'class' => 'Primary 1A',
-        'programme' => '', 'guardian1_name' => 'Akosua Mensah', 'guardian1_phone' => '0244123456',
-        'guardian1_relationship' => 'mother', 'guardian2_name' => '', 'guardian2_phone' => '', 'guardian2_relationship' => '',
-    ], $cells);
-
-    return array_map(fn (string $column) => $row[$column], StudentImportColumns::ALL);
-}
-
-/**
- * Writes an import file to the private disk, the way a school would fill in the template.
- */
-function importFile(array $rows): string
-{
-    Excel::store(new StudentImportTemplate($rows), 'imports/test.xlsx', 'local');
-
-    return 'imports/test.xlsx';
-}
-
-function preview(array $rows)
-{
-    return app(PreviewStudentImport::class)->handle(importFile($rows));
-}
-
-/**
- * @return list<string> "row:field" for each error
- */
-function problemKeys(array $rows): array
-{
-    return array_map(fn (array $e) => $e['row'].':'.$e['field'], preview($rows)->errors);
-}
-
-/**
- * Runs a job on the real sync queue (with its middleware), even while Queue::fake() is on.
- */
-function runJob(ImportStudentsChunk $job): void
-{
-    Queue::swap(test()->realQueue);
-    dispatch_sync($job);
-}
-
-function importer(): User
-{
-    return User::factory()->for(app(CurrentSchool::class)->require())->create();
-}
 
 it('builds a template with this school\'s classes and programmes', function () {
     app(CreateProgramme::class)->handle('General Science');
