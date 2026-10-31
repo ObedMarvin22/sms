@@ -60,6 +60,20 @@ return [
             'report' => false,
         ],
 
+        // Off-site backups (config/backup.php): a private Cloudflare R2 bucket, S3-compatible.
+        // Endpoint: https://<account-id>.r2.cloudflarestorage.com, region "auto".
+        'r2' => [
+            'driver' => 's3',
+            'key' => env('R2_ACCESS_KEY_ID'),
+            'secret' => env('R2_SECRET_ACCESS_KEY'),
+            'region' => 'auto',
+            'bucket' => env('R2_BUCKET'),
+            'endpoint' => env('R2_ENDPOINT'),
+            'use_path_style_endpoint' => true,
+            'throw' => true, // a failed upload must fail the backup, not pass silently
+            'report' => false,
+        ],
+
     ],
 
     /*

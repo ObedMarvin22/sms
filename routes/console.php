@@ -30,3 +30,14 @@ Schedule::command('sanctum:prune-expired --hours=24')
 Schedule::command('saas:census')
     ->dailyAt('01:00')
     ->withoutOverlapping();
+
+// Backups (config/backup.php): nightly, then old copies removed and the newest checked.
+// A failure or an unhealthy backup is emailed to BACKUP_NOTIFY_EMAIL.
+Schedule::command('backup:run')
+    ->dailyAt('02:30')
+    ->withoutOverlapping();
+Schedule::command('backup:clean')
+    ->dailyAt('03:15')
+    ->withoutOverlapping();
+Schedule::command('backup:monitor')
+    ->dailyAt('03:30');
