@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\PermissionKey;
+use App\Http\Controllers\Api\V1\AnnouncementsController;
 use App\Http\Controllers\Api\V1\ChildAttendanceController;
 use App\Http\Controllers\Api\V1\ChildFeesController;
 use App\Http\Controllers\Api\V1\ChildPaymentController;
@@ -41,6 +42,9 @@ Route::domain('{school}.'.config('app.base_domain'))
                 Route::get('children/{student}/statement', [ChildFeesController::class, 'statement'])->whereNumber('student')->name('children.statement');
                 Route::post('children/{student}/payments', ChildPaymentController::class)->whereNumber('student')
                     ->middleware('throttle:parent-payment')->name('children.payments');
+
+                Route::get('announcements', [AnnouncementsController::class, 'index'])->name('announcements.index');
+                Route::get('announcements/{announcement}', [AnnouncementsController::class, 'show'])->whereNumber('announcement')->name('announcements.show');
 
                 Route::get('notifications', [NotificationsController::class, 'index'])->name('notifications.index');
                 Route::post('notifications/read-all', [NotificationsController::class, 'readAll'])->name('notifications.read-all');

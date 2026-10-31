@@ -2,8 +2,10 @@ import { createRouter, createWebHashHistory } from 'vue-router';
 import { whenSignedOut } from './api.js';
 import { session } from './session.js';
 import Account from './pages/Account.vue';
+import Announcement from './pages/Announcement.vue';
 import Child from './pages/Child.vue';
 import Children from './pages/Children.vue';
+import News from './pages/News.vue';
 import Notifications from './pages/Notifications.vue';
 import SetPassword from './pages/SetPassword.vue';
 import SignIn from './pages/SignIn.vue';
@@ -16,6 +18,8 @@ export const router = createRouter({
         { path: '/set-password', name: 'set-password', component: SetPassword, meta: { guest: true } },
         { path: '/', name: 'children', component: Children },
         { path: '/children/:id(\\d+)', name: 'child', component: Child, props: (route) => ({ id: Number(route.params.id) }) },
+        { path: '/news', name: 'news', component: News },
+        { path: '/news/:id(\\d+)', name: 'announcement', component: Announcement, props: (route) => ({ id: Number(route.params.id) }) },
         { path: '/notifications', name: 'notifications', component: Notifications },
         { path: '/account', name: 'account', component: Account },
         { path: '/:rest(.*)*', redirect: '/' },

@@ -1,10 +1,12 @@
 <script setup>
 import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { api } from '../api.js';
 import { session } from '../session.js';
 import { when } from '../format.js';
 import ErrorNote from '../components/ErrorNote.vue';
 
+const router = useRouter();
 const notices = ref(null);
 const page = ref(1);
 const lastPage = ref(1);
@@ -24,6 +26,12 @@ async function load(more = false) {
 }
 
 async function markRead(notice) {
+    // An announcement's notice opens it (which marks the notice read on the server).
+    if (notice.kind === 'announcement' && notice.announcement_id) {
+        router.push({ name: 'announcement', params: { id: notice.announcement_id } });
+
+        return;
+    }
     if (notice.read) {
         return;
     }
