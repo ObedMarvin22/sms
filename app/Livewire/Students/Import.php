@@ -6,8 +6,10 @@ use App\Actions\Students\Import\PreviewStudentImport;
 use App\Actions\Students\Import\StartStudentImport;
 use App\Enums\ImportRowStatus;
 use App\Enums\PermissionKey;
+use App\Exports\StudentImportErrorReport;
 use App\Models\StudentImport;
 use App\Models\StudentImportRow;
+use App\Models\User;
 use App\Support\Tenancy\CurrentSchool;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
@@ -20,6 +22,8 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * Template download, upload with dry run, then a queued import with a progress bar (polled).
@@ -52,6 +56,18 @@ class Import extends Component
     public int $linkedGuardians = 0;
 
     #[Locked]
+    public int $boarders = 0;
+
+    #[Locked]
+    public int $balanceCount = 0;
+
+    #[Locked]
+    public int $owedPesewas = 0;
+
+    #[Locked]
+    public int $creditPesewas = 0;
+
+    #[Locked]
     public ?int $importId = null;
 
     public function mount(): void
@@ -81,11 +97,37 @@ class Import extends Component
             return;
         }
 
-        $result = $preview->handle($this->path);
+        $result = $preview->handle($this->path, $this->user());
         $this->problems = $result->errors;
         $this->studentCount = count($result->rows);
         $this->newGuardians = $result->newGuardians;
         $this->linkedGuardians = $result->linkedGuardians;
+        $this->boarders = $result->boarders;
+        $this->balanceCount = $result->balanceCount;
+        $this->owedPesewas = $result->owedPesewas;
+        $this->creditPesewas = $result->creditPesewas;
+    }
+
+    /**
+     * The school's file back with an errors column and the problem cells highlighted. Made on
+     * request from the upload being previewed; nothing is kept.
+     */
+    public function downloadErrors(PreviewStudentImport $preview): BinaryFileResponse
+    {
+        $this->authorize(PermissionKey::StudentsManage->value);
+        abort_if($this->path === null, 404);
+
+        $name = pathinfo($this->fileName, PATHINFO_FILENAME) ?: 'students';
+
+        return Excel::download(new StudentImportErrorReport($preview->handle($this->path, $this->user())), "{$name} - errors.xlsx");
+    }
+
+    private function user(): User
+    {
+        $user = Auth::user();
+        abort_unless($user instanceof User, 403);
+
+        return $user;
     }
 
     public function startImport(StartStudentImport $start): void
@@ -94,7 +136,7 @@ class Import extends Component
         abort_if($this->path === null, 404);
 
         try {
-            $import = $start->handle(Auth::user() ?? abort(403), $this->path, $this->fileName);
+            $import = $start->handle($this->user(), $this->path, $this->fileName);
         } catch (ValidationException $e) {
             $this->setErrorBag($e->validator->errors());
 
@@ -140,5 +182,6 @@ class Import extends Component
         $this->fileName = '';
         $this->problems = [];
         $this->studentCount = $this->newGuardians = $this->linkedGuardians = 0;
+        $this->boarders = $this->balanceCount = $this->owedPesewas = $this->creditPesewas = 0;
     }
 }

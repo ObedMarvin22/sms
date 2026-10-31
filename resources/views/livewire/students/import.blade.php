@@ -24,6 +24,18 @@
                 <flux:callout variant="success" icon="check-circle">
                     <flux:callout.heading>{{ __('Ready to import :count students', ['count' => $studentCount]) }}</flux:callout.heading>
                     <flux:callout.text>{{ __(':new new guardians; :linked guardians already on file will be linked.', ['new' => $newGuardians, 'linked' => $linkedGuardians]) }}</flux:callout.text>
+                    @if ($boarders > 0)
+                        <flux:callout.text>{{ trans_choice('{1} 1 boarder.|[2,*] :count boarders.', $boarders, ['count' => $boarders]) }}</flux:callout.text>
+                    @endif
+                    @if ($balanceCount > 0)
+                        <flux:callout.text data-test="balances">
+                            {{ __('Balances brought forward for :count students: :owed owed, :credit in credit. Each is added to the student\'s account as "Balance brought forward from previous records".', [
+                                'count' => $balanceCount,
+                                'owed' => \App\Support\Money\Money::pesewas($owedPesewas)->format(),
+                                'credit' => \App\Support\Money\Money::pesewas($creditPesewas)->format(),
+                            ]) }}
+                        </flux:callout.text>
+                    @endif
                 </flux:callout>
                 <flux:error name="file" />
                 <div class="flex gap-2">
@@ -35,6 +47,10 @@
                     <flux:callout.heading>{{ trans_choice('{1} 1 problem to fix|[2,*] :count problems to fix', count($problems), ['count' => count($problems)]) }}</flux:callout.heading>
                     <flux:callout.text>{{ __('Fix these in your file and upload it again. Nothing has been imported.') }}</flux:callout.text>
                 </flux:callout>
+                <div>
+                    <flux:button wire:click="downloadErrors" icon="arrow-down-tray" data-test="download-errors">{{ __('Download the file with errors marked') }}</flux:button>
+                    <flux:text size="sm" class="mt-1">{{ __('Your rows with an "errors" column and the problem cells in red. Fix them in that file and upload it again.') }}</flux:text>
+                </div>
                 <flux:table>
                     <flux:table.columns>
                         <flux:table.column>{{ __('Row') }}</flux:table.column>
