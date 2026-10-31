@@ -4,6 +4,7 @@ namespace App\Actions\Students\Import;
 
 use App\Enums\Gender;
 use App\Enums\GuardianRelationship;
+use App\Enums\Residence;
 use App\Exports\StudentImportTemplate;
 use App\Models\Programme;
 use App\Models\Stream;
@@ -26,6 +27,7 @@ class BuildImportTemplate
             'programme' => array_values(Programme::orderBy('name')->get()->map(fn (Programme $p): string => $p->name)->all()),
             'gender' => array_map(fn (Gender $g) => $g->value, Gender::cases()),
             'relationship' => array_map(fn (GuardianRelationship $r) => $r->value, GuardianRelationship::cases()),
+            'residence' => array_map(fn (Residence $r) => $r->value, Residence::cases()),
         ]);
     }
 }

@@ -21,6 +21,8 @@ final class StudentImportColumns
         ...self::STUDENT,
         'guardian1_name', 'guardian1_phone', 'guardian1_relationship',
         'guardian2_name', 'guardian2_phone', 'guardian2_relationship',
+        // Added for the pilot (Pilot preparation step 2), at the end so older files still read.
+        'residence', 'opening_balance',
     ];
 
     /** Largest file the dry run will read, to keep a request on shared hosting short. */
