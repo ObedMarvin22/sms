@@ -99,7 +99,8 @@ Done when:
 - [x] 9. Seeder upgrade: ~600 students per demo school with guardians; list pages stay fast.
 
 Done when:
-- [ ] 600-row import works with clear errors
+- [x] 600-row import works with clear errors (closed in Pilot preparation step 2: a made-up
+      600-row file with planted mistakes lists each one by row and column, then imports cleanly)
 - [x] concurrent admissions never collide (tested)
 - [x] promotion keeps history
 - [ ] teachers can only register their own class
@@ -165,7 +166,9 @@ Done when:
 - [x] 1. `docs/DEPLOYMENT.md`: first-time server setup and the release script. (Plus
       `scripts/release.sh`, `app:preflight`, security headers and R2 backups. Tried against a
       local clone; not yet run on Stellar Plus.)
-- [ ] 2. Import tooling hardened for the pilot school's real data.
+- [x] 2. Import tooling hardened for the pilot school's real data. (Balances brought forward,
+      day/boarding, duplicates refused, messy cells, error report. Not yet tried with the pilot
+      school's own file.)
 - [ ] 3. Fix bugs found during pilot testing on staging.
 - [ ] 4. Read-only lock for schools past the SaaS grace period: staff can view but not change;
       parents keep access (SPEC section 8). (Added in Sprint 4 step 9, Obed's OK.)

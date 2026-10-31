@@ -1101,3 +1101,35 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   encrypted).
 - **Idle timeout:** `SESSION_LIFETIME=60` in production (Laravel's session lifetime counts from
   the last request, so it is an idle timeout).
+
+## 2026-10-31 — Import hardened for real school files (Pilot preparation step 2)
+
+- **Balances brought forward (Obed's choice):** optional `opening_balance` column. Each amount
+  becomes one ledger adjustment, "Balance brought forward from previous records", through
+  `AdjustBalance` (so it is logged under "payments"), recorded as made by the person who started
+  the import. "1,250.50" or "GH₵ 1,250" is owed; "-200", "(200)" or "200 CR" is in credit. Only
+  staff with `fees.manage` may import balances; others get a row error asking them to clear the
+  column. The preview shows the count and totals owed and in credit before anything is saved.
+- **The same child twice is refused (Obed's choice):** first and last name with the date of
+  birth, or with the class when the date of birth is blank, matched against students on file
+  (any status) and earlier rows. The message names the student on file and their admission
+  number. A date that was typed but cannot be read does not fall back to the class (it already
+  has its own error); this was found by the 600-row test, where two planted bad dates shared a
+  name and class. So importing the same file twice now gives errors, not doubled students.
+- **Names typed all in capitals are tidied (Obed's choice):** "AMA SERWAA MENSAH" → "Ama Serwaa
+  Mensah", for students and guardians. Any lower-case letter leaves the name exactly as typed
+  (McCarthy, deGraft).
+- **Error report (Obed's choice):** "Download the file with errors marked" returns the school's
+  rows with an "errors" column and the problem cells in red, made on request (nothing stored).
+  The columns are the template's, so the fixed report uploads again as it is (tested).
+- **Also accepted now:** non-breaking and zero-width spaces (cleaned from every cell); two phones
+  in a guardian cell (first is the phone, second the alternative phone); dates in words ("8 Sep
+  2015", "8th September 2015", "September 8, 2015"; two-digit years still refused); other heading
+  names ("Surname", "DOB", "Sex", "Adm No", "Form", "Parent Phone", "Arrears"…), used only when
+  the template's own heading is missing.
+- **Day or boarding:** optional `residence` column (blank is day), checked against the school's
+  "offers boarding" setting, applied with `SetResidence` when the row is imported.
+- **New columns go at the end** of the template (`residence`, `opening_balance`), so files made
+  from the old template still read.
+- **Not yet:** a real file from the pilot school. The 600-row test file is made up, with every
+  kind of mistake above; the school's own layout may still surprise us.
