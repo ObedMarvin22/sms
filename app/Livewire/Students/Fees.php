@@ -10,6 +10,7 @@ use App\Actions\Fees\SetInstalmentPlan;
 use App\Actions\Fees\SetResidence;
 use App\Actions\Fees\SetStudentDiscount;
 use App\Actions\Payments\AdjustBalance;
+use App\Actions\Payments\BuildStatement;
 use App\Actions\Paystack\InitialisePaystackPayment;
 use App\Enums\DiscountKind;
 use App\Enums\DiscountType;
@@ -302,14 +303,7 @@ class Fees extends Component
      */
     public function statement(): array
     {
-        $running = 0;
-        $rows = [];
-        foreach (LedgerEntry::with('payment')->where('student_id', $this->studentId)->orderBy('entry_date')->orderBy('id')->get() as $entry) {
-            $running += $entry->amount->pesewas;
-            $rows[] = ['entry' => $entry, 'balance' => Money::pesewas($running)];
-        }
-
-        return $rows;
+        return app(BuildStatement::class)->handle($this->studentId);
     }
 
     public function takesOnlinePayments(): bool
