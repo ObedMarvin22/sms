@@ -144,15 +144,17 @@ Done when:
 - [x] 9. SaaS census command and invoices in the console. (Cut line: 8 and 9 may slip a week.)
       (Plans, daily `saas:census`, Billing page per school, Invoices list, PDF. Read-only lock
       for overdue schools moved to Pilot preparation step 4.)
-- [ ] 10. Staff 2FA if not done in Sprint 1.
+- [x] 10. Staff 2FA if not done in Sprint 1. (Done in Sprint 1 step 9; checked at the end of
+      Sprint 4 that every new staff screen sits behind `two-factor.required`.)
 
 Done when:
-- [ ] term bills correct for day and boarding students
-- [ ] Paystack test payment updates balance, issues receipt and SMS
-- [ ] duplicate webhook recorded once and bad signature rejected (tested)
+- [x] term bills correct for day and boarding students (tested)
+- [ ] Paystack test payment updates balance, issues receipt and SMS — **tested with faked
+      Paystack only.** Needs Obed's Paystack test keys on staging for a real test payment.
+- [x] duplicate webhook recorded once and bad signature rejected (tested)
 - [x] a parent sees only their own children (tested)
-- [ ] SMS stops when credit runs out
-- [ ] CI green
+- [x] SMS stops when credit runs out (tested; real sending through Arkesel not tried yet)
+- [ ] CI green — **local: yes (993 tests). CI: still blocked** by the GitHub billing lock.
 
 **STOP for review — Phase 1 complete.**
 
