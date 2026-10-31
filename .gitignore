@@ -37,3 +37,10 @@ yarn-error.log
 /boost.json
 /opencode.json
 /opencode.jsonc
+
+# Releases (scripts/release.sh, scripts/deploy.sh)
+/scripts/release.env
+/storage/release
+/public/build.previous
+/public/build.rolled-back
+/.last-release
