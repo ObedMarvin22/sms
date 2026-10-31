@@ -4,8 +4,10 @@ namespace App\Providers;
 
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
+use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -38,6 +40,18 @@ class FortifyServiceProvider extends ServiceProvider
     {
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
         Fortify::createUsersUsing(CreateNewUser::class);
+
+        // Fortify's own check (the scoped provider), except that parent-app users may not open
+        // the staff screens: they sign in through the parent app (/api/v1) only.
+        Fortify::authenticateUsing(function (Request $request): ?User {
+            $provider = Auth::createUserProvider('users');
+            $user = $provider?->retrieveByCredentials(['email' => $request->string('email')->toString()]);
+
+            return $user instanceof User
+                && $provider->validateCredentials($user, ['password' => $request->string('password')->toString()])
+                && ! $user->isParentOnly()
+                ? $user : null;
+        });
     }
 
     /**
