@@ -2,6 +2,7 @@
 
 use App\Enums\PermissionKey;
 use App\Http\Controllers\ClassListPdfController;
+use App\Http\Controllers\ParentAppController;
 use App\Http\Controllers\PaymentProofController;
 use App\Http\Controllers\PaystackReturnController;
 use App\Http\Controllers\PaystackWebhookController;
@@ -81,6 +82,13 @@ Route::domain('{school}.'.config('app.base_domain'))
 
         // This school's logo only (private disk). Public: the login page shows it.
         Route::get('branding/logo', SchoolLogoController::class)->name('school.logo');
+
+        // The parent app (Vue, resources/js/parent). Public shell: sign-in happens in the app,
+        // against /api/v1. Screens use hash URLs (/parent#/children/5), so one page serves all.
+        Route::get('parent', [ParentAppController::class, 'page'])->name('parent.app');
+        Route::get('parent/manifest.webmanifest', [ParentAppController::class, 'manifest'])->name('parent.manifest');
+        Route::get('parent/icon-{size}.png', [ParentAppController::class, 'icon'])->whereNumber('size')->name('parent.icon');
+        Route::get('parent/sw.js', [ParentAppController::class, 'serviceWorker'])->name('parent.sw');
 
         // Where Paystack sends a parent back after paying (public: parents may not be signed in).
         Route::get('pay/return', PaystackReturnController::class)->name('paystack.return');

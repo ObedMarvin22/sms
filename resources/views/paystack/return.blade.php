@@ -29,5 +29,9 @@
         @endswitch
 
         <flux:text size="sm">{{ __('Reference') }}: <span class="font-mono">{{ $transaction->reference }}</span></flux:text>
+
+        <flux:button variant="primary" :href="route('parent.app').'#/children/'.$transaction->student_id" data-test="back-to-parent-app">
+            {{ __('Back to the parent app') }}
+        </flux:button>
     </div>
 </x-layouts::auth>
