@@ -18,6 +18,41 @@
     </form>
     <flux:error name="planId" />
 
+    @php($lock = $this->lock())
+    <div class="flex flex-col gap-3" data-test="lock-state">
+        @if ($lock->isLocked())
+            <flux:callout variant="danger" icon="lock-closed">
+                <flux:callout.heading>{{ __('Read-only since :date', ['date' => $lock->locksOn?->format('j M Y')]) }}</flux:callout.heading>
+                <flux:callout.text>{{ __(':number is unpaid. Staff can view and record fee payments but change nothing else; parents are not affected. Paying or voiding it reopens the school.', ['number' => $lock->invoice?->number]) }}</flux:callout.text>
+            </flux:callout>
+        @elseif ($lock->status === \App\Support\Saas\SaasLock::WARNING)
+            <flux:callout variant="warning" icon="exclamation-triangle">
+                <flux:callout.heading>{{ __('Overdue: read-only from :date', ['date' => $lock->locksOn?->format('j M Y')]) }}</flux:callout.heading>
+                <flux:callout.text>
+                    {{ __(':number is past its due date. Staff see a warning banner.', ['number' => $lock->invoice?->number]) }}
+                    @if ($lock->keptOpenUntil)
+                        {{ __('Kept open until :date: :reason', ['date' => $lock->keptOpenUntil->format('j M Y'), 'reason' => $school->saas_lock_override_reason]) }}
+                    @endif
+                </flux:callout.text>
+            </flux:callout>
+        @else
+            <flux:text>{{ __('Nothing overdue: the school is open.') }}</flux:text>
+        @endif
+
+        @if ($this->canManage() && $lock->status !== \App\Support\Saas\SaasLock::OPEN)
+            <form wire:submit="keepOpen" class="flex flex-wrap items-end gap-3">
+                <flux:input type="date" wire:model="keepOpenUntil" :label="__('Keep open until')" class="max-w-48" />
+                <flux:input wire:model="keepOpenReason" :label="__('Reason')" :placeholder="__('e.g. half paid, rest agreed by 15 Jan')" class="min-w-72 flex-1" />
+                <flux:button type="submit">{{ __('Keep open') }}</flux:button>
+                @if ($school->saas_lock_override_until)
+                    <flux:button wire:click="stopKeepingOpen" variant="ghost">{{ __('Stop keeping open') }}</flux:button>
+                @endif
+            </form>
+            <flux:error name="until" />
+            <flux:error name="keep_reason" />
+        @endif
+    </div>
+
     @if ($term = $this->termToBill())
         <flux:callout icon="document-text">
             <flux:callout.heading>{{ __(':term: census date :date has passed', ['term' => $term->name, 'date' => $term->census_on->format('j M Y')]) }}</flux:callout.heading>

@@ -4,6 +4,7 @@ namespace App\Livewire\Console\Schools;
 
 use App\Actions\Saas\CountCensusStudents;
 use App\Actions\Saas\IssueSaasInvoice;
+use App\Actions\Saas\KeepSchoolOpen;
 use App\Actions\Saas\RecordSaasPayment;
 use App\Actions\Saas\SetSchoolPlan;
 use App\Actions\Saas\VoidSaasInvoice;
@@ -13,6 +14,7 @@ use App\Models\SaasInvoice;
 use App\Models\School;
 use App\Models\Term;
 use App\Models\User;
+use App\Support\Saas\SaasLock;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
@@ -46,6 +48,10 @@ class Billing extends Component
     public ?int $voidingId = null;
 
     public string $voidReason = '';
+
+    public string $keepOpenUntil = '';
+
+    public string $keepOpenReason = '';
 
     public function mount(School $school): void
     {
@@ -106,6 +112,38 @@ class Billing extends Component
     public function censusCount(Term $term): int
     {
         return app(CountCensusStudents::class)->handle($this->school(), $term->census_on);
+    }
+
+    /**
+     * Open, overdue (with the date it locks) or read-only.
+     */
+    public function lock(): SaasLock
+    {
+        return SaasLock::for($this->school());
+    }
+
+    public function keepOpen(KeepSchoolOpen $keepSchoolOpen): void
+    {
+        $this->authorize('manage-billing');
+        $this->resetErrorBag();
+
+        try {
+            $keepSchoolOpen->handle($this->school(), $this->keepOpenUntil, $this->keepOpenReason);
+        } catch (ValidationException $e) {
+            $this->setErrorBag($e->validator->errors());
+
+            return;
+        }
+
+        $this->keepOpenUntil = $this->keepOpenReason = '';
+        Flux::toast(variant: 'success', text: __('The school stays open until that date.'));
+    }
+
+    public function stopKeepingOpen(KeepSchoolOpen $keepSchoolOpen): void
+    {
+        $this->authorize('manage-billing');
+        $keepSchoolOpen->handle($this->school(), null);
+        Flux::toast(text: __('No longer kept open.'));
     }
 
     public function savePlan(SetSchoolPlan $setSchoolPlan): void

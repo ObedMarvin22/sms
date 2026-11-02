@@ -25,7 +25,12 @@
                     <flux:table.cell>
                         <flux:link :href="route('school.home', ['school' => $school->subdomain])" target="_blank">{{ $school->subdomain }}</flux:link>
                     </flux:table.cell>
-                    <flux:table.cell><flux:badge size="sm">{{ $school->status->label() }}</flux:badge></flux:table.cell>
+                    <flux:table.cell>
+                        <flux:badge size="sm">{{ $school->status->label() }}</flux:badge>
+                        @if (\App\Support\Saas\SaasLock::for($school)->isLocked())
+                            <flux:badge size="sm" color="red" data-test="read-only-badge">{{ __('Read-only') }}</flux:badge>
+                        @endif
+                    </flux:table.cell>
                     <flux:table.cell>{{ $school->created_at?->toDateString() }}</flux:table.cell>
                     <flux:table.cell>
                         <flux:link :href="route('console.schools.payments', $school)" wire:navigate data-test="payments-link">
