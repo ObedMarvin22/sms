@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Enums\PermissionKey;
+use App\Exceptions\SchoolIsReadOnly;
+use App\Http\Middleware\EnforceSaasReadOnly;
 use App\Http\Middleware\EnsureTwoFactorEnabled;
 use App\Http\Middleware\EnsureUserBelongsToSchool;
 use App\Http\Middleware\IdentifySchool;
@@ -14,10 +16,12 @@ use App\Services\Sms\LogSmsGateway;
 use App\Services\Sms\SmsGateway;
 use App\Support\Navigation\StaffNavigation;
 use App\Support\Phone;
+use App\Support\Saas\ReadOnlyGuard;
 use App\Support\Tenancy\CurrentSchool;
 use App\Support\Tenancy\ReservedSubdomains;
 use App\Support\Tenancy\SchoolUserProvider;
 use Carbon\CarbonImmutable;
+use Closure;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Hashing\Hasher;
@@ -31,11 +35,15 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Livewire\Component;
 use Livewire\Livewire;
 use Spatie\Permission\Events\PermissionAttachedEvent;
 use Spatie\Permission\Events\PermissionDetachedEvent;
 use Spatie\Permission\Events\RoleAttachedEvent;
 use Spatie\Permission\Events\RoleDetachedEvent;
+use Throwable;
+
+use function Livewire\on;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -46,6 +54,8 @@ class AppServiceProvider extends ServiceProvider
     {
         // One holder per request or queued job; Laravel resets scoped instances between them.
         $this->app->scoped(CurrentSchool::class);
+        // Off at the start of every request and job; EnforceSaasReadOnly switches it on.
+        $this->app->scoped(ReadOnlyGuard::class);
 
         $this->app->bind(StaffNavigation::class, fn () => StaffNavigation::default());
 
@@ -73,7 +83,17 @@ class AppServiceProvider extends ServiceProvider
 
         // Livewire updates post to its own endpoint; re-run these there using the
         // original page's route, so components always have the current school and user.
-        Livewire::addPersistentMiddleware([IdentifySchool::class, EnsureUserBelongsToSchool::class, EnsureTwoFactorEnabled::class]);
+        Livewire::addPersistentMiddleware([IdentifySchool::class, EnsureUserBelongsToSchool::class, EnsureTwoFactorEnabled::class, EnforceSaasReadOnly::class]);
+
+        // Read-only schools (Pilot preparation step 4): every write to a school-owned table is
+        // checked; on a Livewire screen a refused save becomes a message, not an error page.
+        DB::beforeExecuting(fn (string $query) => $this->app->make(ReadOnlyGuard::class)->check($query));
+        on('exception', function (mixed $component, Throwable $e, Closure $stopPropagation): void {
+            if ($e instanceof SchoolIsReadOnly && $component instanceof Component) {
+                $component->dispatch('toast-show', duration: 8000, slots: ['text' => $e->userMessage()], dataset: ['variant' => 'danger']);
+                $stopPropagation();
+            }
+        });
 
         // Audit trail for role assignments and permission grants.
         Event::listen(RoleAttachedEvent::class, [LogRoleChanges::class, 'roleAttached']);

@@ -13,6 +13,7 @@ use App\Models\Student;
 use App\Models\User;
 use App\Notifications\PaymentReceived;
 use App\Support\Money\Money;
+use App\Support\Saas\ReadOnlyGuard;
 use App\Support\Tenancy\CurrentSchool;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\UploadedFile;
@@ -45,6 +46,16 @@ class RecordPayment
      * @param  array{amount?: string, method?: string, reference?: string|null, paid_on?: string, note?: string|null}  $input
      */
     public function handle(?User $user, Student $student, array $input, ?UploadedFile $proof = null): Payment
+    {
+        // Still allowed while the school is read-only for an unpaid Orange Tree invoice: the money
+        // is the school's and parents need their receipts (Pilot preparation step 4).
+        return app(ReadOnlyGuard::class)->permit(fn () => $this->record($user, $student, $input, $proof));
+    }
+
+    /**
+     * @param  array{amount?: string, method?: string, reference?: string|null, paid_on?: string, note?: string|null}  $input
+     */
+    private function record(?User $user, Student $student, array $input, ?UploadedFile $proof): Payment
     {
         $amount = FeeRules::amount((string) ($input['amount'] ?? ''), 'amount');
         $method = PaymentMethod::tryFrom((string) ($input['method'] ?? '')) ?? throw ValidationException::withMessages(['method' => 'Choose how it was paid.']);

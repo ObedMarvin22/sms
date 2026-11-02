@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnforceSaasReadOnly;
 use App\Http\Middleware\EnsureParent;
 use App\Http\Middleware\EnsureSchoolReadyForStudents;
 use App\Http\Middleware\EnsureTwoFactorEnabled;
@@ -26,6 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'two-factor.required' => EnsureTwoFactorEnabled::class,
             'school.ready' => EnsureSchoolReadyForStudents::class,
             'parent' => EnsureParent::class,
+            'saas.read-only' => EnforceSaasReadOnly::class,
         ]);
 
         // HSTS and friends on every response (production and staging only).

@@ -6,6 +6,7 @@ use App\Enums\LedgerEntryType;
 use App\Models\LedgerEntry;
 use App\Models\Payment;
 use App\Models\User;
+use App\Support\Saas\ReadOnlyGuard;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -17,6 +18,12 @@ use Illuminate\Validation\ValidationException;
 class ReversePayment
 {
     public function handle(User $user, Payment $payment, string $reason): Payment
+    {
+        // Allowed while read-only, like recording (RecordPayment).
+        return app(ReadOnlyGuard::class)->permit(fn () => $this->reverse($user, $payment, $reason));
+    }
+
+    private function reverse(User $user, Payment $payment, string $reason): Payment
     {
         $reason = trim($reason);
         if ($reason === '' || mb_strlen($reason) > 255) {

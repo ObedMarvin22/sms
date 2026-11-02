@@ -111,7 +111,8 @@ Route::domain('{school}.'.config('app.base_domain'))
 
         // Staff screens. Settings (incl. two-factor setup) are in routes/settings.php, outside
         // this group, so staff who must set up two-factor can still reach them.
-        Route::middleware(['auth', 'verified', 'two-factor.required'])->group(function () {
+        // saas.read-only: banner for an overdue Orange Tree invoice; no changes once locked.
+        Route::middleware(['auth', 'verified', 'two-factor.required', 'saas.read-only'])->group(function () {
             Route::view('dashboard', 'dashboard')->name('dashboard');
 
             // Student screens need a current term and a class first (setup wizard).
