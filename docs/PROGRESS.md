@@ -170,8 +170,9 @@ Done when:
       day/boarding, duplicates refused, messy cells, error report. Not yet tried with the pilot
       school's own file.)
 - [ ] 3. Fix bugs found during pilot testing on staging.
-- [ ] 4. Read-only lock for schools past the SaaS grace period: staff can view but not change;
-      parents keep access (SPEC section 8). (Added in Sprint 4 step 9, Obed's OK.)
+- [x] 4. Read-only lock for schools past the SaaS grace period: staff can view but not change;
+      parents keep access (SPEC section 8). (Added in Sprint 4 step 9, Obed's OK. Automatic 14
+      days after the due date; Orange Tree can keep a school open; fee payments still allowed.)
 
 ---
 

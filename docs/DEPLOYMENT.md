@@ -108,6 +108,7 @@ the build).
   | `BACKUP_ARCHIVE_PASSWORD` | optional | a long password, **also kept somewhere off the server** |
   | `R2_*` | empty | from section 10 |
   | `SAAS_INVOICE_*` | Orange Tree's invoice details | Orange Tree's invoice details |
+  | `SAAS_GRACE_DAYS` | `14` | `14` (days after an invoice's due date before staff screens become read-only) |
   | `VAPID_*` | empty until web push (Sprint 7) | empty until web push (Sprint 7) |
 
 - [ ] Check it: `php artisan app:preflight` lists anything wrong (section 9 explains the checks).
@@ -286,4 +287,4 @@ A backup nobody has restored is not a backup. On **staging** (never on productio
 - CI building and shipping `public/build` (blocked while GitHub billing is locked).
 - Two-factor for console users.
 - HSTS preload (after production has run on HTTPS for some months).
-- The read-only lock for schools past the SaaS grace period (Pilot preparation step 4).
+

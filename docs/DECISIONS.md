@@ -1133,3 +1133,38 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   from the old template still read.
 - **Not yet:** a real file from the pilot school. The 600-row test file is made up, with every
   kind of mistake above; the school's own layout may still surprise us.
+
+## 2026-11-02 — Read-only lock for unpaid schools (Pilot preparation step 4)
+
+- **Automatic (Obed's choice):** a school is read-only once any live Orange Tree invoice is still
+  unpaid `SAAS_GRACE_DAYS` (14) days after its due date, so from day 15. Worked out from the
+  invoices each request (`SaasLock`), never stored: paying or voiding the invoice reopens the
+  school at once; a part payment does not. Another school's invoice never affects it.
+- **Kept open by Orange Tree:** a super admin can keep a school open until a date (today to 90
+  days ahead) with a reason, on the school's Billing page; logged on the school. The lock then
+  starts the day after, if the invoice is still unpaid.
+- **Warning first (Obed's choice):** every staff page shows a banner from the day after the due
+  date with the date it becomes read-only; once locked, a red banner says what still works.
+- **Fee payments still allowed (Obed's choice):** `RecordPayment` and `ReversePayment` run inside
+  `ReadOnlyGuard::permit()`; the money is the school's and parents need receipts.
+- **How writes are stopped:** a database guard (`ReadOnlyGuard`, via `DB::beforeExecuting`)
+  refuses insert, update and delete on school-owned tables (every `BelongsToSchool` model's table,
+  found automatically) plus `schools` and Spatie's role tables. Users, sessions, cache, jobs and
+  the activity log are left alone, so staff still sign in and change their own password and
+  two-factor. *Rejected:* a check in each of ~60 screens (easy to forget on the next one; 17
+  places write with the query builder and would skip model events).
+- **Only staff screens:** `EnforceSaasReadOnly` switches the guard on, on the staff route group
+  and as Livewire persistent middleware (where saves happen). The parent API, webhooks, queued
+  jobs (the worker clears per-job state), the scheduler and the console never switch it on.
+- **A refused save is a message, not an error page:** a Livewire `exception` hook shows "This
+  school is read-only until the Orange Tree invoice is paid. Nothing was changed." Other requests
+  get a 423 page. Every staff page still opens exactly as when open (tested by comparing all
+  staff GET routes open versus locked).
+- **Testing note:** `Livewire::test()` does not run route middleware, so the lock is tested with
+  real requests (load the page, post a Livewire update to the real endpoint), clearing
+  per-request state in between as a new server request would. The first version of that helper
+  did not, and a bite check (middleware removed from Livewire updates) went unnoticed until it did.
+- **"Suspended" is unchanged:** still a full stop for everyone, set by hand. The read-only lock is
+  the softer, automatic state.
+- **Not done:** a pre-flight warning when `SAAS_GRACE_DAYS` is missing. With config cached, a
+  missing value cannot be told apart from the default (14), so the check would mean nothing.
