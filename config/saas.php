@@ -9,6 +9,10 @@ return [
     // Days from issue to the due date.
     'due_days' => (int) env('SAAS_DUE_DAYS', 30),
 
+    // Days after the due date before an unpaid school's staff screens become read-only
+    // (App\Support\Saas\SaasLock). Parents are never affected.
+    'grace_days' => (int) env('SAAS_GRACE_DAYS', 14),
+
     'invoice' => [
         'from_name' => env('SAAS_INVOICE_FROM_NAME', 'Orange Tree Technologies'),
         'from_address' => env('SAAS_INVOICE_FROM_ADDRESS', ''),

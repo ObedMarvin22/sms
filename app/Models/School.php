@@ -33,6 +33,8 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property string|null $plan Unused (free text from Sprint 1); the plan is plan_id.
  * @property int|null $plan_id Orange Tree's price plan (SaaS billing)
  * @property-read Plan|null $planModel
+ * @property CarbonImmutable|null $saas_lock_override_until Kept open despite an overdue invoice until this date
+ * @property string|null $saas_lock_override_reason
  * @property string|null $paystack_subaccount_code
  * @property string|null $paystack_settlement e.g. "GCB Bank · ****1234 · Greenhill Academy Ltd"
  * @property string|null $sms_sender_id
@@ -90,6 +92,7 @@ class School extends Model
             ->logOnly([
                 'name', 'status', 'logo_path', 'primary_colour', 'secondary_colour',
                 'phone', 'email', 'address', 'levels_offered', 'plan_id',
+                'saas_lock_override_until', 'saas_lock_override_reason',
             ])
             ->logOnlyDirty()
             ->dontLogEmptyChanges();
@@ -106,6 +109,7 @@ class School extends Model
             'status' => SchoolStatus::class,
             'levels_offered' => AsEnumCollection::of(SchoolLevel::class),
             'settings' => 'array',
+            'saas_lock_override_until' => 'immutable_date',
         ];
     }
 }
