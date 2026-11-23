@@ -121,6 +121,32 @@ describe('saving a scheme', function () {
         expect(Activity::where('subject_id', $project->id)->where('subject_type', $project->getMorphClass())->where('event', 'deleted')->exists())->toBeTrue();
     });
 
+    it('swaps two part names in one save', function () {
+        $save = app(SaveAssessmentScheme::class);
+        [$tests, $exam] = $save->handle($this->year, SchoolLevel::Jhs, AssessmentMode::Weighted, schemeParts(['Tests' => 30, 'Exam' => 70]))->components->all();
+
+        $save->handle($this->year, SchoolLevel::Jhs, AssessmentMode::Weighted, [
+            ['id' => $tests->id, 'name' => 'Exam', 'kind' => 'exam', 'weight' => 30],
+            ['id' => $exam->id, 'name' => 'Tests', 'kind' => 'test', 'weight' => 70],
+        ]);
+
+        expect($tests->fresh()->name)->toBe('Exam')->and($exam->fresh()->name)->toBe('Tests');
+
+        $log = Activity::where('subject_type', $tests->getMorphClass())->where('subject_id', $tests->id)->where('event', 'updated')->sole();
+        expect($log->attribute_changes['old']['name'])->toBe('Tests')
+            ->and($log->attribute_changes['attributes']['name'])->toBe('Exam');
+    });
+
+    it('refuses a part id from another scheme without renaming anything', function () {
+        $save = app(SaveAssessmentScheme::class);
+        $other = $save->handle($this->year, SchoolLevel::Primary, AssessmentMode::Weighted, schemeParts(['Exam' => 100]))->components->sole();
+        $save->handle($this->year, SchoolLevel::Jhs, AssessmentMode::Weighted, schemeParts(['Exam' => 100]));
+
+        expect(fn () => $save->handle($this->year, SchoolLevel::Jhs, AssessmentMode::Weighted, [['id' => $other->id, 'name' => 'Final', 'kind' => 'exam', 'weight' => 100]]))
+            ->toThrow(ModelNotFoundException::class)
+            ->and($other->fresh()->name)->toBe('Exam');
+    });
+
     it('drops the parts when a level switches to comments only', function () {
         $save = app(SaveAssessmentScheme::class);
         $save->handle($this->year, SchoolLevel::Primary, AssessmentMode::Weighted, schemeParts(['Tests' => 30, 'Exam' => 70]));
