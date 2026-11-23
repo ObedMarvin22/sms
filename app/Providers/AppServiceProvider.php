@@ -113,6 +113,10 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('take-attendance', fn (User $user): bool => $user->can(PermissionKey::AttendanceTake->value)
             || $user->can(PermissionKey::AttendanceEditLocked->value));
 
+        // Marks: subject teachers (grades.enter) and heads (grades.approve).
+        Gate::define('enter-grades', fn (User $user): bool => $user->can(PermissionKey::GradesEnter->value)
+            || $user->can(PermissionKey::GradesApprove->value));
+
         // Payments and receipts: staff who look at finances, and staff who record payments
         // (an accounts clerk may record without seeing every report).
         Gate::define('view-payments', fn (User $user): bool => $user->can(PermissionKey::FinanceView->value)

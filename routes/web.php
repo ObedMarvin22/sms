@@ -14,6 +14,8 @@ use App\Http\Controllers\StudentImportTemplateController;
 use App\Livewire\Academic\CreateYear as CreateAcademicYear;
 use App\Livewire\Academic\Years as AcademicYears;
 use App\Livewire\Announcements\Index as AnnouncementsIndex;
+use App\Livewire\Assessment\ClassTasks as AssessmentClassTasks;
+use App\Livewire\Assessment\MyClasses as AssessmentMyClasses;
 use App\Livewire\Assessment\Schemes as AssessmentSchemes;
 use App\Livewire\Attendance\Register as AttendanceRegister;
 use App\Livewire\Attendance\Today as AttendanceToday;
@@ -138,6 +140,13 @@ Route::domain('{school}.'.config('app.base_domain'))
                 Route::livewire('attendance/today', AttendanceToday::class)
                     ->middleware('can:'.PermissionKey::AttendanceEditLocked->value)
                     ->name('attendance.today');
+            });
+
+            // Marks: subject teachers (grades.enter) and heads (grades.approve). Which classes each
+            // may open is decided by TaskRules.
+            Route::middleware(['can:enter-grades', 'school.ready'])->group(function () {
+                Route::livewire('assessment', AssessmentMyClasses::class)->name('assessment.index');
+                Route::livewire('assessment/{stream}/{subject}', AssessmentClassTasks::class)->name('assessment.tasks');
             });
 
             // Fees: finance.view to look; changes need fees.manage (checked in each component).
