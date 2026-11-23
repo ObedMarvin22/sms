@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { api, ApiError } from '../api.js';
 import { signIn } from '../session.js';
+import AuthHeader from '../components/AuthHeader.vue';
 import ErrorNote from '../components/ErrorNote.vue';
 import PrimaryButton from '../components/PrimaryButton.vue';
 import TextField from '../components/TextField.vue';
@@ -79,35 +80,43 @@ const otherError = computed(() => {
 </script>
 
 <template>
-    <section class="space-y-6 pt-4">
-        <div>
-            <h2 class="text-2xl font-semibold">{{ forgot ? 'Set a new password' : 'Get started' }}</h2>
-            <p class="mt-1 text-zinc-600">
-                {{ step === 'phone' ? 'Enter the phone number the school has for you. We will text you a 6-digit code.' : sentMessage }}
-            </p>
-        </div>
+    <section class="mx-auto max-w-sm">
+        <AuthHeader
+            :title="forgot ? 'Set a new password' : 'Get started'"
+            :text="step === 'phone' ? 'Enter the phone number the school has for you. We will text you a 6-digit code.' : sentMessage"
+        />
 
-        <form v-if="step === 'phone'" class="space-y-4" novalidate @submit.prevent="sendCode">
+        <!-- Where they are: phone first, then code and password. -->
+        <ol class="mb-4 flex items-center justify-center gap-2 text-xs text-muted" aria-label="Steps">
+            <li class="flex items-center gap-1.5" :class="step === 'phone' ? 'font-bold text-ink' : ''">
+                <span class="grid size-5 place-items-center rounded-full text-[11px]" :class="step === 'phone' ? 'bg-school text-school-text' : 'bg-present text-white'">1</span> Phone
+            </li>
+            <li class="h-px w-6 bg-line" aria-hidden="true"></li>
+            <li class="flex items-center gap-1.5" :class="step === 'code' ? 'font-bold text-ink' : ''">
+                <span class="grid size-5 place-items-center rounded-full text-[11px]" :class="step === 'code' ? 'bg-school text-school-text' : 'bg-line text-muted'">2</span> Code and password
+            </li>
+        </ol>
+
+        <form v-if="step === 'phone'" class="space-y-4 rounded-2xl bg-surface p-5 ring-1 ring-line" novalidate @submit.prevent="sendCode">
             <TextField v-model="phone" label="Phone number" type="tel" inputmode="tel" autocomplete="tel" placeholder="024 412 3456" :error="error?.field('phone')" required />
             <ErrorNote :message="otherError" />
             <PrimaryButton :busy="busy">{{ busy ? 'Sending…' : 'Text me a code' }}</PrimaryButton>
         </form>
 
-        <form v-else class="space-y-4" novalidate @submit.prevent="setPassword">
-            <TextField v-model="code" label="Code from the SMS" inputmode="numeric" autocomplete="one-time-code" maxlength="6" :error="error?.field('code') ?? error?.field('phone')" required />
+        <form v-else class="space-y-4 rounded-2xl bg-surface p-5 ring-1 ring-line" novalidate @submit.prevent="setPassword">
+            <TextField v-model="code" label="Code from the SMS" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6 digits" :error="error?.field('code') ?? error?.field('phone')" required />
             <TextField v-model="password" label="New password" type="password" autocomplete="new-password" hint="At least 8 characters." :error="error?.field('password')" required />
             <TextField v-model="confirmation" label="Type the password again" type="password" autocomplete="new-password" required />
             <ErrorNote :message="otherError" />
             <PrimaryButton :busy="busy">{{ busy ? 'Saving…' : 'Save password and sign in' }}</PrimaryButton>
 
-            <p class="text-sm text-zinc-600">
-                No code?
-                <button v-if="wait <= 0" type="button" class="font-semibold text-zinc-900 underline" :disabled="busy" @click="sendCode">Send another</button>
-                <span v-else>You can ask for another in {{ wait }} s.</span>
-                <button type="button" class="ml-2 underline" @click="step = 'phone'">Change number</button>
-            </p>
+            <div class="flex flex-wrap items-center justify-between gap-2 text-sm">
+                <button v-if="wait <= 0" type="button" class="font-bold text-ink underline decoration-line underline-offset-4" :disabled="busy" @click="sendCode">Send another code</button>
+                <span v-else class="text-muted">Another code in {{ wait }} s</span>
+                <button type="button" class="font-bold text-muted hover:text-ink" @click="step = 'phone'">Change number</button>
+            </div>
         </form>
 
-        <RouterLink :to="{ name: 'sign-in' }" class="inline-block text-sm underline">Back to sign in</RouterLink>
+        <RouterLink :to="{ name: 'sign-in' }" class="mt-5 block text-center text-sm font-bold text-muted hover:text-ink">Back to sign in</RouterLink>
     </section>
 </template>
