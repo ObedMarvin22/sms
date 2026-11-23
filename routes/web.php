@@ -14,6 +14,7 @@ use App\Http\Controllers\StudentImportTemplateController;
 use App\Livewire\Academic\CreateYear as CreateAcademicYear;
 use App\Livewire\Academic\Years as AcademicYears;
 use App\Livewire\Announcements\Index as AnnouncementsIndex;
+use App\Livewire\Assessment\Schemes as AssessmentSchemes;
 use App\Livewire\Attendance\Register as AttendanceRegister;
 use App\Livewire\Attendance\Today as AttendanceToday;
 use App\Livewire\Classes\Index as ClassesIndex;
@@ -176,6 +177,7 @@ Route::domain('{school}.'.config('app.base_domain'))
                 Route::livewire('settings/class-subjects', ClassSubjects::class)->name('class-subjects.index');
                 Route::livewire('settings/subjects', SubjectsIndex::class)->name('subjects.index');
                 Route::livewire('settings/programmes', SubjectsProgrammes::class)->name('programmes.index');
+                Route::livewire('settings/assessment', AssessmentSchemes::class)->name('assessment.schemes');
             });
         });
 

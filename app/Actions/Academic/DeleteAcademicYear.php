@@ -3,12 +3,14 @@
 namespace App\Actions\Academic;
 
 use App\Models\AcademicYear;
+use App\Models\AssessmentScheme;
 use App\Models\Enrolment;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 /**
  * Deletes an academic year and its terms. The current year cannot be deleted.
- * A year with student enrolments cannot be deleted either.
+ * A year with student enrolments cannot be deleted either. Its assessment schemes go with it.
  */
 class DeleteAcademicYear
 {
@@ -23,6 +25,14 @@ class DeleteAcademicYear
             throw ValidationException::withMessages(['year' => "{$year->name} has student enrolments, so it cannot be deleted."]);
         }
 
-        $year->delete();
+        DB::transaction(function () use ($year): void {
+            AssessmentScheme::with('components')->where('academic_year_id', $year->id)->get()
+                ->each(function (AssessmentScheme $scheme): void {
+                    $scheme->components->each->delete();
+                    $scheme->delete();
+                });
+
+            $year->delete();
+        });
     }
 }

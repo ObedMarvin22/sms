@@ -1212,3 +1212,21 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
 - **Checked** with screenshots at 390, 820 and 1280 px (Playwright): children, child (register
   and fees), news, notices, account, sign in, set password. Sizes: 53 kB JS and 5.9 kB CSS
   gzipped, plus the font.
+
+## 2026-11-23 — Assessment schemes (Sprint 5 step 1)
+
+- **One scheme per school, year and level** (`assessment_schemes`, unique on school, year,
+  level), not per class or subject. Every subject at a level is marked the same way, which is
+  how Ghanaian report cards work. A per-subject override can be added later if a school asks.
+- **Weights are whole percentages** (1 to 100) that must total exactly 100; up to 8 parts. Whole
+  numbers keep the maths on the report card exact and are what heads expect to type.
+- **Parts keep their id when edited** (matched by id, not by name), so the tasks and marks
+  added in steps 2 and 3 stay attached when a part is renamed. Parts left out are deleted;
+  once marks exist (step 3) that will be refused.
+- **Descriptive levels have no parts.** Switching a level to "Comments only" removes its parts.
+- **The standard setup**: Creche, Nursery and KG get comments only; other levels get Class
+  exercises 10, Class tests 10, Project 10, End of term exam 70. Nothing is created
+  automatically: the head picks "Use the standard setup" or "Copy from <last year>" on
+  Settings → Assessment. Copying skips levels already set up and levels no longer offered.
+- **Deleting an academic year** (allowed only without enrolments) now deletes its schemes too.
+- Scheme and part changes go to the activity log under `grades`.

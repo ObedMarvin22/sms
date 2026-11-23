@@ -4,6 +4,8 @@ use App\Models\AcademicYear;
 use App\Models\AdmissionSequence;
 use App\Models\Announcement;
 use App\Models\AnnouncementStream;
+use App\Models\AssessmentComponent;
+use App\Models\AssessmentScheme;
 use App\Models\AttendanceRecord;
 use App\Models\AttendanceSession;
 use App\Models\Bill;
@@ -104,6 +106,8 @@ dataset('school-owned models', [
     'ClassSubject' => [fn (School $school): Model => ClassSubject::factory()->state(['school_class_id' => SchoolClass::factory()->for($school)])->create()],
     'Programme' => [fn (School $school): Model => Programme::factory()->for($school)->create()],
     'ProgrammeSubject' => [fn (School $school): Model => ProgrammeSubject::factory()->state(['programme_id' => Programme::factory()->for($school)])->create()],
+    'AssessmentScheme' => [fn (School $school): Model => AssessmentScheme::factory()->for($school)->create()],
+    'AssessmentComponent' => [fn (School $school): Model => AssessmentComponent::factory()->state(['assessment_scheme_id' => AssessmentScheme::factory()->for($school)])->create()],
 ]);
 
 beforeEach(function () {
