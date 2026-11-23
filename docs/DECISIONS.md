@@ -1230,3 +1230,21 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   Settings → Assessment. Copying skips levels already set up and levels no longer offered.
 - **Deleting an academic year** (allowed only without enrolments) now deletes its schemes too.
 - Scheme and part changes go to the activity log under `grades`.
+
+## 2026-11-23 — Assessment tasks (Sprint 5 step 2)
+
+- **Tasks belong to a term, stream, subject and scheme part**, not to a teaching assignment.
+  `MarkStaffLeft` deletes a leaver's assignments; tying tasks to them would lose a class's
+  marks. A new teacher of the same class and subject sees and continues the same tasks.
+- **Who:** the subject's teacher in that stream this year (`grades.enter` plus a teaching
+  assignment), or anyone with `grades.approve` (proprietor, headteacher) for any subject the
+  class takes. Administrators do not have grades permissions by default, so they don't see Marks.
+- **Per stream:** 4A and 4B have separate tasks even when they write the same test.
+- **Out of:** whole numbers from 1 to 1000. **Date:** required, inside the term.
+- **The exam part takes one task per term.** If a school needs Paper 1 and Paper 2, it can add
+  them as parts in its scheme, or we lift the limit later.
+- **Guards:** a scheme part with tasks cannot be removed (rename it or change its weight), and a
+  subject, stream, class or academic year with tasks cannot be deleted. Lowering the maximum
+  mark below marks already given and deleting a task with marks will be refused in step 3.
+- The `ClassTasks` component method is `classStream()`, because `stream()` is a Livewire
+  method (`Component::stream()` sends streamed responses).
