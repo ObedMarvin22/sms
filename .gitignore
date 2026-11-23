@@ -44,3 +44,6 @@ yarn-error.log
 /public/build.previous
 /public/build.rolled-back
 /.last-release
+
+# Playwright screenshots and logs from design reviews
+/.playwright-mcp

@@ -1187,3 +1187,28 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   guardian with children in Primary 4A and two other classes a parent login (their phone and
   `DemoSchoolsSeeder::PASSWORD`), this term's bills, a cash payment, ten days of register marks
   (one absence, one late), a welcome announcement and SMS credit. Running it again changes nothing.
+
+## 2026-11-23 — Parent app design pass (Obed's go-ahead)
+
+- **Direction:** a quiet, legible app where each school's own colour is the only accent. The one
+  bold element is the child's **school ID card** (a band in the school colour, an initials
+  crest, name, class, admission number, and today / this month / fees underneath). Attendance is
+  shown as the **class register**: school days by week with the teacher's letters (P, L, A, E).
+- **Type:** Atkinson Hyperlegible (one family, 400 and 700), chosen for legibility on small
+  screens and for parents of every reading level; its slashed zero tells 0 from O apart in
+  amounts and phone numbers. Loaded from Bunny Fonts (no tracking); offline the system font is used.
+- **Tokens** in `resources/js/parent/parent.css`: ink, muted, faint, paper (#F4F5F1), surface,
+  line, and the four register colours with soft tints. No new packages: icons are inline SVG
+  (`Icon.vue`), state is Vue's own.
+- **Avoided on purpose:** stacks of identical floating cards (lists share one surface with
+  dividers), all-caps labels, gradient decoration, meta strings joined with dots.
+- **States everywhere:** shaped loading skeletons, empty states that say what to do, and errors
+  with "Try again". Pull down at the top of a list to refresh.
+- **Layout:** phones get a frosted bottom bar; from tablet width the tabs move into the header;
+  on wide screens the child's ID card stays in view on the left beside attendance or fees. Lists
+  keep a reading width.
+- **Small behaviour changes:** an absence notice opens that child; "Change password" signs out
+  properly first, then sends the code; the phone shows as 024 412 3456.
+- **Checked** with screenshots at 390, 820 and 1280 px (Playwright): children, child (register
+  and fees), news, notices, account, sign in, set password. Sizes: 53 kB JS and 5.9 kB CSS
+  gzipped, plus the font.
