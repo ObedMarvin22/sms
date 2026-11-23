@@ -44,6 +44,11 @@
             @if ($statement = $this->statement())
                 <details class="rounded-lg border border-zinc-200 p-3 dark:border-zinc-700" data-test="statement">
                     <summary class="cursor-pointer">{{ __('Statement (:count entries)', ['count' => count($statement)]) }}</summary>
+                    @can('view-payments')
+                        <div class="mt-2">
+                            <flux:button size="sm" icon="arrow-down-tray" :href="route('students.statement.pdf', $this->student())" data-test="statement-pdf">{{ __('Download statement (PDF)') }}</flux:button>
+                        </div>
+                    @endcan
                     <table class="mt-2 w-full text-sm">
                         <tr class="text-start text-zinc-500">
                             <th class="py-1 text-start font-normal">{{ __('Date') }}</th>

@@ -9,6 +9,7 @@ use App\Http\Controllers\PaystackWebhookController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\SaasInvoicePdfController;
 use App\Http\Controllers\SchoolLogoController;
+use App\Http\Controllers\StatementPdfController;
 use App\Http\Controllers\StudentImportTemplateController;
 use App\Livewire\Academic\CreateYear as CreateAcademicYear;
 use App\Livewire\Academic\Years as AcademicYears;
@@ -157,6 +158,7 @@ Route::domain('{school}.'.config('app.base_domain'))
             Route::middleware(['can:view-payments', 'school.ready'])->group(function () {
                 Route::livewire('fees/payments', FeePayments::class)->name('fees.payments');
                 Route::get('receipts/{payment}/pdf', ReceiptController::class)->name('receipts.pdf');
+                Route::get('students/{student}/statement/pdf', StatementPdfController::class)->name('students.statement.pdf');
                 Route::get('payments/{payment}/proof', PaymentProofController::class)->name('payments.proof');
             });
 
