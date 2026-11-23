@@ -3,6 +3,7 @@
 use App\Enums\PermissionKey;
 use App\Http\Controllers\Api\V1\AnnouncementsController;
 use App\Http\Controllers\Api\V1\ChildAttendanceController;
+use App\Http\Controllers\Api\V1\ChildDocumentsController;
 use App\Http\Controllers\Api\V1\ChildFeesController;
 use App\Http\Controllers\Api\V1\ChildPaymentController;
 use App\Http\Controllers\Api\V1\ChildrenController;
@@ -40,6 +41,8 @@ Route::domain('{school}.'.config('app.base_domain'))
                 Route::get('children/{student}/attendance', ChildAttendanceController::class)->whereNumber('student')->name('children.attendance');
                 Route::get('children/{student}/bills', [ChildFeesController::class, 'bills'])->whereNumber('student')->name('children.bills');
                 Route::get('children/{student}/statement', [ChildFeesController::class, 'statement'])->whereNumber('student')->name('children.statement');
+                Route::get('children/{student}/statement.pdf', [ChildDocumentsController::class, 'statement'])->whereNumber('student')->name('children.statement.pdf');
+                Route::get('children/{student}/receipts/{payment}.pdf', [ChildDocumentsController::class, 'receipt'])->whereNumber(['student', 'payment'])->name('children.receipt.pdf');
                 Route::post('children/{student}/payments', ChildPaymentController::class)->whereNumber('student')
                     ->middleware('throttle:parent-payment')->name('children.payments');
 

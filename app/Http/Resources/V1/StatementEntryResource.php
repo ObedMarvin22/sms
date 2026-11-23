@@ -26,6 +26,7 @@ class StatementEntryResource extends JsonResource
             'type' => $entry->type->value,
             'description' => $entry->description,
             'receipt_number' => $entry->payment?->receipt_number,
+            'payment_id' => $entry->payment_id, // for GET children/{id}/receipts/{payment_id}.pdf
             'amount' => MoneyData::of($entry->amount),
             'balance' => MoneyData::of($this->resource['balance']),
         ];

@@ -24,6 +24,37 @@ export function whenSignedOut(callback) {
 }
 
 /**
+ * Downloads a PDF from /api/v1 with the parent's token and hands it to the phone to save or open.
+ * (A plain link cannot send the token.) The file is not kept by the app.
+ */
+export async function download(path, fallbackName) {
+    let response;
+    try {
+        response = await fetch(`/api/v1/${path.replace(/^\//, '')}`, {
+            headers: { Accept: 'application/pdf', Authorization: `Bearer ${session.token}` },
+        });
+    } catch {
+        throw new ApiError(0, 'No connection. Check your data or Wi-Fi and try again.');
+    }
+
+    if (response.status === 401) {
+        forget();
+        onSignedOut();
+    }
+    if (!response.ok) {
+        throw new ApiError(response.status, response.status === 404 ? 'Not found.' : 'The document could not be downloaded. Please try again.');
+    }
+
+    const name = /filename="?([^";]+)"?/.exec(response.headers.get('Content-Disposition') ?? '')?.[1] ?? fallbackName;
+    const url = URL.createObjectURL(await response.blob());
+    const link = Object.assign(document.createElement('a'), { href: url, download: name });
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 30_000);
+}
+
+/**
  * Calls /api/v1 with the parent's token. Resolves to the JSON body (null for 204).
  */
 export async function api(path, { method = 'GET', body } = {}) {

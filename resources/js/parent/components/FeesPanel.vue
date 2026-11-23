@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref } from 'vue';
-import { api, ApiError } from '../api.js';
+import { api, ApiError, download } from '../api.js';
 import { longDate } from '../format.js';
 import ErrorNote from './ErrorNote.vue';
 import PrimaryButton from './PrimaryButton.vue';
@@ -43,6 +43,21 @@ async function startPayment() {
         payError.value = e instanceof ApiError ? e : new ApiError(0, e.message);
     } finally {
         paying.value = false;
+    }
+}
+
+const downloading = ref(null); // which document is on its way
+const downloadError = ref(null);
+
+async function save(path, fallbackName) {
+    downloading.value = path;
+    downloadError.value = null;
+    try {
+        await download(path, fallbackName);
+    } catch (e) {
+        downloadError.value = e.message;
+    } finally {
+        downloading.value = null;
     }
 }
 
@@ -104,18 +119,40 @@ onMounted(load);
             </article>
         </template>
 
-        <ul v-if="view === 'statement' && statement" class="divide-y divide-zinc-100 rounded-xl border border-zinc-200 bg-white px-4 shadow-sm">
-            <li v-if="statement.length === 0" class="py-3 text-sm text-zinc-500">Nothing yet.</li>
-            <li v-for="(row, i) in statement" :key="i" class="py-3 text-sm">
-                <div class="flex justify-between gap-3">
-                    <span class="font-medium">{{ row.description }}</span>
-                    <span :class="row.amount.pesewas < 0 ? 'text-green-700' : ''">{{ row.amount.display }}</span>
-                </div>
-                <div class="flex justify-between gap-3 text-zinc-500">
-                    <span>{{ longDate(row.date) }}<template v-if="row.receipt_number"> · {{ row.receipt_number }}</template></span>
-                    <span>Balance {{ row.balance.display }}</span>
-                </div>
-            </li>
-        </ul>
+        <template v-if="view === 'statement' && statement">
+            <ErrorNote :message="downloadError" />
+            <button
+                class="flex w-full items-center justify-center gap-2 rounded-lg border border-zinc-300 bg-white py-2.5 text-sm font-medium disabled:opacity-60"
+                :disabled="downloading !== null"
+                @click="save(`children/${childId}/statement.pdf`, 'statement.pdf')"
+            >
+                <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                </svg>
+                {{ downloading === `children/${childId}/statement.pdf` ? 'Preparing…' : 'Download statement (PDF)' }}
+            </button>
+
+            <ul class="divide-y divide-zinc-100 rounded-xl border border-zinc-200 bg-white px-4 shadow-sm">
+                <li v-if="statement.length === 0" class="py-3 text-sm text-zinc-500">Nothing yet.</li>
+                <li v-for="(row, i) in statement" :key="i" class="py-3 text-sm">
+                    <div class="flex justify-between gap-3">
+                        <span class="font-medium">{{ row.description }}</span>
+                        <span :class="row.amount.pesewas < 0 ? 'text-green-700' : ''">{{ row.amount.display }}</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-3 text-zinc-500">
+                        <span>{{ longDate(row.date) }}<template v-if="row.receipt_number"> · {{ row.receipt_number }}</template></span>
+                        <span>Balance {{ row.balance.display }}</span>
+                    </div>
+                    <button
+                        v-if="row.payment_id"
+                        class="mt-1 text-sm font-medium underline disabled:opacity-60"
+                        :disabled="downloading !== null"
+                        @click="save(`children/${childId}/receipts/${row.payment_id}.pdf`, `receipt-${row.payment_id}.pdf`)"
+                    >
+                        {{ downloading === `children/${childId}/receipts/${row.payment_id}.pdf` ? 'Preparing receipt…' : 'Download receipt' }}
+                    </button>
+                </li>
+            </ul>
+        </template>
     </div>
 </template>
