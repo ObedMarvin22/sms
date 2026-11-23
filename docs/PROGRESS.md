@@ -180,7 +180,32 @@ Done when:
 
 ## Phase 2
 
-- [ ] Sprint 5 — assessments. **STOP for review.**
+### Sprint 5 — assessments
+
+Agreed with Obed (2026-11-23): default weights 30% continuous assessment / 70% exam; several
+tasks inside each part; a head or administrator unlocks a submitted sheet with a reason; parents
+see marks only on the published report card (Sprint 6); Creche and KG get comments per learning
+area, no numbers. Pilot preparation step 3 stays open until Obed has tested staging.
+
+- [x] 1. Assessment schemes per level and year: parts (class work, tests, project, exam) with
+      weights that add up to 100; descriptive for Creche/Nursery/KG; defaults; copy from last year.
+- [ ] 2. Tasks: a teacher adds tasks (name, date, maximum mark) under each part, only for the
+      subjects and streams they teach.
+- [ ] 3. Score entry sheet per teaching assignment: students × tasks, keyboard-friendly, saves as
+      the teacher types, Absent / Exempt; the class teacher views every subject of their class.
+- [ ] 4. Submit and lock; a head or administrator unlocks with a reason; every later change logged.
+- [ ] 5. Progress overview for heads: every class and subject's sheet status and teacher.
+- [ ] 6. Creche/KG comments per child and learning area, with the same submit and lock.
+- [ ] 7. Speed (query-count tests at a full term's marks) and demo assessment data.
+
+Done when:
+- [ ] a teacher can enter and submit marks only for their own subjects and classes (tested)
+- [ ] a submitted sheet cannot change without an unlock, and every change is logged (tested)
+- [ ] the head can see at a glance which sheets are missing
+- [ ] part scores are worked out correctly from tasks and weights, with Absent/Exempt (tested)
+- [ ] CI green
+
+**STOP for review.**
 - [ ] Sprint 6 — grading and report cards. **STOP for review.**
 - [ ] Sprint 7 — PTI chat. **STOP for review.**
 - [ ] Sprint 8 — pickup, homework, boarding. **STOP for review.**
