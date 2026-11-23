@@ -3,9 +3,12 @@
 namespace Database\Seeders;
 
 use App\Actions\Academic\CreateAcademicYear;
+use App\Actions\Assessment\SetUpDefaultSchemes;
+use App\Actions\Classes\ApplyDefaultClassSubjects;
 use App\Actions\Classes\GenerateDefaultClasses;
 use App\Actions\Roles\SeedDefaultRoles;
 use App\Actions\Staff\AssignClassTeacher;
+use App\Actions\Staff\AssignTeacher;
 use App\Actions\Subjects\GenerateDefaultProgrammes;
 use App\Actions\Subjects\GenerateDefaultSubjects;
 use App\Enums\AcademicPeriodType;
@@ -14,10 +17,13 @@ use App\Enums\RoleKey;
 use App\Enums\SchoolLevel;
 use App\Enums\SchoolStatus;
 use App\Models\AcademicYear;
+use App\Models\ClassSubject;
 use App\Models\ClassTeacherAssignment;
 use App\Models\School;
 use App\Models\SchoolClass;
 use App\Models\Staff;
+use App\Models\Subject;
+use App\Models\TeachingAssignment;
 use App\Models\User;
 use App\Support\Academic\DefaultCalendar;
 use App\Support\Tenancy\CurrentSchool;
@@ -84,6 +90,8 @@ class DemoSchoolsSeeder extends Seeder
                 if (! ClassTeacherAssignment::where('stream_id', $stream->id)->exists()) {
                     app(AssignClassTeacher::class)->handle($stream, $teacher);
                 }
+                // ...and teaches Mathematics and Science in every Primary 4 stream, so Marks has classes to show.
+                $this->teaches($teacher, ['Primary 4'], ['Mathematics', 'Science']);
 
                 $this->call(DemoStudentsSeeder::class);
             });
@@ -134,6 +142,42 @@ class DemoSchoolsSeeder extends Seeder
             app(GenerateDefaultProgrammes::class)->handle(); // adds the subjects too
         } else {
             app(GenerateDefaultSubjects::class)->handle();
+        }
+    }
+
+    /**
+     * Gives the demo teacher subjects to teach, so Marks has classes to show. The first time,
+     * classes get their level's subjects and the year gets the standard assessment; a later run
+     * only adds what is missing and never undoes a school's own changes.
+     *
+     * @param  list<string>  $classes
+     * @param  list<string>  $subjects
+     */
+    private function teaches(Staff $teacher, array $classes, array $subjects): void
+    {
+        $year = AcademicYear::current()->first();
+        if ($year === null) {
+            return;
+        }
+
+        if (! ClassSubject::exists()) {
+            app(ApplyDefaultClassSubjects::class)->handle();
+        }
+        app(SetUpDefaultSchemes::class)->handle($year);
+
+        $subjectModels = Subject::whereIn('name', $subjects)->get();
+        foreach (SchoolClass::with('streams')->whereIn('name', $classes)->get() as $class) {
+            $taken = ClassSubject::where('school_class_id', $class->id)->pluck('subject_id')->all();
+
+            foreach ($class->streams as $stream) {
+                foreach ($subjectModels as $subject) {
+                    $assigned = TeachingAssignment::where(['academic_year_id' => $year->id, 'stream_id' => $stream->id, 'subject_id' => $subject->id])->exists();
+
+                    if (! $assigned && in_array($subject->id, $taken, true)) {
+                        app(AssignTeacher::class)->handle($stream, $subject, $teacher, $year);
+                    }
+                }
+            }
         }
     }
 
