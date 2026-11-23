@@ -14,5 +14,6 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(DemoSchoolsSeeder::class);
+        $this->call(DemoParentSeeder::class); // a ready parent-app login with fees, attendance and news
     }
 }
