@@ -32,7 +32,7 @@
                 @php($full = $part->kind === \App\Enums\ComponentKind::Exam && $partTasks->isNotEmpty())
                 <section class="rounded-xl border border-zinc-200 dark:border-zinc-700" wire:key="part-{{ $part->id }}" data-test="part-{{ $part->id }}">
                     <header class="flex items-center justify-between gap-3 px-4 py-3 sm:px-5">
-                        <div class="flex min-w-0 items-baseline gap-2">
+                        <div class="flex min-w-0 flex-col sm:flex-row sm:items-baseline sm:gap-2">
                             <flux:heading size="lg" class="truncate">{{ $part->name }}</flux:heading>
                             <span class="shrink-0 text-sm tabular-nums text-zinc-500 dark:text-zinc-400">{{ __(':weight% of the term', ['weight' => $part->weight]) }}</span>
                         </div>
