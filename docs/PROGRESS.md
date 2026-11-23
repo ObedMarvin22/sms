@@ -173,6 +173,8 @@ Done when:
 - [x] 4. Read-only lock for schools past the SaaS grace period: staff can view but not change;
       parents keep access (SPEC section 8). (Added in Sprint 4 step 9, Obed's OK. Automatic 14
       days after the due date; Orange Tree can keep a school open; fee payments still allowed.)
+- [x] Added with Obed's OK while staging is set up: parents download the fee statement and
+      receipts as PDFs (staff get the statement PDF too), and `DemoParentSeeder` for testing.
 
 ---
 

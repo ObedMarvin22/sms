@@ -1168,3 +1168,22 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   the softer, automatic state.
 - **Not done:** a pre-flight warning when `SAAS_GRACE_DAYS` is missing. With config cached, a
   missing value cannot be told apart from the default (14), so the check would mean nothing.
+
+## 2026-11-23 — Parents download the fee statement and receipts (added with Obed's OK)
+
+- **Why now:** a gap in what Sprint 4 built. Staff could print receipts; parents could not, and
+  nobody could print a statement. Obed chose to close it while staging is set up (option B),
+  before Phase 2.
+- **One set of documents for staff and parents** (`App\Support\Pdf\FeeDocuments`): the receipt
+  (A5, unchanged) and a new fee statement (A4: every bill, payment and adjustment with the balance
+  after each, and the balance to pay or in credit). Staff get "Download statement (PDF)" on the
+  student's fees panel (`view-payments`).
+- **Parent API:** `GET children/{id}/statement.pdf` and `GET children/{id}/receipts/{payment}.pdf`,
+  full access only (limited is 403). A receipt must be for that child: any other payment is 404,
+  even through the parent's own child's URL. Statement lines now carry `payment_id`.
+- **In the app:** the token cannot ride on a plain link, so the app fetches the PDF with it and
+  hands the file to the phone to save or open; the app keeps nothing.
+- **Demo data:** `DemoParentSeeder` (in `DatabaseSeeder`, local and staging only) gives a Greenhill
+  guardian with children in Primary 4A and two other classes a parent login (their phone and
+  `DemoSchoolsSeeder::PASSWORD`), this term's bills, a cash payment, ten days of register marks
+  (one absence, one late), a welcome announcement and SMS credit. Running it again changes nothing.
