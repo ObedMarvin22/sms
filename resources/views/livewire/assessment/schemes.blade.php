@@ -13,7 +13,7 @@
             <flux:text>{{ __('How each level is marked: the parts of continuous assessment, the exam, and their weights.') }}</flux:text>
         </div>
         @if ($this->years->isNotEmpty())
-            <div class="w-48">
+            <div class="w-full sm:w-56">
                 <flux:select wire:model.live="yearId" :label="__('Academic year')" data-test="year">
                     @foreach ($this->years as $y)
                         <flux:select.option :value="$y->id">{{ $y->name }}{{ $y->is_current ? ' ('.__('current').')' : '' }}</flux:select.option>
@@ -93,7 +93,7 @@
         </div>
     @endif
 
-    <flux:modal name="scheme" class="w-full md:w-[40rem]">
+    <flux:modal name="scheme" class="w-full md:w-[46rem]">
         <form wire:submit="save" class="flex flex-col gap-5">
             <div>
                 <flux:heading size="lg">
@@ -110,13 +110,13 @@
 
             @if ($mode === \App\Enums\AssessmentMode::Weighted->value)
                 <div class="flex flex-col gap-3">
-                    <div class="hidden grid-cols-[1fr_10rem_6rem_2rem] gap-2 sm:grid">
+                    <div class="hidden grid-cols-[1fr_12rem_7.5rem_2rem] gap-2 sm:grid">
                         <flux:label>{{ __('Part') }}</flux:label>
                         <flux:label>{{ __('Kind') }}</flux:label>
                         <flux:label>{{ __('Weight') }}</flux:label>
                     </div>
                     @foreach ($parts as $i => $part)
-                        <div class="grid grid-cols-[1fr_6rem_2rem] gap-2 sm:grid-cols-[1fr_10rem_6rem_2rem]" wire:key="part-{{ $i }}-{{ $part['id'] ?? 'new' }}">
+                        <div class="grid grid-cols-[1fr_7.5rem_2rem] gap-2 sm:grid-cols-[1fr_12rem_7.5rem_2rem]" wire:key="part-{{ $i }}-{{ $part['id'] ?? 'new' }}">
                             <div class="col-span-3 sm:col-span-1">
                                 <flux:input wire:model="parts.{{ $i }}.name" :aria-label="__('Part name')" placeholder="{{ __('e.g. Class tests') }}" />
                                 <flux:error name="parts.{{ $i }}.name" />
