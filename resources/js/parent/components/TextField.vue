@@ -1,4 +1,6 @@
 <script setup>
+import { useId } from 'vue';
+
 defineProps({
     label: { type: String, required: true },
     error: { type: String, default: null },
@@ -6,21 +8,24 @@ defineProps({
 });
 
 const model = defineModel({ type: String, default: '' });
+const id = useId();
 </script>
 
 <template>
-    <label class="block">
-        <span class="mb-1 block text-sm font-medium text-zinc-700">{{ label }}</span>
+    <div>
+        <label :for="id" class="mb-1.5 block text-sm font-bold text-ink">{{ label }}</label>
         <input
+            :id="id"
             v-model="model"
             v-bind="$attrs"
-            class="block w-full rounded-lg border bg-white px-3 py-2.5 text-base outline-none focus:ring-2 focus:ring-school"
-            :class="error ? 'border-red-500' : 'border-zinc-300'"
+            class="block w-full rounded-xl border bg-surface px-3.5 py-3 text-base text-ink placeholder:text-faint outline-none transition focus:border-school focus:ring-2 focus:ring-school/25"
+            :class="error ? 'border-absent' : 'border-line'"
             :aria-invalid="error ? 'true' : undefined"
+            :aria-describedby="error || hint ? `${id}-help` : undefined"
         />
-        <span v-if="error" class="mt-1 block text-sm text-red-600">{{ error }}</span>
-        <span v-else-if="hint" class="mt-1 block text-sm text-zinc-500">{{ hint }}</span>
-    </label>
+        <p v-if="error" :id="`${id}-help`" class="mt-1.5 text-sm text-absent">{{ error }}</p>
+        <p v-else-if="hint" :id="`${id}-help`" class="mt-1.5 text-sm text-muted">{{ hint }}</p>
+    </div>
 </template>
 
 <script>

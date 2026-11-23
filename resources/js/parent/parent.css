@@ -2,10 +2,94 @@
 @import 'tailwindcss' source(none);
 
 @source './**/*.vue';
+@source './**/*.js';
 @source '../../views/parent';
 
-/* The school's colour comes from the page (resources/views/parent/app.blade.php). */
+/*
+| Parent app design tokens. The school's own colour (--school, from the page) is the only accent;
+| everything else is a quiet neutral set, plus the register's four marks.
+*/
 @theme inline {
+    --font-sans: 'Atkinson Hyperlegible', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
     --color-school: var(--school);
     --color-school-text: var(--school-text);
+
+    --color-ink: #1f2933;
+    --color-muted: #5b6670;
+    --color-faint: #8a939b;
+    --color-paper: #f4f5f1;
+    --color-surface: #ffffff;
+    --color-line: #e2e5de;
+
+    --color-present: #1f7a4d;
+    --color-present-soft: #e3f1e9;
+    --color-late: #b7791f;
+    --color-late-soft: #f8efdc;
+    --color-absent: #c2412d;
+    --color-absent-soft: #f9e5e1;
+    --color-excused: #2b6cb0;
+    --color-excused-soft: #e3edf8;
+}
+
+@layer base {
+    html {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+        font-feature-settings: 'tnum' 1;
+    }
+
+    :focus-visible {
+        outline: 2px solid var(--school);
+        outline-offset: 2px;
+        border-radius: 6px;
+    }
+}
+
+/* In the components layer, so Tailwind utilities (rounded-full, sizes) can override them. */
+@layer components {
+    /* A subtle press, so a tap visibly lands. */
+    .press {
+        transition: transform 120ms ease, background-color 120ms ease;
+    }
+    .press:active {
+        transform: scale(0.985);
+    }
+
+    /* Loading placeholders. */
+    .skeleton {
+        background: linear-gradient(90deg, #eceee9 0%, #f6f7f4 50%, #eceee9 100%);
+        background-size: 200% 100%;
+        animation: shimmer 1.4s ease-in-out infinite;
+        border-radius: 8px;
+    }
+    @keyframes shimmer {
+        to {
+            background-position: -200% 0;
+        }
+    }
+
+    /* Screen changes: a short cross-fade. */
+    .screen-enter-active,
+    .screen-leave-active {
+        transition: opacity 140ms ease, transform 140ms ease;
+    }
+    .screen-enter-from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    .screen-leave-to {
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
 }

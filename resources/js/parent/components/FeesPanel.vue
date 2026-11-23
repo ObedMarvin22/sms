@@ -1,8 +1,11 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { api, ApiError, download } from '../api.js';
-import { longDate } from '../format.js';
+import { session } from '../session.js';
+import { longDate, shortDate } from '../format.js';
 import ErrorNote from './ErrorNote.vue';
+import ErrorState from './ErrorState.vue';
+import Icon from './Icon.vue';
 import PrimaryButton from './PrimaryButton.vue';
 import TextField from './TextField.vue';
 
@@ -12,12 +15,15 @@ const bills = ref(null);
 const statement = ref(null);
 const balance = ref(null);
 const error = ref(null);
-const view = ref('bills');
+const view = ref('statement');
 
 const amount = ref('');
 const paying = ref(false);
 const payError = ref(null);
 const checkout = ref(null); // the started payment, waiting for the parent to continue to Paystack
+
+const downloading = ref(null);
+const downloadError = ref(null);
 
 async function load() {
     error.value = null;
@@ -34,6 +40,20 @@ async function load() {
     }
 }
 
+/** This term: what was asked for (the latest bill) and how much of it is paid. */
+const term = computed(() => {
+    const bill = bills.value?.[0];
+    if (!bill || !balance.value) {
+        return null;
+    }
+    const due = bill.payable.pesewas;
+    const paid = Math.min(due, Math.max(0, due - balance.value.pesewas));
+
+    return { name: bill.term, due: bill.payable.display, paid, percent: due > 0 ? Math.round((paid / due) * 100) : 100 };
+});
+
+const cedis = (pesewas) => `GH₵${(pesewas / 100).toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
 async function startPayment() {
     paying.value = true;
     payError.value = null;
@@ -46,8 +66,9 @@ async function startPayment() {
     }
 }
 
-const downloading = ref(null); // which document is on its way
-const downloadError = ref(null);
+function continueToPaystack() {
+    window.location.assign(checkout.value.authorization_url);
+}
 
 async function save(path, fallbackName) {
     downloading.value = path;
@@ -61,98 +82,142 @@ async function save(path, fallbackName) {
     }
 }
 
-function continueToPaystack() {
-    window.location.assign(checkout.value.authorization_url);
-}
+const statementPath = computed(() => `children/${props.childId}/statement.pdf`);
 
 onMounted(load);
+watch(() => session.refreshes, load);
 </script>
 
 <template>
-    <div class="space-y-4">
-        <ErrorNote :message="error" />
+    <div class="space-y-5">
+        <ErrorState v-if="error" :message="error" @retry="load" />
 
-        <div v-if="balance" class="space-y-3 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
-            <p class="text-sm text-zinc-600">{{ balance.pesewas >= 0 ? 'Balance to pay' : 'In credit' }}</p>
-            <p class="text-2xl font-semibold">{{ balance.display }}</p>
+        <div v-else-if="!balance" class="space-y-3 rounded-2xl bg-surface p-5 ring-1 ring-line" aria-hidden="true">
+            <div class="skeleton h-3.5 w-1/4"></div><div class="skeleton h-8 w-1/2"></div><div class="skeleton h-2.5 w-full"></div><div class="skeleton h-12 w-full"></div>
+        </div>
 
-            <form v-if="!checkout" class="space-y-3" novalidate @submit.prevent="startPayment">
+        <!-- What to pay, and paying it. -->
+        <section v-else class="rounded-2xl bg-surface p-5 ring-1 ring-line">
+            <p class="text-sm text-muted">{{ balance.pesewas >= 0 ? 'Balance to pay' : 'In credit' }}</p>
+            <p class="mt-0.5 text-3xl font-bold tracking-tight">{{ balance.pesewas >= 0 ? balance.display : cedis(-balance.pesewas) }}</p>
+
+            <div v-if="term" class="mt-4">
+                <div class="h-2 overflow-hidden rounded-full bg-paper" role="progressbar" :aria-valuenow="term.percent" aria-valuemin="0" aria-valuemax="100" :aria-label="`${term.percent}% of ${term.name} paid`">
+                    <div class="h-full rounded-full bg-present transition-[width] duration-500" :style="{ width: `${term.percent}%` }"></div>
+                </div>
+                <p class="mt-1.5 text-sm text-muted">{{ cedis(term.paid) }} of {{ term.due }} paid for {{ term.name }}</p>
+            </div>
+
+            <form v-if="balance.pesewas > 0 && !checkout" class="mt-5 space-y-3" novalidate @submit.prevent="startPayment">
                 <TextField v-model="amount" label="Amount to pay (GH₵)" inputmode="decimal" placeholder="500.00" :error="payError?.field('amount')" />
                 <ErrorNote :message="payError && !payError.field('amount') ? payError.message : null" />
-                <PrimaryButton :busy="paying">{{ paying ? 'Please wait…' : 'Pay by card or mobile money' }}</PrimaryButton>
+                <PrimaryButton :busy="paying"><Icon name="card" /> {{ paying ? 'Preparing payment…' : 'Pay by card or mobile money' }}</PrimaryButton>
             </form>
 
-            <div v-else class="space-y-3">
-                <dl class="space-y-1 text-sm">
+            <div v-else-if="checkout" class="mt-5 space-y-3">
+                <dl class="space-y-1.5 rounded-xl bg-paper p-4 text-sm">
                     <div class="flex justify-between"><dt>Fees</dt><dd>{{ checkout.amount.display }}</dd></div>
-                    <div v-if="checkout.charge.pesewas > 0" class="flex justify-between"><dt>Paystack charge</dt><dd>{{ checkout.charge.display }}</dd></div>
-                    <div class="flex justify-between font-semibold"><dt>You pay</dt><dd>{{ checkout.total.display }}</dd></div>
+                    <div v-if="checkout.charge.pesewas > 0" class="flex justify-between text-muted"><dt>Paystack charge</dt><dd>{{ checkout.charge.display }}</dd></div>
+                    <div class="flex justify-between border-t border-line pt-1.5 text-base font-bold"><dt>You pay</dt><dd>{{ checkout.total.display }}</dd></div>
                 </dl>
                 <PrimaryButton type="button" @click="continueToPaystack">Continue to Paystack</PrimaryButton>
-                <button type="button" class="w-full text-sm underline" @click="checkout = null">Change the amount</button>
+                <button type="button" class="press w-full py-1 text-sm font-bold text-muted" @click="checkout = null">Change the amount</button>
             </div>
-        </div>
+        </section>
 
-        <div class="flex rounded-lg bg-zinc-200 p-1 text-sm font-medium">
-            <button class="flex-1 rounded-md py-2" :class="view === 'bills' ? 'bg-white shadow-sm' : 'text-zinc-600'" @click="view = 'bills'">Bills</button>
-            <button class="flex-1 rounded-md py-2" :class="view === 'statement' ? 'bg-white shadow-sm' : 'text-zinc-600'" @click="view = 'statement'">Statement</button>
-        </div>
+        <template v-if="balance">
+            <div class="grid grid-cols-2 rounded-xl bg-line/60 p-1 text-sm font-bold">
+                <button
+                    v-for="option in [{ key: 'statement', label: 'Statement' }, { key: 'bills', label: 'Bills' }]"
+                    :key="option.key"
+                    class="press rounded-lg py-2.5 transition"
+                    :class="view === option.key ? 'bg-surface text-ink shadow-[0_1px_2px_rgba(0,0,0,0.08)]' : 'text-muted'"
+                    :aria-pressed="view === option.key"
+                    @click="view = option.key"
+                >
+                    {{ option.label }}
+                </button>
+            </div>
 
-        <template v-if="view === 'bills' && bills">
-            <p v-if="bills.length === 0" class="text-sm text-zinc-500">No bills yet.</p>
-            <article v-for="bill in bills" :key="bill.id" class="space-y-2 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
-                <h3 class="font-semibold">{{ bill.term }} · {{ bill.class }}</h3>
-                <ul class="space-y-1 text-sm">
-                    <li v-for="(line, i) in bill.lines" :key="i" class="flex justify-between gap-3">
-                        <span>{{ line.description }}</span><span>{{ line.amount.display }}</span>
+            <ErrorNote :message="downloadError" />
+
+            <!-- Statement: newest first, each line with the balance after it. -->
+            <section v-if="view === 'statement'" class="overflow-hidden rounded-2xl bg-surface ring-1 ring-line">
+                <div class="flex items-center justify-between gap-3 border-b border-line p-4">
+                    <h2 class="font-bold">Statement</h2>
+                    <button
+                        class="press inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-bold ring-1 ring-line hover:bg-paper disabled:opacity-60"
+                        :disabled="downloading !== null"
+                        @click="save(statementPath, 'statement.pdf')"
+                    >
+                        <Icon name="download" size="size-4" /> {{ downloading === statementPath ? 'Preparing…' : 'PDF' }}
+                    </button>
+                </div>
+                <p v-if="statement.length === 0" class="p-4 text-sm text-muted">Nothing has been billed or paid yet.</p>
+                <ul v-else class="divide-y divide-line">
+                    <li v-for="(row, i) in statement" :key="i" class="flex gap-3 p-4">
+                        <span class="mt-0.5 grid size-9 shrink-0 place-items-center rounded-full" :class="row.amount.pesewas < 0 ? 'bg-present-soft text-present' : 'bg-paper text-muted'">
+                            <Icon :name="row.amount.pesewas < 0 ? 'check' : 'cash'" size="size-4.5" />
+                        </span>
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-baseline justify-between gap-3">
+                                <p class="font-bold">{{ row.amount.pesewas < 0 ? 'Payment' : row.description }}</p>
+                                <p class="shrink-0 font-bold" :class="row.amount.pesewas < 0 ? 'text-present' : ''">
+                                    {{ row.amount.pesewas < 0 ? `− ${cedis(-row.amount.pesewas)}` : row.amount.display }}
+                                </p>
+                            </div>
+                            <p class="text-sm text-muted">{{ longDate(row.date) }}</p>
+                            <p v-if="row.receipt_number" class="text-sm text-muted">Receipt {{ row.receipt_number }}</p>
+                            <div class="mt-1 flex items-center justify-between gap-3 text-sm">
+                                <button
+                                    v-if="row.payment_id"
+                                    class="press inline-flex items-center gap-1 font-bold text-ink underline decoration-line underline-offset-4 disabled:opacity-60"
+                                    :disabled="downloading !== null"
+                                    @click="save(`children/${childId}/receipts/${row.payment_id}.pdf`, `receipt-${row.payment_id}.pdf`)"
+                                >
+                                    <Icon name="download" size="size-4" />
+                                    {{ downloading === `children/${childId}/receipts/${row.payment_id}.pdf` ? 'Preparing receipt…' : 'Receipt' }}
+                                </button>
+                                <span v-else></span>
+                                <span class="text-faint">Balance {{ row.balance.display }}</span>
+                            </div>
+                        </div>
                     </li>
                 </ul>
-                <dl class="space-y-1 border-t border-zinc-100 pt-2 text-sm">
-                    <div v-if="bill.reductions.pesewas !== 0" class="flex justify-between"><dt>This term after discounts</dt><dd>{{ bill.net.display }}</dd></div>
-                    <div v-if="bill.arrears.pesewas !== 0" class="flex justify-between"><dt>Brought forward</dt><dd>{{ bill.arrears.display }}</dd></div>
-                    <div class="flex justify-between font-semibold"><dt>To pay</dt><dd>{{ bill.payable.display }}</dd></div>
-                </dl>
-                <div v-if="bill.instalments.length" class="text-sm text-zinc-600">
-                    <p class="font-medium text-zinc-800">Instalments</p>
-                    <p v-for="(step, i) in bill.instalments" :key="i">{{ longDate(step.due_on) }}: {{ step.amount.display }}</p>
-                </div>
-            </article>
-        </template>
+            </section>
 
-        <template v-if="view === 'statement' && statement">
-            <ErrorNote :message="downloadError" />
-            <button
-                class="flex w-full items-center justify-center gap-2 rounded-lg border border-zinc-300 bg-white py-2.5 text-sm font-medium disabled:opacity-60"
-                :disabled="downloading !== null"
-                @click="save(`children/${childId}/statement.pdf`, 'statement.pdf')"
-            >
-                <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                </svg>
-                {{ downloading === `children/${childId}/statement.pdf` ? 'Preparing…' : 'Download statement (PDF)' }}
-            </button>
-
-            <ul class="divide-y divide-zinc-100 rounded-xl border border-zinc-200 bg-white px-4 shadow-sm">
-                <li v-if="statement.length === 0" class="py-3 text-sm text-zinc-500">Nothing yet.</li>
-                <li v-for="(row, i) in statement" :key="i" class="py-3 text-sm">
-                    <div class="flex justify-between gap-3">
-                        <span class="font-medium">{{ row.description }}</span>
-                        <span :class="row.amount.pesewas < 0 ? 'text-green-700' : ''">{{ row.amount.display }}</span>
+            <!-- Bills, one per term. -->
+            <template v-else>
+                <p v-if="bills.length === 0" class="rounded-2xl bg-surface p-4 text-sm text-muted ring-1 ring-line">No bills yet.</p>
+                <article v-for="bill in bills" :key="bill.id" class="rounded-2xl bg-surface p-4 ring-1 ring-line">
+                    <h2 class="font-bold">{{ bill.term }}</h2>
+                    <p class="text-sm text-muted">{{ bill.class }}, issued {{ shortDate(bill.issued_on) }}</p>
+                    <table class="mt-3 w-full text-sm">
+                        <tbody>
+                            <tr v-for="(line, i) in bill.lines" :key="i">
+                                <td class="py-1.5" :class="line.amount.pesewas < 0 ? 'text-present' : ''">{{ line.description }}</td>
+                                <td class="py-1.5 text-right" :class="line.amount.pesewas < 0 ? 'text-present' : ''">{{ line.amount.display }}</td>
+                            </tr>
+                            <tr v-if="bill.arrears.pesewas !== 0" class="text-muted">
+                                <td class="py-1.5">Brought forward</td>
+                                <td class="py-1.5 text-right">{{ bill.arrears.display }}</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="border-t border-line text-base font-bold">
+                                <td class="pt-2.5">To pay</td>
+                                <td class="pt-2.5 text-right">{{ bill.payable.display }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <div v-if="bill.instalments.length" class="mt-3 rounded-xl bg-paper p-3 text-sm">
+                        <p class="font-bold">Instalments</p>
+                        <p v-for="(step, i) in bill.instalments" :key="i" class="flex justify-between text-muted">
+                            <span>By {{ longDate(step.due_on) }}</span><span>{{ step.amount.display }}</span>
+                        </p>
                     </div>
-                    <div class="flex items-center justify-between gap-3 text-zinc-500">
-                        <span>{{ longDate(row.date) }}<template v-if="row.receipt_number"> · {{ row.receipt_number }}</template></span>
-                        <span>Balance {{ row.balance.display }}</span>
-                    </div>
-                    <button
-                        v-if="row.payment_id"
-                        class="mt-1 text-sm font-medium underline disabled:opacity-60"
-                        :disabled="downloading !== null"
-                        @click="save(`children/${childId}/receipts/${row.payment_id}.pdf`, `receipt-${row.payment_id}.pdf`)"
-                    >
-                        {{ downloading === `children/${childId}/receipts/${row.payment_id}.pdf` ? 'Preparing receipt…' : 'Download receipt' }}
-                    </button>
-                </li>
-            </ul>
+                </article>
+            </template>
         </template>
     </div>
 </template>

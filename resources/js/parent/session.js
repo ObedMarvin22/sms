@@ -19,6 +19,8 @@ export const session = reactive({
     token: readToken(),
     me: null,
     unread: 0,
+    // Goes up when the parent pulls down to refresh; screens watch it and load again.
+    refreshes: 0,
     online: navigator.onLine,
     installPrompt: null,
     school: {

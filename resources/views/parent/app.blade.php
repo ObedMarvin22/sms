@@ -8,10 +8,15 @@
     <link rel="manifest" href="/parent/manifest.webmanifest">
     <link rel="icon" type="image/png" href="/parent/icon-192.png">
     <link rel="apple-touch-icon" href="/parent/icon-192.png">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    {{-- Atkinson Hyperlegible: built for legibility on small screens. Bunny Fonts (no tracking);
+         offline the system font is used. --}}
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link rel="stylesheet" href="https://fonts.bunny.net/css?family=atkinson-hyperlegible:400,700&display=swap">
     @vite(['resources/js/parent/main.js'])
 </head>
-<body class="bg-zinc-50 text-zinc-900 antialiased" style="--school: {{ $colour }}; --school-text: {{ $textColour }};">
+<body class="bg-paper text-ink antialiased" style="--school: {{ $colour }}; --school-text: {{ $textColour }};">
     {{-- Vue (resources/js/parent) mounts here. Only the school's public details are passed in. --}}
     <div id="app"
          data-school-name="{{ $school->name }}"
