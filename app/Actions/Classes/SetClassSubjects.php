@@ -2,6 +2,7 @@
 
 namespace App\Actions\Classes;
 
+use App\Models\AssessmentTask;
 use App\Models\ClassSubject;
 use App\Models\SchoolClass;
 use App\Models\Subject;
@@ -10,7 +11,7 @@ use Illuminate\Validation\ValidationException;
 
 /**
  * Replaces the subjects a class takes. Each must be a subject of this school that is taught at
- * the class's level. (From Sprint 5, recorded scores will block removing a subject.)
+ * the class's level. A subject with assessment tasks in any of the class's streams stays.
  */
 class SetClassSubjects
 {
@@ -40,6 +41,14 @@ class SetClassSubjects
 
         if ($added === [] && $removed === []) {
             return $class;
+        }
+
+        $withTasks = AssessmentTask::whereIn('stream_id', $class->streams()->pluck('id'))->whereIn('subject_id', $removed)
+            ->with('subject')->first();
+        if ($withTasks !== null) {
+            throw ValidationException::withMessages([
+                'subjects' => "{$withTasks->subject->name} has assessment tasks in {$class->name}, so it cannot be removed.",
+            ]);
         }
 
         DB::transaction(function () use ($class, $added, $removed, $subjects): void {

@@ -125,7 +125,13 @@ class Index extends Component
     public function delete(int $id, DeleteSubject $deleteSubject): void
     {
         $this->authorize(PermissionKey::SettingsManage->value);
-        $deleteSubject->handle(Subject::findOrFail($id));
+        try {
+            $deleteSubject->handle(Subject::findOrFail($id));
+        } catch (ValidationException $e) {
+            Flux::toast(variant: 'danger', text: (string) collect($e->errors())->flatten()->first());
+
+            return;
+        }
         unset($this->subjects);
     }
 
