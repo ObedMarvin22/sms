@@ -16,5 +16,12 @@ final readonly class NavItem
         /** A permission, or the name of a Gate ability combining several (e.g. "view-payments"). */
         public PermissionKey|string|null $permission = null,
         public ?string $group = null,
+        /** @var list<string> Other route names (patterns allowed) that light this item up, e.g. its detail pages. */
+        public array $alsoCurrentOn = [],
     ) {}
+
+    public function isCurrent(): bool
+    {
+        return request()->routeIs($this->route, ...$this->alsoCurrentOn);
+    }
 }

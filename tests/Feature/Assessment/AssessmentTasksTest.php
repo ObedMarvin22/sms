@@ -311,3 +311,11 @@ describe('the screens', function () {
             ->assertSee('JHS assessment is not set up yet');
     });
 });
+
+it('keeps Marks highlighted in the sidebar on a class page', function () {
+    $this->onSchool($this->school);
+
+    $html = $this->actingAs($this->teacher)->get(route('assessment.tasks', [$this->p4, $this->maths]))->assertOk()->getContent();
+
+    expect($html)->toContain('href="'.route('assessment.index').'" data-current="data-current"');
+});
