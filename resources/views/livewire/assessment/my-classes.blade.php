@@ -36,7 +36,7 @@
                 <ul class="divide-y divide-zinc-200 rounded-xl border border-zinc-200 dark:divide-zinc-700 dark:border-zinc-700">
                     @foreach ($sheets as $sheet)
                         <li wire:key="sheet-{{ $sheet['stream']->id }}-{{ $sheet['subject']->id }}">
-                            <a href="{{ route('assessment.tasks', [$sheet['stream'], $sheet['subject']]) }}" wire:navigate
+                            <a href="{{ route($sheet['comments'] ? 'assessment.comments' : 'assessment.tasks', [$sheet['stream'], $sheet['subject']]) }}" wire:navigate
                                 class="flex items-center gap-4 px-4 py-3 transition-colors hover:bg-zinc-50 focus-visible:bg-zinc-50 focus-visible:outline-none dark:hover:bg-zinc-800/60 dark:focus-visible:bg-zinc-800/60"
                                 data-test="sheet">
                                 <div class="min-w-0 flex-1">
@@ -52,7 +52,11 @@
                                     <flux:badge size="sm" color="zinc" class="shrink-0">{{ __('View only') }}</flux:badge>
                                 @endunless
                                 <span class="shrink-0 text-sm tabular-nums text-zinc-500 dark:text-zinc-400">
-                                    {{ trans_choice('{0} No tasks yet|{1} :count task|[2,*] :count tasks', $sheet['tasks'], ['count' => $sheet['tasks']]) }}
+                                    @if ($sheet['comments'])
+                                        {{ __('Comments') }}
+                                    @else
+                                        {{ trans_choice('{0} No tasks yet|{1} :count task|[2,*] :count tasks', $sheet['tasks'], ['count' => $sheet['tasks']]) }}
+                                    @endif
                                 </span>
                                 <flux:icon.chevron-right variant="micro" class="shrink-0 text-zinc-400" />
                             </a>

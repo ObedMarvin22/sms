@@ -15,6 +15,7 @@ use App\Livewire\Academic\CreateYear as CreateAcademicYear;
 use App\Livewire\Academic\Years as AcademicYears;
 use App\Livewire\Announcements\Index as AnnouncementsIndex;
 use App\Livewire\Assessment\ClassTasks as AssessmentClassTasks;
+use App\Livewire\Assessment\CommentSheet as AssessmentCommentSheet;
 use App\Livewire\Assessment\MarkSheet as AssessmentMarkSheet;
 use App\Livewire\Assessment\MyClasses as AssessmentMyClasses;
 use App\Livewire\Assessment\Progress as AssessmentProgress;
@@ -152,6 +153,7 @@ Route::domain('{school}.'.config('app.base_domain'))
                     ->middleware('can:'.PermissionKey::GradesApprove->value)->name('assessment.progress');
                 Route::livewire('assessment/{stream}/{subject}', AssessmentClassTasks::class)->name('assessment.tasks');
                 Route::livewire('assessment/{stream}/{subject}/marks', AssessmentMarkSheet::class)->name('assessment.marks');
+                Route::livewire('assessment/{stream}/{subject}/comments', AssessmentCommentSheet::class)->name('assessment.comments');
             });
 
             // Fees: finance.view to look; changes need fees.manage (checked in each component).

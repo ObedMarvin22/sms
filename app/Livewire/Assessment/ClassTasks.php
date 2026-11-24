@@ -66,6 +66,12 @@ class ClassTasks extends Component
 
         $this->streamId = $stream->id;
         $this->subjectId = $subject->id;
+
+        if (TaskRules::isCommentsOnly($stream, $term->academic_year_id)) {
+            $this->redirectRoute('assessment.comments', [$stream, $subject], navigate: true);
+
+            return;
+        }
     }
 
     #[Computed]

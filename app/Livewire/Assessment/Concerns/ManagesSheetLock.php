@@ -2,8 +2,10 @@
 
 namespace App\Livewire\Assessment\Concerns;
 
+use App\Actions\Assessment\CommentRules;
 use App\Actions\Assessment\SheetLock;
 use App\Actions\Assessment\SubmitSheet;
+use App\Actions\Assessment\TaskRules;
 use App\Actions\Assessment\UnlockSheet;
 use App\Enums\PermissionKey;
 use App\Models\AssessmentSheet;
@@ -55,7 +57,13 @@ trait ManagesSheetLock
     #[Computed]
     public function problems(): array
     {
-        return $this->locked ? [] : SheetLock::problems($this->scoreSheet());
+        if ($this->locked) {
+            return [];
+        }
+
+        return TaskRules::isCommentsOnly($this->classStream(), $this->term->academic_year_id)
+            ? CommentRules::problems($this->term, $this->classStream(), $this->subject())
+            : SheetLock::problems($this->scoreSheet());
     }
 
     public function submitSheet(SubmitSheet $submit): void
