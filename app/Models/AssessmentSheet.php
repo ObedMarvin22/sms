@@ -25,6 +25,9 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property int|null $unlocked_by
  * @property CarbonImmutable|null $unlocked_at
  * @property string|null $unlock_reason
+ * @property-read Term $term
+ * @property-read Stream $stream
+ * @property-read Subject $subject
  * @property-read User|null $submitter
  * @property-read User|null $unlocker
  */
@@ -43,6 +46,30 @@ class AssessmentSheet extends Model
     public function isLocked(): bool
     {
         return $this->status === SheetStatus::Submitted;
+    }
+
+    /**
+     * @return BelongsTo<Term, $this>
+     */
+    public function term(): BelongsTo
+    {
+        return $this->belongsTo(Term::class);
+    }
+
+    /**
+     * @return BelongsTo<Stream, $this>
+     */
+    public function stream(): BelongsTo
+    {
+        return $this->belongsTo(Stream::class);
+    }
+
+    /**
+     * @return BelongsTo<Subject, $this>
+     */
+    public function subject(): BelongsTo
+    {
+        return $this->belongsTo(Subject::class);
     }
 
     /**

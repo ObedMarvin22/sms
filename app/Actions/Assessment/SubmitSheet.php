@@ -2,6 +2,8 @@
 
 namespace App\Actions\Assessment;
 
+use App\Actions\Results\CompileClassResults;
+use App\Actions\Results\RecordSheetResults;
 use App\Enums\SheetStatus;
 use App\Models\AssessmentSheet;
 use App\Models\Stream;
@@ -42,6 +44,12 @@ class SubmitSheet
 
             $sheet ??= new AssessmentSheet(['term_id' => $term->id, 'stream_id' => $stream->id, 'subject_id' => $subject->id]);
             $sheet->fill(['status' => SheetStatus::Submitted, 'submitted_by' => $by->id, 'submitted_at' => now()])->save();
+
+            // Marked sheets become term results, and the class's report cards are refreshed.
+            if (! TaskRules::isCommentsOnly($stream, $term->academic_year_id)) {
+                app(RecordSheetResults::class)->handle($term, $stream, $subject);
+                app(CompileClassResults::class)->handle($term, $stream);
+            }
 
             return $sheet;
         });
