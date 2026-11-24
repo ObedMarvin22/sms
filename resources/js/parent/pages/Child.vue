@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import { api } from '../api.js';
 import { session } from '../session.js';
 import { marks, thisMonth } from '../format.js';
@@ -9,13 +10,16 @@ import ErrorState from '../components/ErrorState.vue';
 import FeesPanel from '../components/FeesPanel.vue';
 import Icon from '../components/Icon.vue';
 import RegisterMark from '../components/RegisterMark.vue';
+import ResultsPanel from '../components/ResultsPanel.vue';
 
 const props = defineProps({ id: { type: Number, required: true } });
 
 const child = ref(null);
 const month = ref(null); // this month's register summary, for the card
 const error = ref(null);
-const tab = ref('attendance');
+const route = useRoute();
+// A report-card notice opens the Results tab (?tab=results).
+const tab = ref(route.query.tab === 'results' ? 'results' : 'attendance');
 
 async function load() {
     error.value = null;
@@ -92,9 +96,9 @@ watch(() => session.refreshes, load);
             </article>
 
             <div class="space-y-5">
-            <div v-if="child.sees_fees" class="grid grid-cols-2 rounded-xl bg-line/60 p-1 text-sm font-bold" role="tablist">
+            <div class="grid rounded-xl bg-line/60 p-1 text-sm font-bold" :class="child.sees_fees ? 'grid-cols-3' : 'grid-cols-2'" role="tablist">
                 <button
-                    v-for="name in ['attendance', 'fees']"
+                    v-for="name in child.sees_fees ? ['attendance', 'results', 'fees'] : ['attendance', 'results']"
                     :key="name"
                     role="tab"
                     :aria-selected="tab === name"
@@ -106,8 +110,9 @@ watch(() => session.refreshes, load);
                 </button>
             </div>
 
-            <AttendanceMonth v-if="tab === 'attendance' || !child.sees_fees" :key="`a${child.id}`" :child-id="child.id" />
-            <FeesPanel v-else :key="`f${child.id}`" :child-id="child.id" />
+            <AttendanceMonth v-if="tab === 'attendance'" :key="`a${child.id}`" :child-id="child.id" />
+            <ResultsPanel v-else-if="tab === 'results'" :key="`r${child.id}`" :child-id="child.id" />
+            <FeesPanel v-else-if="child.sees_fees" :key="`f${child.id}`" :child-id="child.id" />
             </div>
         </div>
     </section>

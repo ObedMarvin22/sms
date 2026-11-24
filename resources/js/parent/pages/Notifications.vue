@@ -45,6 +45,10 @@ async function open(notice) {
 
         return;
     }
+    if (notice.kind === 'report_card' && notice.student_id) {
+        router.push({ name: 'child', params: { id: notice.student_id }, query: { tab: 'results' } });
+        return;
+    }
     if (notice.kind === 'absence' && notice.student_id) {
         markRead(notice);
         router.push({ name: 'child', params: { id: notice.student_id } });
