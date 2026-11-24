@@ -1292,3 +1292,18 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   (`SaveScore` writes the "created" entry itself, since the model skips creates).
 - The teacher learns about an unlock from the sheet itself and the activity log; no staff
   notifications yet.
+
+## 2026-11-24 — Marks progress overview (Sprint 5 step 5)
+
+- **Assessment → Progress**, for `grades.approve` (proprietor, headteacher). A grid per level:
+  classes down, subjects across, each box linking to that sheet; a list per class on phones.
+- **States:** not started (no tasks), in progress (with the share of boxes filled), ready
+  (every part has a task and every box is filled, the same rule as submitting), submitted,
+  reopened. A red dot marks a subject the class takes that has no teacher assigned.
+- **Fast by design:** `BuildProgressOverview` counts boxes filled per class, subject and
+  student in one grouped query instead of building every sheet. A test checks the number of
+  queries stays the same as the school grows.
+- **Filters:** level, state ("not submitted yet", any one state, no teacher) and teacher; the
+  state chips in the summary filter too. Past terms can be picked.
+- Levels with comments only, or with no assessment set up, show a short note instead of a grid.
+- No reminders yet (no staff notifications); the head follows up in person.
