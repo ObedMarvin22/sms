@@ -191,7 +191,7 @@ area, no numbers. Pilot preparation step 3 stays open until Obed has tested stag
       weights that add up to 100; descriptive for Creche/Nursery/KG; defaults; copy from last year.
 - [x] 2. Tasks: a teacher adds tasks (name, date, maximum mark) under each part, only for the
       subjects and streams they teach.
-- [ ] 3. Score entry sheet per teaching assignment: students × tasks, keyboard-friendly, saves as
+- [x] 3. Score entry sheet per teaching assignment: students × tasks, keyboard-friendly, saves as
       the teacher types, Absent / Exempt; the class teacher views every subject of their class.
 - [ ] 4. Submit and lock; a head or administrator unlocks with a reason; every later change logged.
 - [ ] 5. Progress overview for heads: every class and subject's sheet status and teacher.
