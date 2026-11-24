@@ -194,7 +194,7 @@ area, no numbers. Pilot preparation step 3 stays open until Obed has tested stag
 - [x] 3. Score entry sheet per teaching assignment: students × tasks, keyboard-friendly, saves as
       the teacher types, Absent / Exempt; the class teacher views every subject of their class.
 - [x] 4. Submit and lock; a head or administrator unlocks with a reason; every later change logged.
-- [ ] 5. Progress overview for heads: every class and subject's sheet status and teacher.
+- [x] 5. Progress overview for heads: every class and subject's sheet status and teacher.
 - [ ] 6. Creche/KG comments per child and learning area, with the same submit and lock.
 - [ ] 7. Speed (query-count tests at a full term's marks) and demo assessment data.
 
