@@ -138,3 +138,22 @@ it('shows each class on the report cards page and makes them from there', functi
 
     $this->actingAs(genUser(RoleKey::ClassTeacher))->get(route('results.report-cards'))->assertForbidden();
 });
+
+it('approves and publishes from the report cards page', function () {
+    Storage::fake('local');
+    genClass($this->head, $this->p4, 2);
+    $this->onSchool($this->school);
+
+    Livewire::actingAs($this->head)->test(ReportCards::class)
+        ->call('generate', $this->p4->id)
+        ->assertSeeHtml('data-test="approve-'.$this->p4->id.'"')
+        ->call('approve', $this->p4->id)
+        ->assertSee('2 approved')
+        ->call('publish', $this->p4->id)
+        ->assertSee('2 published')
+        ->assertSeeHtml('data-test="withdraw-'.$this->p4->id.'"')
+        ->call('withdraw', $this->p4->id)
+        ->assertSee('2 made');
+
+    expect(ReportCard::where('status', ReportCardStatus::Generated)->count())->toBe(2);
+});

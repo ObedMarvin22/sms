@@ -5,6 +5,7 @@ namespace App\Http\Resources\V1;
 use App\Models\Notification;
 use App\Notifications\AnnouncementPosted;
 use App\Notifications\PaymentReceived;
+use App\Notifications\ReportCardPublished;
 use App\Notifications\StudentAbsent;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -30,6 +31,7 @@ class NotificationResource extends JsonResource
                 StudentAbsent::class => 'absence',
                 PaymentReceived::class => 'payment',
                 AnnouncementPosted::class => 'announcement',
+                ReportCardPublished::class => 'report_card',
                 default => 'notice',
             },
             'message' => $data['message'] ?? '',

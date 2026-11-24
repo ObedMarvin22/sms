@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\ChildDocumentsController;
 use App\Http\Controllers\Api\V1\ChildFeesController;
 use App\Http\Controllers\Api\V1\ChildPaymentController;
 use App\Http\Controllers\Api\V1\ChildrenController;
+use App\Http\Controllers\Api\V1\ChildReportCardsController;
 use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\NotificationsController;
 use App\Http\Controllers\Api\V1\ParentAuthController;
@@ -43,6 +44,8 @@ Route::domain('{school}.'.config('app.base_domain'))
                 Route::get('children/{student}/statement', [ChildFeesController::class, 'statement'])->whereNumber('student')->name('children.statement');
                 Route::get('children/{student}/statement.pdf', [ChildDocumentsController::class, 'statement'])->whereNumber('student')->name('children.statement.pdf');
                 Route::get('children/{student}/receipts/{payment}.pdf', [ChildDocumentsController::class, 'receipt'])->whereNumber(['student', 'payment'])->name('children.receipt.pdf');
+                Route::get('children/{student}/report-cards', [ChildReportCardsController::class, 'index'])->whereNumber('student')->name('children.report-cards');
+                Route::get('children/{student}/report-cards/{reportCard}.pdf', [ChildReportCardsController::class, 'pdf'])->whereNumber(['student', 'reportCard'])->name('children.report-card.pdf');
                 Route::post('children/{student}/payments', ChildPaymentController::class)->whereNumber('student')
                     ->middleware('throttle:parent-payment')->name('children.payments');
 

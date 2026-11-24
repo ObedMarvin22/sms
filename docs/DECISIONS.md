@@ -1424,3 +1424,22 @@ review at the end of the sprint.
   `report-cards/{school}/{term}/{card}.pdf`; the card becomes "Ready to approve". Cards approved
   or published meanwhile are not remade. "Make again" remakes the rest (after a remark changes).
 - The page polls every 15 s while jobs run (no websockets on shared hosting).
+
+## 2026-11-24 — Approving and publishing report cards (Sprint 6 step 6)
+
+- **The head's steps per class** on Assessment → Report cards: make → **approve** (only when
+  every card is made) → **publish**. **Withdraw** takes approved or published cards back to
+  "ready to approve" so marks or remarks can be corrected, and parents lose access until the
+  class is published again. Each is a separate Action (Approve/Publish/WithdrawReportCards),
+  heads only, and every status change is logged.
+- **Parents see a report card only once published** (tested). Every guardian who can see the
+  child in the parent app may see it: **full and limited access** (report cards are about
+  learning, not fees; limited access hides only fees).
+- **Notice:** publishing sends each guardian an in-app notice ("Kofi's report card for First
+  term is ready.") of kind `report_card`; it is stored on the guardian like all parent notices,
+  so a parent who signs up later still finds it. Tapping it opens the child's Results tab.
+- **Parent API:** `GET children/{id}/report-cards` (newest first: term, class, average,
+  aggregate, position only if the school shows positions, each subject's total and grade, both
+  remarks) and `GET children/{id}/report-cards/{card}.pdf` (the stored PDF, or made on the spot
+  if the file is missing). Another child's card through this child's address is "not found".
+- **Parent app:** the child page's tabs are Attendance, Results and (full access) Fees.

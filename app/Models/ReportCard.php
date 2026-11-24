@@ -31,6 +31,9 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property string|null $head_remark
  * @property string|null $pdf_path on the private (local) disk
  * @property CarbonImmutable|null $generated_at
+ * @property int|null $approved_by
+ * @property CarbonImmutable|null $approved_at
+ * @property CarbonImmutable|null $published_at
  * @property-read Student $student
  * @property-read Stream $stream
  * @property-read Term $term
@@ -48,6 +51,7 @@ class ReportCard extends Model
     protected $fillable = [
         'term_id', 'stream_id', 'student_id', 'status', 'average', 'aggregate', 'position', 'class_size', 'subjects_count',
         'teacher_remark', 'conduct', 'interest', 'head_remark', 'pdf_path', 'generated_at',
+        'approved_by', 'approved_at', 'published_at',
     ];
 
     /**
@@ -76,7 +80,7 @@ class ReportCard extends Model
 
     public function getActivitylogOptions(): LogOptions
     {
-        return LogOptions::defaults()->useLogName('grades')->logOnly(['status', 'teacher_remark', 'conduct', 'interest', 'head_remark'])->logOnlyDirty()->dontLogEmptyChanges();
+        return LogOptions::defaults()->useLogName('grades')->logOnly(['status', 'teacher_remark', 'conduct', 'interest', 'head_remark', 'approved_by'])->logOnlyDirty()->dontLogEmptyChanges();
     }
 
     /**
@@ -92,6 +96,8 @@ class ReportCard extends Model
             'class_size' => 'integer',
             'subjects_count' => 'integer',
             'generated_at' => 'immutable_datetime',
+            'approved_at' => 'immutable_datetime',
+            'published_at' => 'immutable_datetime',
         ];
     }
 }
