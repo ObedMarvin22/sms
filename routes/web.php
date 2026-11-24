@@ -7,6 +7,7 @@ use App\Http\Controllers\PaymentProofController;
 use App\Http\Controllers\PaystackReturnController;
 use App\Http\Controllers\PaystackWebhookController;
 use App\Http\Controllers\ReceiptController;
+use App\Http\Controllers\ReportCardPdfController;
 use App\Http\Controllers\SaasInvoicePdfController;
 use App\Http\Controllers\SchoolLogoController;
 use App\Http\Controllers\StatementPdfController;
@@ -159,6 +160,7 @@ Route::domain('{school}.'.config('app.base_domain'))
                 Route::livewire('assessment/{stream}/{subject}/comments', AssessmentCommentSheet::class)->name('assessment.comments');
                 Route::livewire('results', ResultsClassResults::class)->name('results.index');
                 Route::livewire('results/remarks', ResultsRemarks::class)->name('results.remarks');
+                Route::get('results/report-cards/{reportCard}', ReportCardPdfController::class)->name('results.report-card');
             });
 
             // Fees: finance.view to look; changes need fees.manage (checked in each component).
