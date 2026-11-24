@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\ReportCardStatus;
 use App\Models\Concerns\BelongsToSchool;
+use Carbon\CarbonImmutable;
 use Database\Factories\ReportCardFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -28,6 +29,8 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property string|null $conduct a Conduct value
  * @property string|null $interest
  * @property string|null $head_remark
+ * @property string|null $pdf_path on the private (local) disk
+ * @property CarbonImmutable|null $generated_at
  * @property-read Student $student
  * @property-read Stream $stream
  * @property-read Term $term
@@ -44,7 +47,7 @@ class ReportCard extends Model
     /** @var list<string> */
     protected $fillable = [
         'term_id', 'stream_id', 'student_id', 'status', 'average', 'aggregate', 'position', 'class_size', 'subjects_count',
-        'teacher_remark', 'conduct', 'interest', 'head_remark',
+        'teacher_remark', 'conduct', 'interest', 'head_remark', 'pdf_path', 'generated_at',
     ];
 
     /**
@@ -88,6 +91,7 @@ class ReportCard extends Model
             'position' => 'integer',
             'class_size' => 'integer',
             'subjects_count' => 'integer',
+            'generated_at' => 'immutable_datetime',
         ];
     }
 }
