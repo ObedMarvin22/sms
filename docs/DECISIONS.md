@@ -1273,3 +1273,22 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   sends the save when the teacher leaves a box. And every cell is given a key up front (even
   empty), because an empty PHP array reaches the browser as a JSON list, on which
   `cells.t5-s10` cannot be set.
+
+## 2026-11-24 — Submit and lock (Sprint 5 step 4)
+
+- **`assessment_sheets`**, one row per term, stream and subject, created on the first submit.
+  No row means still being filled in; `submitted` locks it; `reopened` after a head unlocks it.
+- **Complete means** every part of the scheme has a task and every student still in the class
+  has a mark, A or X in every box. Students who left during the term do not hold it up.
+  The sheet says exactly what is missing ("Kofi Mensah has no mark for Exam.", up to 8 lines
+  then "…and N more").
+- **A submitted sheet is locked for everyone, heads included.** Marks and task add, edit and
+  delete are refused until a head unlocks it. Chosen so every change after submit has a reason
+  and a name attached.
+- **Unlocking** needs `grades.approve` (proprietor and headteacher by default; a school can
+  grant it to an administrator) and a reason of 10 to 500 characters, shown on the sheet and
+  kept in the activity log.
+- **After a sheet has been submitted once**, every mark save is logged, first entries too
+  (`SaveScore` writes the "created" entry itself, since the model skips creates).
+- The teacher learns about an unlock from the sheet itself and the activity log; no staff
+  notifications yet.
