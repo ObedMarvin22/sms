@@ -1,11 +1,6 @@
 <div class="flex max-w-4xl flex-col gap-6">
-    <div class="flex flex-col gap-3">
-        <flux:button :href="route('assessment.index')" wire:navigate variant="ghost" size="sm" icon="arrow-left" class="self-start -ms-2">{{ __('Marks') }}</flux:button>
-        <div>
-            <flux:heading size="xl">{{ $this->subject()->name }}, {{ $this->classStream()->full_name }}</flux:heading>
-            <flux:text>{{ $this->term->name }}, {{ $this->term->starts_on->format('j M') }} to {{ $this->term->ends_on->format('j M Y') }}</flux:text>
-        </div>
-    </div>
+    <x-assessment.sheet-header :stream="$this->classStream()" :subject="$this->subject()" :term="$this->term"
+        :can-manage="$this->canManage" active="assessment.tasks" />
 
     @php($scheme = $this->scheme)
     @php($level = $this->classStream()->schoolClass->level)
@@ -36,9 +31,9 @@
                             <flux:heading size="lg" class="truncate">{{ $part->name }}</flux:heading>
                             <span class="shrink-0 text-sm tabular-nums text-zinc-500 dark:text-zinc-400">{{ __(':weight% of the term', ['weight' => $part->weight]) }}</span>
                         </div>
-                        @unless ($full)
+                        @if ($this->canManage && ! $full)
                             <flux:button size="sm" icon="plus" wire:click="startCreate({{ $part->id }})" data-test="add-task-{{ $part->id }}">{{ __('Add task') }}</flux:button>
-                        @endunless
+                        @endif
                     </header>
 
                     @if ($partTasks->isEmpty())
@@ -54,6 +49,7 @@
                                         <div class="text-sm text-zinc-500 dark:text-zinc-400">{{ $task->given_on->format('D j M') }}</div>
                                     </div>
                                     <span class="shrink-0 text-sm tabular-nums text-zinc-700 dark:text-zinc-300">{{ __('out of :max', ['max' => $task->max_mark]) }}</span>
+                                    @if ($this->canManage)
                                     <flux:dropdown position="bottom" align="end">
                                         <flux:button size="sm" variant="ghost" icon="ellipsis-horizontal" :aria-label="__('Task actions')" />
                                         <flux:menu>
@@ -62,6 +58,7 @@
                                                 wire:confirm="{{ __('Delete :task?', ['task' => $task->name]) }}">{{ __('Delete') }}</flux:menu.item>
                                         </flux:menu>
                                     </flux:dropdown>
+                                    @endif
                                 </li>
                             @endforeach
                         </ul>
