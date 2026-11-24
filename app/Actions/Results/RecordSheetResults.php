@@ -58,6 +58,7 @@ class RecordSheetResults
                     'subject_position' => $positions[$id] ?? null,
                     'parts' => array_values($sheet->scheme->components->map(fn ($part) => [
                         'name' => $part->name,
+                        'kind' => $part->kind->value,
                         'weight' => $part->weight,
                         'score' => $sheet->results[$id]['parts'][$part->id] ?? null,
                     ])->all()),
