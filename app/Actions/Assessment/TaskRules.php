@@ -9,6 +9,7 @@ use App\Models\AssessmentComponent;
 use App\Models\AssessmentScheme;
 use App\Models\AssessmentTask;
 use App\Models\ClassSubject;
+use App\Models\ClassTeacherAssignment;
 use App\Models\Stream;
 use App\Models\Subject;
 use App\Models\TeachingAssignment;
@@ -22,7 +23,8 @@ use Illuminate\Validation\ValidationException;
 /**
  * Who may set tasks for which class and subject, and what a valid task is.
  * Subject teachers (grades.enter) manage the subjects and streams they teach this year;
- * heads (grades.approve) manage any subject a class takes. Queries are school-scoped.
+ * heads (grades.approve) manage any subject a class takes. A class teacher may look at every
+ * subject's sheet for their own class without changing it. Queries are school-scoped.
  */
 final class TaskRules
 {
@@ -44,6 +46,28 @@ final class TaskRules
     }
 
     /**
+     * Manage, or look as the stream's class teacher this year.
+     */
+    public static function canView(User $user, Stream $stream, Subject $subject, int $yearId): bool
+    {
+        return self::canManage($user, $stream, $subject, $yearId)
+            || ($user->can(PermissionKey::GradesEnter->value)
+                && in_array($stream->id, self::classTeacherStreamIds($user, $yearId), true)
+                && ClassSubject::where('school_class_id', $stream->school_class_id)->where('subject_id', $subject->id)->exists());
+    }
+
+    /**
+     * @return list<int>
+     */
+    public static function classTeacherStreamIds(User $user, int $yearId): array
+    {
+        return array_values(array_map(intval(...), ClassTeacherAssignment::query()
+            ->where('academic_year_id', $yearId)
+            ->whereHas('staff', fn ($q) => $q->where('user_id', $user->id))
+            ->pluck('stream_id')->all()));
+    }
+
+    /**
      * @throws AuthorizationException
      */
     public static function authorize(User $user, Stream $stream, Subject $subject, int $yearId): void
@@ -54,9 +78,10 @@ final class TaskRules
     }
 
     /**
-     * The class and subject pairs this user may open in a year, in class order.
+     * The class and subject pairs this user may open in a year, in class order. `manage` is
+     * false for a class teacher looking at another teacher's subject.
      *
-     * @return Collection<int, array{stream: Stream, subject: Subject, teacher: string|null}>
+     * @return Collection<int, array{stream: Stream, subject: Subject, teacher: string|null, manage: bool}>
      */
     public static function sheetsFor(User $user, int $yearId): Collection
     {
@@ -70,6 +95,7 @@ final class TaskRules
         $subjects = Subject::orderBy('name')->get();
         $subjectIdsByClass = ClassSubject::all()->groupBy('school_class_id')
             ->map(fn ($links) => $links->pluck('subject_id')->all());
+        $myStreams = $approver ? [] : self::classTeacherStreamIds($user, $yearId);
 
         // Streams in class order, then subjects by name: the order of the list on screen.
         $sheets = [];
@@ -80,8 +106,10 @@ final class TaskRules
                 $assignment = $assignments->get("{$stream->id}-{$subject->id}");
                 $mine = $assignment !== null && $assignment->staff->user_id === $user->id;
 
-                if (in_array($subject->id, $taken, true) && ($approver || $mine)) {
-                    $sheets[] = ['stream' => $stream, 'subject' => $subject, 'teacher' => $assignment?->staff->full_name];
+                $classTeacher = in_array($stream->id, $myStreams, true);
+
+                if (in_array($subject->id, $taken, true) && ($approver || $mine || $classTeacher)) {
+                    $sheets[] = ['stream' => $stream, 'subject' => $subject, 'teacher' => $assignment?->staff->full_name, 'manage' => $approver || $mine];
                 }
             }
         }
