@@ -227,7 +227,7 @@ default (a school setting turns them on). Report cards are published per class b
 - [x] 2. Term results: when a sheet is submitted, each student's subject total and grade is
       stored (a snapshot), plus class average and, if turned on, subject and overall positions;
       aggregates for JHS and SHS.
-- [ ] 3. Remarks: the class teacher's remark, conduct and interest per child per term; the
+- [x] 3. Remarks: the class teacher's remark, conduct and interest per child per term; the
       head's remark (suggested from the overall result, editable); attendance summary.
 - [ ] 4. Report card templates per level (early years, primary, JHS, SHS) with dompdf: school
       logo and colours, results, grades, remarks, attendance, next term's start date.

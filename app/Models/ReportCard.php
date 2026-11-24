@@ -24,6 +24,10 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property int|null $position
  * @property int $class_size
  * @property int $subjects_count
+ * @property string|null $teacher_remark
+ * @property string|null $conduct a Conduct value
+ * @property string|null $interest
+ * @property string|null $head_remark
  * @property-read Student $student
  * @property-read Stream $stream
  * @property-read Term $term
@@ -38,7 +42,10 @@ class ReportCard extends Model
     use LogsActivity;
 
     /** @var list<string> */
-    protected $fillable = ['term_id', 'stream_id', 'student_id', 'status', 'average', 'aggregate', 'position', 'class_size', 'subjects_count'];
+    protected $fillable = [
+        'term_id', 'stream_id', 'student_id', 'status', 'average', 'aggregate', 'position', 'class_size', 'subjects_count',
+        'teacher_remark', 'conduct', 'interest', 'head_remark',
+    ];
 
     /**
      * @return BelongsTo<Student, $this>
@@ -66,7 +73,7 @@ class ReportCard extends Model
 
     public function getActivitylogOptions(): LogOptions
     {
-        return LogOptions::defaults()->useLogName('grades')->logOnly(['status'])->logOnlyDirty()->dontLogEmptyChanges();
+        return LogOptions::defaults()->useLogName('grades')->logOnly(['status', 'teacher_remark', 'conduct', 'interest', 'head_remark'])->logOnlyDirty()->dontLogEmptyChanges();
     }
 
     /**

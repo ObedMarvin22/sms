@@ -1379,3 +1379,21 @@ review at the end of the sprint.
   out but shown only when the school turns them on (Settings → Grading, off by default).
 - **Assessment → Results**: a class's grades and totals by subject, average, aggregate and (if
   on) position. Heads see every class, class teachers their own.
+
+## 2026-11-24 — Remarks and attendance (Sprint 6 step 3)
+
+- **On the report card row** (`report_cards`): the class teacher's remark (400 characters),
+  conduct (Excellent, Very good, Good, Fair, Needs improvement), interest (100 characters) and
+  the head's remark (400). New nullable columns on a table with no production data.
+- **Who:** the class teacher of the stream (or a head) writes the remark, conduct and interest;
+  only a head (`grades.approve`) writes the head's remark. Nothing changes once a report card is
+  approved or published. Changes are logged under `grades`.
+- **Suggested head's remarks** from the average (80+, 65+, 50+, 40+, below; a general one for
+  early years) fill only empty boxes, for the head to read and change. Saves heads with large
+  schools a lot of typing; the head still owns every word.
+- **Attendance on the report card** = days present (late counts as present) out of days on the
+  register this term; excused and absent are not present. Worked out when needed, in one query
+  per class.
+- **Assessment → Remarks** (class teacher: own class; head: any class). Opening it makes sure every
+  child in the class has a draft report card to write on. Early-years submits now also refresh
+  the class's report cards.
