@@ -20,6 +20,7 @@ class UpdateAssessmentTask
     {
         $task->loadMissing(['term', 'stream.schoolClass', 'subject']);
         TaskRules::authorize($by, $task->stream, $task->subject, $task->term->academic_year_id);
+        SheetLock::ensureOpen($task->term_id, $task->stream_id, $task->subject_id);
         $clean = TaskRules::validate($task->term, $task->stream, $task->subject, $component, $data, $task);
 
         $highest = AssessmentScore::where('assessment_task_id', $task->id)->max('mark');

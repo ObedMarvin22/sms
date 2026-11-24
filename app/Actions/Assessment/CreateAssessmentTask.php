@@ -21,6 +21,7 @@ class CreateAssessmentTask
     public function handle(User $by, Term $term, Stream $stream, Subject $subject, AssessmentComponent $component, array $data): AssessmentTask
     {
         TaskRules::authorize($by, $stream, $subject, $term->academic_year_id);
+        SheetLock::ensureOpen($term->id, $stream->id, $subject->id);
         $clean = TaskRules::validate($term, $stream, $subject, $component, $data);
 
         return AssessmentTask::create([
