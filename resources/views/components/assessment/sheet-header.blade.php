@@ -72,7 +72,7 @@
             @elseif (! $locked && $canManage)
                 <flux:button size="sm" :variant="$problems === [] ? 'primary' : 'filled'" icon="check" wire:click="submitSheet"
                     :disabled="$problems !== []" data-test="submit-sheet">
-                    {{ $record ? __('Submit again') : __('Submit marks') }}
+                    {{ $record ? __('Submit again') : ($commentsOnly ? __('Submit comments') : __('Submit marks')) }}
                 </flux:button>
             @endif
         </div>

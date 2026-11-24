@@ -44,7 +44,7 @@ class DemoSchoolsSeeder extends Seeder
     public const CONSOLE_ADMIN_EMAIL = 'admin@orangetree.test';
 
     /**
-     * @var array<string, array{name: string, colour: string, levels: list<SchoolLevel>, admin: string, teacher: string}>
+     * @var array<string, array{name: string, colour: string, levels: list<SchoolLevel>, admin: string, teacher: string, kg_teacher?: string}>
      */
     private const SCHOOLS = [
         'greenhill' => [
@@ -53,6 +53,7 @@ class DemoSchoolsSeeder extends Seeder
             'levels' => [SchoolLevel::Creche, SchoolLevel::Kg, SchoolLevel::Primary, SchoolLevel::Jhs],
             'admin' => 'Ama Mensah',
             'teacher' => 'Kwame Owusu',
+            'kg_teacher' => 'Akosua Frimpong',
         ],
         'hillview' => [
             'name' => 'Hillview School',
@@ -94,6 +95,15 @@ class DemoSchoolsSeeder extends Seeder
                 $this->teaches($teacher, ['Primary 4'], ['Mathematics', 'Science']);
 
                 $this->call(DemoStudentsSeeder::class);
+
+                // A KG class teacher, who writes the early-years comments for KG 1A.
+                if (isset($spec['kg_teacher'])) {
+                    $kgTeacher = $this->staff($school, "kg@{$subdomain}.test", $spec['kg_teacher'], RoleKey::ClassTeacher);
+                    $kg1 = SchoolClass::where('name', 'KG 1')->first()?->streams()->orderBy('name')->first();
+                    if ($kg1 !== null && ! ClassTeacherAssignment::where('stream_id', $kg1->id)->exists()) {
+                        app(AssignClassTeacher::class)->handle($kg1, $kgTeacher);
+                    }
+                }
             });
         }
 

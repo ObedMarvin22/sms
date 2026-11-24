@@ -196,16 +196,20 @@ area, no numbers. Pilot preparation step 3 stays open until Obed has tested stag
 - [x] 4. Submit and lock; a head or administrator unlocks with a reason; every later change logged.
 - [x] 5. Progress overview for heads: every class and subject's sheet status and teacher.
 - [x] 6. Creche/KG comments per child and learning area, with the same submit and lock.
-- [ ] 7. Speed (query-count tests at a full term's marks) and demo assessment data.
+- [x] 7. Speed (query-count tests at a full term's marks) and demo assessment data.
 
 Done when:
-- [ ] a teacher can enter and submit marks only for their own subjects and classes (tested)
-- [ ] a submitted sheet cannot change without an unlock, and every change is logged (tested)
-- [ ] the head can see at a glance which sheets are missing
-- [ ] part scores are worked out correctly from tasks and weights, with Absent/Exempt (tested)
-- [ ] CI green
+- [x] a teacher can enter and submit marks only for their own subjects and classes (tested)
+- [x] a submitted sheet cannot change without an unlock, and every change is logged (tested)
+- [x] the head can see at a glance which sheets are missing (Assessment → Progress; screen tests pass, not yet seen in the browser by a head)
+- [x] part scores are worked out correctly from tasks and weights, with Absent/Exempt (tested)
+- [x] local suite green (1,228+ tests); GitHub CI not checked from here (no `gh`)
 
-**STOP for review.**
+**Sprint 5 done (2026-11-24).** Obed asked to carry straight on to Sprint 6 and review both
+together, so there was no stop here. Deferred: comment bank for early years; reminders to
+teachers (needs staff notifications); a head's demo login (heads need two-factor, set up by
+Obed); showing marks to parents during the term (per-school option, in the backlog).
+
 ### Sprint 6 — grading and report cards
 
 Obed (2026-11-24): build Sprint 6 straight after Sprint 5 and stop when Sprint 6 is done, then

@@ -4,9 +4,9 @@
             <flux:heading size="xl">{{ __('Marks') }}</flux:heading>
             <flux:text>
                 @if ($this->term)
-                    {{ __('Tasks you set for each class this term: :term, :start to :end.', ['term' => $this->term->name, 'start' => $this->term->starts_on->format('j M'), 'end' => $this->term->ends_on->format('j M Y')]) }}
+                    {{ __('Marks and comments for each class you teach: :term, :start to :end.', ['term' => $this->term->name, 'start' => $this->term->starts_on->format('j M'), 'end' => $this->term->ends_on->format('j M Y')]) }}
                 @else
-                    {{ __('Tasks you set for each class this term.') }}
+                    {{ __('Marks and comments for each class you teach this term.') }}
                 @endif
             </flux:text>
         </div>

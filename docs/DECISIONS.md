@@ -1324,3 +1324,22 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
 - The Tasks and Marks pages send comments-only classes to the Comments page; Marks and Progress
   list early-years sheets too, with the class teacher shown as the teacher.
 - Comment bank (ready-made phrases): later.
+
+## 2026-11-24 — Speed and demo assessment data (Sprint 5 step 7)
+
+- **Speed tests compare a small and a large case** and expect the same number of queries
+  (mark sheet with 5 or 45 students and a full term of marks; comment sheet with 3 or 30
+  children; the Marks list with 1 or many classes; the Progress page). Saving one mark stays
+  within 15 queries. Comparing sizes catches N+1 problems without pinning exact numbers.
+- **`DemoAssessmentSeeder`** gives both demo schools a term of tasks, marks (by student
+  ability, 2% absent, half marks) and early-years comments, with sheets in every state: about
+  55% submitted, some ready, some in progress, a few not started, one reopened. The demo
+  teacher's Primary 4 Mathematics is left part-filled to finish and submit.
+- It writes marks and comments in bulk (no activity log: demo data), runs from
+  `DatabaseSeeder` (about 15 s a school) and is skipped by the other seeder tests; it has its own
+  test. Each sheet's state comes from its own random generator in a fixed order, so running it
+  again adds nothing.
+- **A demo KG class teacher**, `kg@greenhill.test` (Akosua Frimpong), class teacher of KG 1A,
+  so the Comments page can be tried. Password: `DemoSchoolsSeeder::PASSWORD`.
+- **Test runs:** run the full suite with `vendor/bin/pest`; `php artisan test` piped into
+  another command hung twice with Pest spinning.
