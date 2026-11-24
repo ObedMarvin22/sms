@@ -1413,3 +1413,14 @@ review at the end of the sprint.
   record each part's kind (exam or not).
 - **Staff preview:** Results → click a name, or `results/report-cards/{id}`; heads any, class
   teachers their own class. Rendered on request; step 5 stores generated PDFs.
+
+## 2026-11-24 — Generating report cards (Sprint 6 step 5)
+
+- **Assessment → Report cards** (heads): a row per class with subjects submitted and the state
+  of its cards; "Make report cards" once **every subject the class takes is submitted**, so no
+  card goes out half empty.
+- **`GenerateReportCards` job**: 15 cards per job on the database queue (run by cron on shared
+  hosting), timeout 120 s, 3 tries. Each PDF is stored on the private `local` disk at
+  `report-cards/{school}/{term}/{card}.pdf`; the card becomes "Ready to approve". Cards approved
+  or published meanwhile are not remade. "Make again" remakes the rest (after a remark changes).
+- The page polls every 15 s while jobs run (no websockets on shared hosting).

@@ -45,6 +45,7 @@ use App\Livewire\Guardians\Index as GuardiansIndex;
 use App\Livewire\Invitations\AcceptInvitation;
 use App\Livewire\Results\ClassResults as ResultsClassResults;
 use App\Livewire\Results\Remarks as ResultsRemarks;
+use App\Livewire\Results\ReportCards as ResultsReportCards;
 use App\Livewire\School\Profile as SchoolProfile;
 use App\Livewire\Setup\Wizard as SetupWizard;
 use App\Livewire\Staff\Index as StaffIndex;
@@ -161,6 +162,8 @@ Route::domain('{school}.'.config('app.base_domain'))
                 Route::livewire('results', ResultsClassResults::class)->name('results.index');
                 Route::livewire('results/remarks', ResultsRemarks::class)->name('results.remarks');
                 Route::get('results/report-cards/{reportCard}', ReportCardPdfController::class)->name('results.report-card');
+                Route::livewire('results/report-cards', ResultsReportCards::class)
+                    ->middleware('can:'.PermissionKey::GradesApprove->value)->name('results.report-cards');
             });
 
             // Fees: finance.view to look; changes need fees.manage (checked in each component).
