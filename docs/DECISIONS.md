@@ -1343,3 +1343,19 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   so the Comments page can be tried. Password: `DemoSchoolsSeeder::PASSWORD`.
 - **Test runs:** run the full suite with `vendor/bin/pest`; `php artisan test` piped into
   another command hung twice with Pest spinning.
+
+## 2026-11-24 — Grade scales (Sprint 6 step 1)
+
+Obed asked to build Sprint 6 without stopping for each choice; these defaults are Claude's, for
+review at the end of the sprint.
+
+- **One scale per level** (`grade_scales`, unique school + level), not per year. Term results
+  will store the grade given at the time, so changing a scale never rewrites past results.
+- **Bands** (`grade_bands`): from a whole-number total up to the next band; one band must start
+  at 0; grades distinct; 2 to 12 bands. **Points** (1 is best) are required for JHS and SHS
+  because their aggregates add points.
+- **Rounding:** a term total is rounded to a whole number (half up) before grading, so 79.5 is
+  graded as 80. Common practice; avoids a child missing a grade by a tenth.
+- **Defaults:** Primary uses NaCCA proficiency levels (HP 80+, P 68–79, AP 54–67, D 40–53,
+  E below 40); JHS 1–9 BECE style (80, 70, 65, 60, 55, 50, 45, 40, 0); SHS A1–F9 WASSCE style
+  (same cut-offs). Early years have no grades. Settings → Grading, "Use the standard scales".
