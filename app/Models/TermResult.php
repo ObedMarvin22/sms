@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $grade_label
  * @property int|null $points
  * @property int|null $subject_position
- * @property list<array{name: string, weight: int, score: float|null}> $parts
+ * @property list<array{name: string, kind?: string, weight: int, score: float|null}> $parts
  * @property-read Subject $subject
  * @property-read Student $student
  */

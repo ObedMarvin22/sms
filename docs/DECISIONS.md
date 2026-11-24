@@ -1397,3 +1397,19 @@ review at the end of the sprint.
 - **Assessment → Remarks** (class teacher: own class; head: any class). Opening it makes sure every
   child in the class has a draft report card to write on. Early-years submits now also refresh
   the class's report cards.
+
+## 2026-11-24 — Report card templates (Sprint 6 step 4)
+
+- **A4, dompdf, plain CSS** (dompdf has no flexbox or Tailwind). One shared layout
+  (`pdf/report-cards/layout`) with the school's logo and colour, the student, class, number on
+  roll, attendance, term dates and **next term's start date** (the next term in the calendar, or
+  "To be announced"), conduct, interest, both remarks and signature lines.
+- **Three bodies:** primary (class score out of the continuous-assessment weight, exam out of
+  the exam weight, total, grade, meaning, optional subject position, grade key); secondary for
+  JHS and SHS (the same plus the aggregate, with how it is counted); early years (each learning
+  area's comment). SPEC said "one template per level"; JHS and SHS share one because they
+  differ only in the aggregate line.
+- **Class score / exam split** comes from the parts stored with each term result, which now also
+  record each part's kind (exam or not).
+- **Staff preview:** Results → click a name, or `results/report-cards/{id}`; heads any, class
+  teachers their own class. Rendered on request; step 5 stores generated PDFs.

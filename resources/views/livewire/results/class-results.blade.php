@@ -70,7 +70,9 @@
                     @foreach ($cards as $card)
                         <tr wire:key="card-{{ $card->id }}" data-test="result-row">
                             <th scope="row" class="sticky left-0 z-10 max-w-36 truncate border-b border-zinc-100 bg-white px-4 py-1.5 text-left font-medium text-zinc-900 sm:max-w-52 dark:border-zinc-800 dark:bg-zinc-900 dark:text-white" title="{{ $card->student->full_name }}">
-                                {{ $card->student->last_name }}, {{ $card->student->first_name }}
+                                <a href="{{ route('results.report-card', $card) }}" target="_blank" rel="noopener" class="hover:underline focus-visible:underline focus-visible:outline-none" data-test="preview">
+                                    {{ $card->student->last_name }}, {{ $card->student->first_name }}
+                                </a>
                             </th>
                             @foreach ($subjects as $subject)
                                 @php($result = $results->get($card->student_id.'-'.$subject->id))
@@ -100,7 +102,7 @@
         </div>
 
         <flux:text size="sm" class="max-w-5xl">
-            {{ __('Each box shows the grade and, under it, the term total out of 100. A dot means that subject is not submitted yet.') }}
+            {{ __('Each box shows the grade and, under it, the term total out of 100. A dot means that subject is not submitted yet. Click a name to see their report card.') }}
             @if ($aggregates)
                 {{ __('The aggregate adds the core subjects\' grade points and the best others; lower is better.') }}
             @endif
