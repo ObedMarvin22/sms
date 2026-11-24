@@ -45,6 +45,9 @@
                                         <div class="truncate text-sm text-zinc-500 dark:text-zinc-400">{{ $sheet['teacher'] ?? __('No teacher assigned') }}</div>
                                     @endif
                                 </div>
+                                @unless ($sheet['manage'])
+                                    <flux:badge size="sm" color="zinc" class="shrink-0">{{ __('View only') }}</flux:badge>
+                                @endunless
                                 <span class="shrink-0 text-sm tabular-nums text-zinc-500 dark:text-zinc-400">
                                     {{ trans_choice('{0} No tasks yet|{1} :count task|[2,*] :count tasks', $sheet['tasks'], ['count' => $sheet['tasks']]) }}
                                 </span>

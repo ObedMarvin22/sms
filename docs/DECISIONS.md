@@ -1248,3 +1248,28 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   mark below marks already given and deleting a task with marks will be refused in step 3.
 - The `ClassTasks` component method is `classStream()`, because `stream()` is a Livewire
   method (`Component::stream()` sends streamed responses).
+
+## 2026-11-24 — Score entry (Sprint 5 step 3)
+
+- **Scoring (Obed):** inside a part, marks add up: part score = marks scored / marks possible ×
+  the part's weight, so a test out of 50 counts more than one out of 20. Worked in tenths of a
+  mark so halves add exactly; part scores and totals are rounded to 2 places
+  (`App\Support\Assessment\PartScores`).
+- **Absent counts as zero; Exempt is left out** for that student. Empty boxes are left out
+  until filled, so the sheet shows a total "so far". Step 4 (submit) will require every box.
+- **Half marks** are allowed (12.5); tenths are refused. A comma is read as a decimal point.
+- **One row per student and task** in `assessment_scores`; clearing a box deletes the row.
+- **Activity log:** a mark's first entry is not logged (a school would write well over 100,000
+  rows a term); every change to a mark already given, and every clearing, is
+  (`$recordEvents = ['updated', 'deleted']`).
+- **Who is on a sheet:** everyone enrolled in the stream at any time in the term. A student who
+  left or moved class during the term stays on it, greyed and read-only, so their marks are
+  kept; the student appears on the new class's sheet too. SHS electives list only the
+  programmes that include the subject.
+- **Class teachers** can open every subject's sheet for their own class, to look only.
+- **Guards from step 2 now in place:** "out of" cannot go below a mark already given, and a
+  task with marks cannot be deleted.
+- **Livewire 4 note:** `wire:model.blur` only updates the browser copy; `.live.blur` is what
+  sends the save when the teacher leaves a box. And every cell is given a key up front (even
+  empty), because an empty PHP array reaches the browser as a JSON list, on which
+  `cells.t5-s10` cannot be set.

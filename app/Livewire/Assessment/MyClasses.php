@@ -19,7 +19,7 @@ use Livewire\Component;
  * Subject teachers see what they teach; heads see every subject of every class.
  *
  * @property-read Term|null $term
- * @property-read Collection<int, array{stream: Stream, subject: Subject, teacher: string|null, tasks: int}> $sheets
+ * @property-read Collection<int, array{stream: Stream, subject: Subject, teacher: string|null, manage: bool, tasks: int}> $sheets
  */
 #[Title('Marks')]
 class MyClasses extends Component
@@ -34,7 +34,7 @@ class MyClasses extends Component
     }
 
     /**
-     * @return Collection<int, array{stream: Stream, subject: Subject, teacher: string|null, tasks: int}>
+     * @return Collection<int, array{stream: Stream, subject: Subject, teacher: string|null, manage: bool, tasks: int}>
      */
     #[Computed]
     public function sheets(): Collection

@@ -25,6 +25,7 @@ use Livewire\Component;
  * One class and subject in the current term: the scheme's parts and the tasks set under each.
  *
  * @property-read Term $term
+ * @property-read bool $canManage
  * @property-read AssessmentScheme|null $scheme
  * @property-read Collection<int, AssessmentTask> $tasks
  */
@@ -50,7 +51,7 @@ class ClassTasks extends Component
     public function mount(Stream $stream, Subject $subject): void
     {
         $term = Term::current()->firstOrFail();
-        abort_unless(TaskRules::canManage(auth()->user(), $stream, $subject, $term->academic_year_id), 403);
+        abort_unless(TaskRules::canView(auth()->user(), $stream, $subject, $term->academic_year_id), 403);
 
         $this->streamId = $stream->id;
         $this->subjectId = $subject->id;
@@ -72,6 +73,12 @@ class ClassTasks extends Component
     public function subject(): Subject
     {
         return Subject::findOrFail($this->subjectId);
+    }
+
+    #[Computed]
+    public function canManage(): bool
+    {
+        return TaskRules::canManage(auth()->user(), $this->classStream(), $this->subject(), $this->term->academic_year_id);
     }
 
     #[Computed]
@@ -144,7 +151,13 @@ class ClassTasks extends Component
 
     public function delete(int $taskId, DeleteAssessmentTask $delete): void
     {
-        $delete->handle(auth()->user(), $this->task($taskId));
+        try {
+            $delete->handle(auth()->user(), $this->task($taskId));
+        } catch (ValidationException $e) {
+            Flux::toast(variant: 'danger', text: (string) collect($e->errors())->flatten()->first());
+
+            return;
+        }
         unset($this->tasks);
         Flux::toast(text: __('Task deleted.'));
     }

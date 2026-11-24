@@ -3,8 +3,10 @@
 namespace App\Actions\Assessment;
 
 use App\Models\AssessmentComponent;
+use App\Models\AssessmentScore;
 use App\Models\AssessmentTask;
 use App\Models\User;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Renames a task, moves it to another part, or changes its date or maximum mark.
@@ -20,7 +22,12 @@ class UpdateAssessmentTask
         TaskRules::authorize($by, $task->stream, $task->subject, $task->term->academic_year_id);
         $clean = TaskRules::validate($task->term, $task->stream, $task->subject, $component, $data, $task);
 
-        // Step 3: once marks exist, a lower maximum mark than the highest mark will be refused.
+        $highest = AssessmentScore::where('assessment_task_id', $task->id)->max('mark');
+        if ($highest !== null && (float) $highest > $clean['max_mark']) {
+            $shown = rtrim(rtrim((string) $highest, '0'), '.');
+            throw ValidationException::withMessages(['max_mark' => "A student already has {$shown} on this task, so it cannot be out of less than that."]);
+        }
+
         $task->update(['assessment_component_id' => $component->id, ...$clean]);
 
         return $task;
