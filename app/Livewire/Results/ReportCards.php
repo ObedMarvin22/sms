@@ -2,7 +2,10 @@
 
 namespace App\Livewire\Results;
 
+use App\Actions\Results\ApproveReportCards;
 use App\Actions\Results\GenerateClassReportCards;
+use App\Actions\Results\PublishReportCards;
+use App\Actions\Results\WithdrawReportCards;
 use App\Enums\PermissionKey;
 use App\Enums\ReportCardStatus;
 use App\Enums\SheetStatus;
@@ -101,6 +104,46 @@ class ReportCards extends Component
 
         unset($this->classes);
         Flux::toast(variant: 'success', text: trans_choice('{0} No report cards to make for :class.|{1} Making 1 report card for :class.|[2,*] Making :count report cards for :class. This page updates as they are done.', $count, ['count' => $count, 'class' => $stream->full_name]));
+    }
+
+    public function approve(int $streamId, ApproveReportCards $approve): void
+    {
+        $this->step($streamId, fn (Stream $stream) => $approve->handle(auth()->user(), $this->term ?? abort(404), $stream),
+            '{1} 1 report card approved for :class.|[2,*] :count report cards approved for :class.');
+    }
+
+    public function publish(int $streamId, PublishReportCards $publish): void
+    {
+        $this->step($streamId, fn (Stream $stream) => $publish->handle(auth()->user(), $this->term ?? abort(404), $stream),
+            '{1} 1 report card published for :class. Parents can see it now.|[2,*] :count report cards published for :class. Parents can see them now.');
+    }
+
+    public function withdraw(int $streamId, WithdrawReportCards $withdraw): void
+    {
+        $this->step($streamId, fn (Stream $stream) => $withdraw->handle(auth()->user(), $this->term ?? abort(404), $stream),
+            '{0} Nothing to withdraw for :class.|{1} 1 report card withdrawn for :class.|[2,*] :count report cards withdrawn for :class. Parents no longer see them.');
+    }
+
+    /**
+     * Runs one of the head's steps for a class and reports how it went.
+     *
+     * @param  \Closure(Stream): int  $run
+     */
+    private function step(int $streamId, \Closure $run, string $message): void
+    {
+        $this->authorize(PermissionKey::GradesApprove->value);
+        $stream = Stream::findOrFail($streamId);
+
+        try {
+            $count = $run($stream);
+        } catch (ValidationException $e) {
+            Flux::toast(variant: 'danger', text: (string) collect($e->errors())->flatten()->first());
+
+            return;
+        }
+
+        unset($this->classes);
+        Flux::toast(variant: 'success', text: trans_choice($message, $count, ['count' => $count, 'class' => $stream->full_name]));
     }
 
     public function render(): View
