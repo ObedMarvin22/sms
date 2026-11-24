@@ -38,6 +38,7 @@ use App\Models\PaystackTransaction;
 use App\Models\Programme;
 use App\Models\ProgrammeSubject;
 use App\Models\ReceiptSequence;
+use App\Models\ReportCard;
 use App\Models\School;
 use App\Models\SchoolClass;
 use App\Models\SmsMessage;
@@ -52,6 +53,7 @@ use App\Models\StudentInstalmentPlan;
 use App\Models\Subject;
 use App\Models\TeachingAssignment;
 use App\Models\Term;
+use App\Models\TermResult;
 use App\Support\Tenancy\CurrentSchool;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -120,6 +122,8 @@ dataset('school-owned models', [
     'AssessmentComment' => [fn (School $school): Model => AssessmentComment::factory()->create(['school_id' => $school->id])],
     'GradeScale' => [fn (School $school): Model => GradeScale::factory()->for($school)->create()],
     'GradeBand' => [fn (School $school): Model => GradeBand::factory()->state(['grade_scale_id' => GradeScale::factory()->for($school)])->create()],
+    'TermResult' => [fn (School $school): Model => TermResult::factory()->create(['school_id' => $school->id])],
+    'ReportCard' => [fn (School $school): Model => ReportCard::factory()->create(['school_id' => $school->id])],
 ]);
 
 beforeEach(function () {
