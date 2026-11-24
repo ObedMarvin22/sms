@@ -223,7 +223,7 @@ Aggregates: JHS = English, Mathematics, Science, Social Studies + best 2 others 
 SHS = English, Core Mathematics, Integrated Science + best 3 electives. Class positions off by
 default (a school setting turns them on). Report cards are published per class by the head.
 
-- [ ] 1. Grade scales and bands per level, with the defaults above; Settings → Grading.
+- [x] 1. Grade scales and bands per level, with the defaults above; Settings → Grading.
 - [ ] 2. Term results: when a sheet is submitted, each student's subject total and grade is
       stored (a snapshot), plus class average and, if turned on, subject and overall positions;
       aggregates for JHS and SHS.
