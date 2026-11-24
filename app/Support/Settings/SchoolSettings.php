@@ -28,6 +28,8 @@ final class SchoolSettings
         // SmsEvent values that also go by SMS (none until the school chooses), and when to warn.
         'sms_events' => [],
         'sms_low_credit_threshold' => 100,
+        // Show class and subject positions (1st, 2nd…) on results and report cards (Sprint 6).
+        'show_positions' => false,
     ];
 
     /**
