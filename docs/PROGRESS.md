@@ -231,7 +231,7 @@ default (a school setting turns them on). Report cards are published per class b
       head's remark (suggested from the overall result, editable); attendance summary.
 - [x] 4. Report card templates per level (early years, primary, JHS, SHS) with dompdf: school
       logo and colours, results, grades, remarks, attendance, next term's start date.
-- [ ] 5. Generating report cards as queued jobs in batches of 15, per class, stored as PDFs.
+- [x] 5. Generating report cards as queued jobs in batches of 15, per class, stored as PDFs.
 - [ ] 6. Head's approval and publishing per class; parents see results and download the report
       card in the parent app, with a notification.
 - [ ] 7. Promotion rules per level (minimum average; head can override) feeding end-of-year
