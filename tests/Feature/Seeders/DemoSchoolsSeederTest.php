@@ -156,10 +156,13 @@ it('gives the demo teacher Mathematics and Science in Primary 4, with the standa
     $teacher = User::where('email', 'teacher@greenhill.test')->sole();
 
     app(CurrentSchool::class)->runFor($greenhill, function () use ($teacher) {
-        $sheets = TaskRules::sheetsFor($teacher, AcademicYear::current()->sole()->id)
-            ->map(fn (array $s) => "{$s['subject']->name}, {$s['stream']->full_name}")->all();
+        $sheets = TaskRules::sheetsFor($teacher, AcademicYear::current()->sole()->id);
+        $names = fn (bool $manage) => $sheets->where('manage', $manage)
+            ->map(fn (array $s) => "{$s['subject']->name}, {$s['stream']->full_name}")->values()->all();
 
-        expect($sheets)->toBe(['Mathematics, Primary 4A', 'Science, Primary 4A'])
+        // Teaches two subjects; as 4A's class teacher, sees the other eight to look at only.
+        expect($names(true))->toBe(['Mathematics, Primary 4A', 'Science, Primary 4A'])
+            ->and($names(false))->toHaveCount(8)
             ->and(AssessmentScheme::where('level', SchoolLevel::Primary)->sole()->components)->toHaveCount(4);
     });
 });
