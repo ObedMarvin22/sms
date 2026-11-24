@@ -23,6 +23,8 @@ use App\Models\Enrolment;
 use App\Models\FeeItem;
 use App\Models\FeeStructure;
 use App\Models\FeeStructureItem;
+use App\Models\GradeBand;
+use App\Models\GradeScale;
 use App\Models\Guardian;
 use App\Models\GuardianStudent;
 use App\Models\InstalmentPlan;
@@ -116,6 +118,8 @@ dataset('school-owned models', [
     'AssessmentScore' => [fn (School $school): Model => AssessmentScore::factory()->create(['school_id' => $school->id])],
     'AssessmentSheet' => [fn (School $school): Model => AssessmentSheet::factory()->create(['school_id' => $school->id])],
     'AssessmentComment' => [fn (School $school): Model => AssessmentComment::factory()->create(['school_id' => $school->id])],
+    'GradeScale' => [fn (School $school): Model => GradeScale::factory()->for($school)->create()],
+    'GradeBand' => [fn (School $school): Model => GradeBand::factory()->state(['grade_scale_id' => GradeScale::factory()->for($school)])->create()],
 ]);
 
 beforeEach(function () {
