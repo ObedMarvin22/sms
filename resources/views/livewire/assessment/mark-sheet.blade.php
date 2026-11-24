@@ -9,7 +9,8 @@
 <div class="flex max-w-full flex-col gap-6">
     <div class="max-w-4xl">
         <x-assessment.sheet-header :stream="$this->classStream()" :subject="$this->subject()" :term="$this->term"
-            :can-manage="$this->canManage" active="assessment.marks" />
+            :can-manage="$this->canManage" active="assessment.marks"
+            :record="$this->sheetRecord" :can-unlock="$this->canUnlock" :problems="$this->problems" />
     </div>
 
     @if ($scheme === null)
@@ -39,7 +40,7 @@
         </flux:callout>
     @else
         <div class="flex max-w-4xl flex-wrap items-center justify-between gap-x-6 gap-y-2">
-            @if ($this->canManage)
+            @if ($this->editable)
                 <flux:text size="sm">
                     {{ __('Type a mark, A for absent or X for exempt. Enter moves down, Tab moves across. Each mark saves when you leave the box.') }}
                 </flux:text>
@@ -123,7 +124,7 @@
                                         wire:model.live.blur="cells.{{ $key }}"
                                         data-row="{{ $r }}" data-col="{{ $c }}"
                                         aria-label="{{ __(':student, :task, out of :max', ['student' => $row->student->full_name, 'task' => $task->name, 'max' => $task->max_mark]) }}"
-                                        @disabled(! $this->canManage || ! $row->editable)
+                                        @disabled(! $this->editable || ! $row->editable)
                                         @error("cells.$key") aria-invalid="true" @enderror
                                         @class([
                                             'w-14 rounded-md border bg-white px-1.5 py-1 text-center tabular-nums text-zinc-900 outline-none transition-colors',

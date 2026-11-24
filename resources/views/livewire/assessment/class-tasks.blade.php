@@ -1,6 +1,7 @@
 <div class="flex max-w-4xl flex-col gap-6">
     <x-assessment.sheet-header :stream="$this->classStream()" :subject="$this->subject()" :term="$this->term"
-        :can-manage="$this->canManage" active="assessment.tasks" />
+        :can-manage="$this->canManage" active="assessment.tasks"
+        :record="$this->sheetRecord" :can-unlock="$this->canUnlock" :problems="$this->problems" />
 
     @php($scheme = $this->scheme)
     @php($level = $this->classStream()->schoolClass->level)
@@ -31,7 +32,7 @@
                             <flux:heading size="lg" class="truncate">{{ $part->name }}</flux:heading>
                             <span class="shrink-0 text-sm tabular-nums text-zinc-500 dark:text-zinc-400">{{ __(':weight% of the term', ['weight' => $part->weight]) }}</span>
                         </div>
-                        @if ($this->canManage && ! $full)
+                        @if ($this->editable && ! $full)
                             <flux:button size="sm" icon="plus" wire:click="startCreate({{ $part->id }})" data-test="add-task-{{ $part->id }}">{{ __('Add task') }}</flux:button>
                         @endif
                     </header>
@@ -49,7 +50,7 @@
                                         <div class="text-sm text-zinc-500 dark:text-zinc-400">{{ $task->given_on->format('D j M') }}</div>
                                     </div>
                                     <span class="shrink-0 text-sm tabular-nums text-zinc-700 dark:text-zinc-300">{{ __('out of :max', ['max' => $task->max_mark]) }}</span>
-                                    @if ($this->canManage)
+                                    @if ($this->editable)
                                     <flux:dropdown position="bottom" align="end">
                                         <flux:button size="sm" variant="ghost" icon="ellipsis-horizontal" :aria-label="__('Task actions')" />
                                         <flux:menu>
@@ -77,6 +78,7 @@
                     @endforeach
                 </flux:select>
                 <flux:error name="component" />
+                <flux:error name="sheet" />
 
                 <flux:input wire:model="name" :label="__('Name')" :placeholder="__('e.g. Class test 1')" />
 
