@@ -7,6 +7,7 @@ use App\Models\AnnouncementStream;
 use App\Models\AssessmentComponent;
 use App\Models\AssessmentScheme;
 use App\Models\AssessmentScore;
+use App\Models\AssessmentSheet;
 use App\Models\AssessmentTask;
 use App\Models\AttendanceRecord;
 use App\Models\AttendanceSession;
@@ -112,6 +113,7 @@ dataset('school-owned models', [
     'AssessmentComponent' => [fn (School $school): Model => AssessmentComponent::factory()->state(['assessment_scheme_id' => AssessmentScheme::factory()->for($school)])->create()],
     'AssessmentTask' => [fn (School $school): Model => AssessmentTask::factory()->create(['school_id' => $school->id])],
     'AssessmentScore' => [fn (School $school): Model => AssessmentScore::factory()->create(['school_id' => $school->id])],
+    'AssessmentSheet' => [fn (School $school): Model => AssessmentSheet::factory()->create(['school_id' => $school->id])],
 ]);
 
 beforeEach(function () {

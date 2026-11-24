@@ -45,6 +45,9 @@
                                         <div class="truncate text-sm text-zinc-500 dark:text-zinc-400">{{ $sheet['teacher'] ?? __('No teacher assigned') }}</div>
                                     @endif
                                 </div>
+                                @if ($sheet['status'])
+                                    <flux:badge size="sm" :color="$sheet['status'] === \App\Enums\SheetStatus::Submitted ? 'green' : 'amber'" class="shrink-0" data-test="sheet-badge">{{ $sheet['status']->label() }}</flux:badge>
+                                @endif
                                 @unless ($sheet['manage'])
                                     <flux:badge size="sm" color="zinc" class="shrink-0">{{ __('View only') }}</flux:badge>
                                 @endunless

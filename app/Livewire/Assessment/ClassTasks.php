@@ -2,16 +2,20 @@
 
 namespace App\Livewire\Assessment;
 
+use App\Actions\Assessment\BuildScoreSheet;
 use App\Actions\Assessment\CreateAssessmentTask;
 use App\Actions\Assessment\DeleteAssessmentTask;
 use App\Actions\Assessment\TaskRules;
 use App\Actions\Assessment\UpdateAssessmentTask;
+use App\Livewire\Assessment\Concerns\ManagesSheetLock;
 use App\Models\AssessmentComponent;
 use App\Models\AssessmentScheme;
+use App\Models\AssessmentSheet;
 use App\Models\AssessmentTask;
 use App\Models\Stream;
 use App\Models\Subject;
 use App\Models\Term;
+use App\Support\Assessment\ScoreSheet;
 use Carbon\CarbonImmutable;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
@@ -26,11 +30,18 @@ use Livewire\Component;
  *
  * @property-read Term $term
  * @property-read bool $canManage
+ * @property-read bool $editable
+ * @property-read bool $locked
+ * @property-read bool $canUnlock
+ * @property-read AssessmentSheet|null $sheetRecord
+ * @property-read list<string> $problems
  * @property-read AssessmentScheme|null $scheme
  * @property-read Collection<int, AssessmentTask> $tasks
  */
 class ClassTasks extends Component
 {
+    use ManagesSheetLock;
+
     #[Locked]
     public int $streamId;
 
@@ -97,6 +108,11 @@ class ClassTasks extends Component
             ->orderBy('given_on')->orderBy('id')->get();
     }
 
+    protected function scoreSheet(): ScoreSheet
+    {
+        return app(BuildScoreSheet::class)->handle($this->term, $this->classStream(), $this->subject());
+    }
+
     public function startCreate(int $componentId): void
     {
         $this->resetErrorBag();
@@ -144,7 +160,7 @@ class ClassTasks extends Component
             return;
         }
 
-        unset($this->tasks);
+        unset($this->tasks, $this->problems);
         Flux::modal('task')->close();
         Flux::toast(variant: 'success', text: $this->editingId === null ? __('Task added.') : __('Task saved.'));
     }

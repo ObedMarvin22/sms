@@ -193,7 +193,7 @@ area, no numbers. Pilot preparation step 3 stays open until Obed has tested stag
       subjects and streams they teach.
 - [x] 3. Score entry sheet per teaching assignment: students × tasks, keyboard-friendly, saves as
       the teacher types, Absent / Exempt; the class teacher views every subject of their class.
-- [ ] 4. Submit and lock; a head or administrator unlocks with a reason; every later change logged.
+- [x] 4. Submit and lock; a head or administrator unlocks with a reason; every later change logged.
 - [ ] 5. Progress overview for heads: every class and subject's sheet status and teacher.
 - [ ] 6. Creche/KG comments per child and learning area, with the same submit and lock.
 - [ ] 7. Speed (query-count tests at a full term's marks) and demo assessment data.
@@ -213,3 +213,21 @@ Done when:
 
 (Each Phase 2 sprint will be broken into steps here before it starts. Phase 3 needs Obed's
 go-ahead.)
+
+### Parent app backlog (agreed 2026-11-24, not yet scheduled)
+
+Obed: keep the roadmap order as it is, but make sure every feature is delivered. These parent
+features came up while reviewing the parent app; each gets a slot when its sprint is planned
+(or a short "Parent app 2" sprint after Sprint 9, if Obed prefers).
+
+- [ ] Parent reports an absence before the register ("Kofi is sick today"); shows on the
+      register as excused, reported by parent, and no absence SMS is sent.
+- [ ] One payment for several children (one Paystack checkout, a receipt per child).
+- [ ] Fee due dates from instalment plans, with push reminders and "Pay now".
+- [ ] School calendar: term dates, holidays and school events, "add to my calendar".
+- [ ] Permission slips (excursions) with agree and optional payment. Fits Sprint 8.
+- [ ] Parent asks to update contact details, emergency contacts and medical notes; the school
+      approves each change. Fits Sprint 8.
+- [ ] School documents for parents (booklist, rules, uniform list). Fits Sprint 8.
+- Later: children in two schools under one login; feeding or canteen wallet; Twi, Ga and Ewe;
+  optional per-school setting to show submitted marks to parents during the term.

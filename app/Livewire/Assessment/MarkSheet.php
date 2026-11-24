@@ -5,6 +5,8 @@ namespace App\Livewire\Assessment;
 use App\Actions\Assessment\BuildScoreSheet;
 use App\Actions\Assessment\SaveScore;
 use App\Actions\Assessment\TaskRules;
+use App\Livewire\Assessment\Concerns\ManagesSheetLock;
+use App\Models\AssessmentSheet;
 use App\Models\Stream;
 use App\Models\Subject;
 use App\Models\Term;
@@ -22,9 +24,16 @@ use Livewire\Component;
  * @property-read Term $term
  * @property-read bool $canManage
  * @property-read ScoreSheet $sheet
+ * @property-read bool $editable
+ * @property-read bool $locked
+ * @property-read bool $canUnlock
+ * @property-read AssessmentSheet|null $sheetRecord
+ * @property-read list<string> $problems
  */
 class MarkSheet extends Component
 {
+    use ManagesSheetLock;
+
     #[Locked]
     public int $streamId;
 
@@ -82,6 +91,11 @@ class MarkSheet extends Component
         return app(BuildScoreSheet::class)->handle($this->term, $this->classStream(), $this->subject());
     }
 
+    protected function scoreSheet(): ScoreSheet
+    {
+        return $this->sheet;
+    }
+
     /**
      * A cell was left: save what was typed and show it the way it was stored.
      */
@@ -101,7 +115,7 @@ class MarkSheet extends Component
 
         $this->resetErrorBag("cells.{$key}");
         $this->cells[$key] = $score?->display() ?? '';
-        unset($this->sheet);
+        unset($this->sheet, $this->problems);
     }
 
     public function render(): View

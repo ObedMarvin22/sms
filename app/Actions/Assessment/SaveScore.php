@@ -12,7 +12,8 @@ use Illuminate\Validation\ValidationException;
 /**
  * Saves what a teacher typed in one mark-sheet cell: a mark (halves allowed) from 0 to the
  * task's "out of", "A" for Absent, "X" for Exempt, or nothing to clear the cell.
- * Only the subject's teacher in that class, or a head, may enter marks.
+ * Only the subject's teacher in that class, or a head, may enter marks, and not while the
+ * sheet is submitted. Once a sheet has been submitted, every save is logged, first entries too.
  */
 class SaveScore
 {
@@ -20,6 +21,7 @@ class SaveScore
     {
         $task->loadMissing(['term', 'stream.schoolClass', 'subject']);
         TaskRules::authorize($by, $task->stream, $task->subject, $task->term->academic_year_id);
+        SheetLock::ensureOpen($task->term_id, $task->stream_id, $task->subject_id, 'score');
 
         $row = ScoreRules::rowFor($task->term, $task->stream, $task->subject, $student->id);
         if ($row === null) {
@@ -45,6 +47,13 @@ class SaveScore
         if ($score->isDirty()) {
             $score->entered_by = $by->id;
             $score->save();
+
+            // The model logs changes and clearings itself; after a submit, first entries too.
+            if ($score->wasRecentlyCreated && SheetLock::find($task->term_id, $task->stream_id, $task->subject_id) !== null) {
+                activity('grades')->performedOn($score)->causedBy($by)->event('created')
+                    ->withProperties(['attributes' => ['assessment_task_id' => $task->id, 'student_id' => $student->id, 'status' => $status->value, 'mark' => $mark]])
+                    ->log('created after submit');
+            }
         }
 
         return $score;
