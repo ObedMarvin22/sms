@@ -195,7 +195,7 @@ area, no numbers. Pilot preparation step 3 stays open until Obed has tested stag
       the teacher types, Absent / Exempt; the class teacher views every subject of their class.
 - [x] 4. Submit and lock; a head or administrator unlocks with a reason; every later change logged.
 - [x] 5. Progress overview for heads: every class and subject's sheet status and teacher.
-- [ ] 6. Creche/KG comments per child and learning area, with the same submit and lock.
+- [x] 6. Creche/KG comments per child and learning area, with the same submit and lock.
 - [ ] 7. Speed (query-count tests at a full term's marks) and demo assessment data.
 
 Done when:
@@ -206,7 +206,41 @@ Done when:
 - [ ] CI green
 
 **STOP for review.**
-- [ ] Sprint 6 — grading and report cards. **STOP for review.**
+### Sprint 6 — grading and report cards
+
+Obed (2026-11-24): build Sprint 6 straight after Sprint 5 and stop when Sprint 6 is done, then
+test the whole application. Defaults below were chosen by Claude to keep going; each is recorded
+in DECISIONS.md and can be changed at the review.
+
+Defaults: grade scales per level, all editable: NaCCA proficiency levels for Primary (80+
+Highly proficient, 68–79 Proficient, 54–67 Approaching proficiency, 40–53 Developing, below 40
+Emerging); BECE-style 1–9 for JHS; WASSCE-style A1–F9 for SHS; early years have no grades.
+Aggregates: JHS = English, Mathematics, Science, Social Studies + best 2 others (6 grades);
+SHS = English, Core Mathematics, Integrated Science + best 3 electives. Class positions off by
+default (a school setting turns them on). Report cards are published per class by the head.
+
+- [ ] 1. Grade scales and bands per level, with the defaults above; Settings → Grading.
+- [ ] 2. Term results: when a sheet is submitted, each student's subject total and grade is
+      stored (a snapshot), plus class average and, if turned on, subject and overall positions;
+      aggregates for JHS and SHS.
+- [ ] 3. Remarks: the class teacher's remark, conduct and interest per child per term; the
+      head's remark (suggested from the overall result, editable); attendance summary.
+- [ ] 4. Report card templates per level (early years, primary, JHS, SHS) with dompdf: school
+      logo and colours, results, grades, remarks, attendance, next term's start date.
+- [ ] 5. Generating report cards as queued jobs in batches of 15, per class, stored as PDFs.
+- [ ] 6. Head's approval and publishing per class; parents see results and download the report
+      card in the parent app, with a notification.
+- [ ] 7. Promotion rules per level (minimum average; head can override) feeding end-of-year
+      promotion.
+- [ ] 8. Speed (query counts, a full school's batch) and demo results and report cards.
+
+Done when:
+- [ ] grades and aggregates match hand-worked examples for every level (tested)
+- [ ] a class's report cards generate in the background and match the template
+- [ ] parents see a report card only after the head publishes it (tested)
+- [ ] CI green
+
+**STOP for review.**
 - [ ] Sprint 7 — PTI chat. **STOP for review.**
 - [ ] Sprint 8 — pickup, homework, boarding. **STOP for review.**
 - [ ] Sprint 9 — finance reports and dry run. **STOP for review.**
