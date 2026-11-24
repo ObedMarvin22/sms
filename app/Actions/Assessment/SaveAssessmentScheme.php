@@ -8,7 +8,9 @@ use App\Enums\SchoolLevel;
 use App\Models\AcademicYear;
 use App\Models\AssessmentComponent;
 use App\Models\AssessmentScheme;
+use App\Models\AssessmentTask;
 use App\Support\Tenancy\CurrentSchool;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -40,11 +42,27 @@ class SaveAssessmentScheme
             $scheme->save();
 
             $keep = array_values(array_filter(array_column($clean, 'id')));
-            $scheme->components()->getQuery()->whereKeyNot($keep)->get()->each->delete();
+            $removed = $scheme->components()->getQuery()->whereKeyNot($keep)->get();
+            $inUse = $removed->first(fn (AssessmentComponent $c) => AssessmentTask::where('assessment_component_id', $c->id)->exists());
+
+            if ($inUse !== null) {
+                throw ValidationException::withMessages(['parts' => "{$inUse->name} already has tasks, so it cannot be removed. Rename it or change its weight instead."]);
+            }
+            $removed->each->delete();
+
+            // Parts are matched by id, so renames can swap names ("Tests" <-> "Exam"). Park the
+            // renamed rows on a temporary name in the database first, so the unique index never
+            // sees two rows with one name. The loaded models keep their real names, so the
+            // activity log still records "Tests" -> "Exam".
+            $kept = $scheme->components()->getQuery()->whereKey($keep)->get()->keyBy('id');
+            $renamed = array_values(array_filter($keep, fn (int $id) => $kept->has($id) && $kept[$id]->name !== self::nameFor($clean, $id)));
+            if ($renamed !== []) {
+                AssessmentComponent::whereKey($renamed)->update(['name' => DB::raw("CONCAT('~', id)")]);
+            }
 
             foreach ($clean as $sequence => $part) {
                 $component = $part['id'] !== null
-                    ? $scheme->components()->getQuery()->findOrFail($part['id'])
+                    ? ($kept[$part['id']] ?? throw (new ModelNotFoundException)->setModel(AssessmentComponent::class, [$part['id']]))
                     : new AssessmentComponent(['assessment_scheme_id' => $scheme->id]);
 
                 $component->fill([
@@ -57,6 +75,20 @@ class SaveAssessmentScheme
 
             return $scheme->load('components');
         });
+    }
+
+    /**
+     * @param  list<array{id: int|null, name: string, kind: ComponentKind, weight: int}>  $clean
+     */
+    private static function nameFor(array $clean, int $id): ?string
+    {
+        foreach ($clean as $part) {
+            if ($part['id'] === $id) {
+                return $part['name'];
+            }
+        }
+
+        return null;
     }
 
     /**

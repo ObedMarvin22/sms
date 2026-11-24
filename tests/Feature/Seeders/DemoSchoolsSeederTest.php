@@ -1,9 +1,11 @@
 <?php
 
+use App\Actions\Assessment\TaskRules;
 use App\Actions\Attendance\AttendanceRules;
 use App\Enums\PlatformRoleKey;
 use App\Enums\SchoolLevel;
 use App\Models\AcademicYear;
+use App\Models\AssessmentScheme;
 use App\Models\ClassTeacherAssignment;
 use App\Models\Enrolment;
 use App\Models\Guardian;
@@ -12,6 +14,7 @@ use App\Models\School;
 use App\Models\SchoolClass;
 use App\Models\Staff;
 use App\Models\Student;
+use App\Models\TeachingAssignment;
 use App\Models\Term;
 use App\Models\User;
 use App\Support\Tenancy\CurrentSchool;
@@ -71,6 +74,7 @@ it('can run again without creating duplicates', function () {
     $greenhill = School::where('subdomain', 'greenhill')->sole();
     $schoolCounts = fn () => app(CurrentSchool::class)->runFor($greenhill, fn () => [
         AcademicYear::count(), SchoolClass::count(), Staff::count(), Student::count(), Guardian::count(), ClassTeacherAssignment::count(),
+        TeachingAssignment::count(), AssessmentScheme::count(),
     ]);
     $counts = [School::count(), User::count(), Role::count(), ...$schoolCounts()];
 
@@ -144,4 +148,18 @@ it('refuses to run in production', function () {
         ->toThrow(RuntimeException::class, 'never run in production');
 
     expect(School::count())->toBe(0);
+});
+
+it('gives the demo teacher Mathematics and Science in Primary 4, with the standard assessment', function () {
+    $this->seed(DatabaseSeeder::class);
+    $greenhill = School::where('subdomain', 'greenhill')->sole();
+    $teacher = User::where('email', 'teacher@greenhill.test')->sole();
+
+    app(CurrentSchool::class)->runFor($greenhill, function () use ($teacher) {
+        $sheets = TaskRules::sheetsFor($teacher, AcademicYear::current()->sole()->id)
+            ->map(fn (array $s) => "{$s['subject']->name}, {$s['stream']->full_name}")->all();
+
+        expect($sheets)->toBe(['Mathematics, Primary 4A', 'Science, Primary 4A'])
+            ->and(AssessmentScheme::where('level', SchoolLevel::Primary)->sole()->components)->toHaveCount(4);
+    });
 });

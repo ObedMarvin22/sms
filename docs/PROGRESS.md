@@ -189,7 +189,7 @@ area, no numbers. Pilot preparation step 3 stays open until Obed has tested stag
 
 - [x] 1. Assessment schemes per level and year: parts (class work, tests, project, exam) with
       weights that add up to 100; descriptive for Creche/Nursery/KG; defaults; copy from last year.
-- [ ] 2. Tasks: a teacher adds tasks (name, date, maximum mark) under each part, only for the
+- [x] 2. Tasks: a teacher adds tasks (name, date, maximum mark) under each part, only for the
       subjects and streams they teach.
 - [ ] 3. Score entry sheet per teaching assignment: students × tasks, keyboard-friendly, saves as
       the teacher types, Absent / Exempt; the class teacher views every subject of their class.

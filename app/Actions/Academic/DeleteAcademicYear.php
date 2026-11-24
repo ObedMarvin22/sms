@@ -4,6 +4,7 @@ namespace App\Actions\Academic;
 
 use App\Models\AcademicYear;
 use App\Models\AssessmentScheme;
+use App\Models\AssessmentTask;
 use App\Models\Enrolment;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -23,6 +24,10 @@ class DeleteAcademicYear
 
         if (Enrolment::where('academic_year_id', $year->id)->exists()) {
             throw ValidationException::withMessages(['year' => "{$year->name} has student enrolments, so it cannot be deleted."]);
+        }
+
+        if (AssessmentTask::whereIn('term_id', $year->terms()->pluck('id'))->exists()) {
+            throw ValidationException::withMessages(['year' => "{$year->name} has assessment tasks, so it cannot be deleted."]);
         }
 
         DB::transaction(function () use ($year): void {

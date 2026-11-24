@@ -16,7 +16,7 @@
                 @foreach (app(\App\Support\Navigation\StaffNavigation::class)->forUser(auth()->user()) as $heading => $items)
                     <flux:sidebar.group :heading="$heading === '' ? null : __($heading)" class="grid">
                         @foreach ($items as $item)
-                            <flux:sidebar.item :icon="$item->icon" :href="route($item->route)" :current="request()->routeIs($item->route)" wire:navigate>
+                            <flux:sidebar.item :icon="$item->icon" :href="route($item->route)" :current="$item->isCurrent()" wire:navigate>
                                 {{ __($item->label) }}
                             </flux:sidebar.item>
                         @endforeach

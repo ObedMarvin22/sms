@@ -2,6 +2,7 @@
 
 namespace App\Actions\Classes;
 
+use App\Models\AssessmentTask;
 use App\Models\Enrolment;
 use App\Models\Stream;
 use Illuminate\Validation\ValidationException;
@@ -19,6 +20,10 @@ class DeleteStream
 
         if (Enrolment::where('stream_id', $stream->id)->exists()) {
             throw ValidationException::withMessages(['stream' => 'This stream has student enrolments, so it cannot be deleted.']);
+        }
+
+        if (AssessmentTask::where('stream_id', $stream->id)->exists()) {
+            throw ValidationException::withMessages(['stream' => 'This stream has assessment tasks, so it cannot be deleted.']);
         }
 
         $stream->delete();
