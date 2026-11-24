@@ -1359,3 +1359,23 @@ review at the end of the sprint.
 - **Defaults:** Primary uses NaCCA proficiency levels (HP 80+, P 68–79, AP 54–67, D 40–53,
   E below 40); JHS 1–9 BECE style (80, 70, 65, 60, 55, 50, 45, 40, 0); SHS A1–F9 WASSCE style
   (same cut-offs). Early years have no grades. Settings → Grading, "Use the standard scales".
+
+## 2026-11-24 — Term results, aggregates and positions (Sprint 6 step 2)
+
+- **`term_results`**: one row per student, subject and term, written when a marked sheet is
+  submitted (total, grade, grade meaning, points, subject position, and each part's score for
+  the report card). A snapshot: changing a grade scale later does not change it. Unlocking a
+  sheet removes its results until it is submitted again. Students who left get no result.
+- **Total** = the sum of the part scores (already weighted), out of 100; the grade comes from the
+  level's scale after rounding to a whole number.
+- **`report_cards`** (one per student per term) hold the overall result, refreshed on every
+  submit and unlock: the **average** of the student's subject totals, the **aggregate** and the
+  **position** in the class by average. Report cards already approved or published are not
+  touched. Later steps add remarks, the PDF and publishing to the same row.
+- **Aggregates** (`App\Support\Academic\Aggregates`): JHS = English, Mathematics, Science, Social
+  Studies + best 2 others; SHS = English, Core Mathematics, Integrated Science + best 3 others,
+  Social Studies not counted. Lower is better; none when a core subject has no grade yet.
+- **Positions** share ties (1, 2, 2, 4), compared to two decimal places. They are always worked
+  out but shown only when the school turns them on (Settings → Grading, off by default).
+- **Assessment → Results**: a class's grades and totals by subject, average, aggregate and (if
+  on) position. Heads see every class, class teachers their own.

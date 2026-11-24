@@ -2,6 +2,8 @@
 
 namespace App\Actions\Assessment;
 
+use App\Actions\Results\CompileClassResults;
+use App\Actions\Results\RecordSheetResults;
 use App\Enums\PermissionKey;
 use App\Enums\SheetStatus;
 use App\Models\AssessmentSheet;
@@ -37,6 +39,11 @@ class UnlockSheet
             'unlocked_at' => now(),
             'unlock_reason' => $reason,
         ]);
+
+        // The results from this sheet no longer stand until it is submitted again.
+        $sheet->loadMissing(['term', 'stream.schoolClass', 'subject']);
+        RecordSheetResults::clear($sheet->term, $sheet->stream, $sheet->subject);
+        app(CompileClassResults::class)->handle($sheet->term, $sheet->stream);
 
         return $sheet;
     }

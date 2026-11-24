@@ -36,6 +36,7 @@ final class StaffNavigation
             new NavItem("Today's attendance", 'chart-bar', 'attendance.today', PermissionKey::AttendanceEditLocked, 'Attendance'),
             new NavItem('Marks', 'pencil-square', 'assessment.index', 'enter-grades', 'Assessment', ['assessment.tasks', 'assessment.marks', 'assessment.comments']),
             new NavItem('Progress', 'chart-bar-square', 'assessment.progress', PermissionKey::GradesApprove, 'Assessment'),
+            new NavItem('Results', 'trophy', 'results.index', 'enter-grades', 'Assessment'),
             new NavItem('Teaching assignments', 'clipboard-document-list', 'staff.assignments', PermissionKey::StaffManage, 'People'),
 
             // Sprint 4: fees.

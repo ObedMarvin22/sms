@@ -4,6 +4,11 @@
         <flux:text>{{ __('How each level\'s term total (out of 100) becomes a grade on the report card. Totals are rounded to a whole number first, so 79.5 counts as 80.') }}</flux:text>
     </div>
 
+    <div class="rounded-xl border border-zinc-200 px-4 py-3 sm:px-5 dark:border-zinc-700">
+        <flux:switch wire:model.live="showPositions" :label="__('Show positions (1st, 2nd, 3rd…)')"
+            :description="__('On results and report cards: each student\'s position in the class and in each subject. Off by default.')" data-test="show-positions" />
+    </div>
+
     @php($graded = collect($this->levels)->filter(fn ($l) => \App\Support\Academic\DefaultGradeScales::for($l) !== null))
     @if ($graded->contains(fn ($l) => ! $this->scales->has($l->value)))
         <div class="rounded-xl border border-dashed border-zinc-300 p-5 dark:border-zinc-600" data-test="defaults">

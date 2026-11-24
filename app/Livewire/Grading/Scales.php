@@ -4,11 +4,13 @@ namespace App\Livewire\Grading;
 
 use App\Actions\Grading\SaveGradeScale;
 use App\Actions\Grading\SetUpDefaultGradeScales;
+use App\Actions\Results\SetShowPositions;
 use App\Enums\PermissionKey;
 use App\Enums\SchoolLevel;
 use App\Models\GradeBand;
 use App\Models\GradeScale;
 use App\Support\Academic\DefaultGradeScales;
+use App\Support\Settings\SchoolSettings;
 use App\Support\Tenancy\CurrentSchool;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
@@ -36,9 +38,19 @@ class Scales extends Component
     /** @var list<array{min_score: int|string, grade: string, label: string, points: int|string|null}> */
     public array $bands = [];
 
+    public bool $showPositions = false;
+
     public function mount(): void
     {
         $this->authorize(PermissionKey::SettingsManage->value);
+        $this->showPositions = (bool) SchoolSettings::for(app(CurrentSchool::class)->require())->get('show_positions', false);
+    }
+
+    public function updatedShowPositions(SetShowPositions $set): void
+    {
+        $this->authorize(PermissionKey::SettingsManage->value);
+        $set->handle(app(CurrentSchool::class)->require(), $this->showPositions);
+        Flux::toast(variant: 'success', text: $this->showPositions ? __('Positions will show on results and report cards.') : __('Positions are hidden.'));
     }
 
     /**

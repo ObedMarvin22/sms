@@ -42,6 +42,7 @@ use App\Livewire\Fees\Structures as FeeStructures;
 use App\Livewire\Grading\Scales as GradingScales;
 use App\Livewire\Guardians\Index as GuardiansIndex;
 use App\Livewire\Invitations\AcceptInvitation;
+use App\Livewire\Results\ClassResults as ResultsClassResults;
 use App\Livewire\School\Profile as SchoolProfile;
 use App\Livewire\Setup\Wizard as SetupWizard;
 use App\Livewire\Staff\Index as StaffIndex;
@@ -155,6 +156,7 @@ Route::domain('{school}.'.config('app.base_domain'))
                 Route::livewire('assessment/{stream}/{subject}', AssessmentClassTasks::class)->name('assessment.tasks');
                 Route::livewire('assessment/{stream}/{subject}/marks', AssessmentMarkSheet::class)->name('assessment.marks');
                 Route::livewire('assessment/{stream}/{subject}/comments', AssessmentCommentSheet::class)->name('assessment.comments');
+                Route::livewire('results', ResultsClassResults::class)->name('results.index');
             });
 
             // Fees: finance.view to look; changes need fees.manage (checked in each component).
