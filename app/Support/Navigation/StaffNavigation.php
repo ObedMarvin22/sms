@@ -55,6 +55,7 @@ final class StaffNavigation
             new NavItem('Subjects', 'book-open', 'subjects.index', PermissionKey::SettingsManage, 'School setup'),
             new NavItem('Class subjects', 'table-cells', 'class-subjects.index', PermissionKey::SettingsManage, 'School setup'),
             new NavItem('Assessment', 'chart-pie', 'assessment.schemes', PermissionKey::SettingsManage, 'School setup'),
+            new NavItem('Grading', 'academic-cap', 'grading.scales', PermissionKey::SettingsManage, 'School setup'),
         ]);
     }
 

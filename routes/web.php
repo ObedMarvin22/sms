@@ -39,6 +39,7 @@ use App\Livewire\Fees\Items as FeeItems;
 use App\Livewire\Fees\Messages as FeeMessages;
 use App\Livewire\Fees\Payments as FeePayments;
 use App\Livewire\Fees\Structures as FeeStructures;
+use App\Livewire\Grading\Scales as GradingScales;
 use App\Livewire\Guardians\Index as GuardiansIndex;
 use App\Livewire\Invitations\AcceptInvitation;
 use App\Livewire\School\Profile as SchoolProfile;
@@ -194,6 +195,7 @@ Route::domain('{school}.'.config('app.base_domain'))
                 Route::livewire('settings/subjects', SubjectsIndex::class)->name('subjects.index');
                 Route::livewire('settings/programmes', SubjectsProgrammes::class)->name('programmes.index');
                 Route::livewire('settings/assessment', AssessmentSchemes::class)->name('assessment.schemes');
+                Route::livewire('settings/grading', GradingScales::class)->name('grading.scales');
             });
         });
 
