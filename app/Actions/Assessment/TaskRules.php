@@ -39,9 +39,28 @@ final class TaskRules
             return true;
         }
 
-        return $user->can(PermissionKey::GradesEnter->value) && TeachingAssignment::query()
+        if (! $user->can(PermissionKey::GradesEnter->value)) {
+            return false;
+        }
+
+        $teaches = TeachingAssignment::query()
             ->where(['academic_year_id' => $yearId, 'stream_id' => $stream->id, 'subject_id' => $subject->id])
             ->whereHas('staff', fn ($q) => $q->where('user_id', $user->id))
+            ->exists();
+
+        // Early years: the class teacher usually teaches everything, so they may write the
+        // comments for every learning area without a teaching assignment for each.
+        return $teaches || (self::isCommentsOnly($stream, $yearId) && in_array($stream->id, self::classTeacherStreamIds($user, $yearId), true));
+    }
+
+    /**
+     * The stream's level is assessed with comments (Creche, Nursery, KG by default) this year.
+     */
+    public static function isCommentsOnly(Stream $stream, int $yearId): bool
+    {
+        return AssessmentScheme::where('academic_year_id', $yearId)
+            ->where('level', $stream->schoolClass->level)
+            ->where('mode', AssessmentMode::Descriptive)
             ->exists();
     }
 
@@ -81,7 +100,7 @@ final class TaskRules
      * The class and subject pairs this user may open in a year, in class order. `manage` is
      * false for a class teacher looking at another teacher's subject.
      *
-     * @return Collection<int, array{stream: Stream, subject: Subject, teacher: string|null, manage: bool}>
+     * @return Collection<int, array{stream: Stream, subject: Subject, teacher: string|null, manage: bool, comments: bool}>
      */
     public static function sheetsFor(User $user, int $yearId): Collection
     {
@@ -96,6 +115,8 @@ final class TaskRules
         $subjectIdsByClass = ClassSubject::all()->groupBy('school_class_id')
             ->map(fn ($links) => $links->pluck('subject_id')->all());
         $myStreams = $approver ? [] : self::classTeacherStreamIds($user, $yearId);
+        $commentLevels = AssessmentScheme::where('academic_year_id', $yearId)->where('mode', AssessmentMode::Descriptive)
+            ->pluck('level')->all();
 
         // Streams in class order, then subjects by name: the order of the list on screen.
         $sheets = [];
@@ -109,7 +130,7 @@ final class TaskRules
                 $classTeacher = in_array($stream->id, $myStreams, true);
 
                 if (in_array($subject->id, $taken, true) && ($approver || $mine || $classTeacher)) {
-                    $sheets[] = ['stream' => $stream, 'subject' => $subject, 'teacher' => $assignment?->staff->full_name, 'manage' => $approver || $mine];
+                    $sheets[] = ['stream' => $stream, 'subject' => $subject, 'teacher' => $assignment?->staff->full_name, 'manage' => $approver || $mine || ($classTeacher && in_array($stream->schoolClass->level, $commentLevels, true)), 'comments' => in_array($stream->schoolClass->level, $commentLevels, true)];
                 }
             }
         }
