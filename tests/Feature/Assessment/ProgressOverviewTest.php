@@ -159,13 +159,13 @@ describe('the states', function () {
         expect(progState($shs, $physics))->toBe(SheetProgress::Ready);
     });
 
-    it('notes comment-only levels and levels without assessment instead of listing sheets', function () {
+    it('lists comment sheets for early years, and notes levels without assessment', function () {
         $overview = app(BuildProgressOverview::class)->handle(Term::current()->sole());
-        $notes = collect($overview->levels)->mapWithKeys(fn ($l) => [$l['level']->value => $l['note']])->all();
+        $kg = collect($overview->levels)->firstWhere(fn ($l) => $l['level'] === SchoolLevel::Kg);
 
-        expect($notes['kg'])->toBe('Assessed with comments only.')
-            ->and($notes['primary'])->toBeNull()
-            ->and($overview->cell(progStream('KG 1')->id, Subject::where('name', 'Numeracy')->sole()->id))->toBeNull();
+        expect($kg['note'])->toBeNull()
+            ->and($kg['commentsOnly'])->toBeTrue()
+            ->and($overview->cell(progStream('KG 1')->id, Subject::where('name', 'Numeracy')->sole()->id)?->progress)->toBe(SheetProgress::NotStarted);
 
         AssessmentScheme::with('components')->where('level', SchoolLevel::Shs)->get()->each(function ($s) {
             $s->components->each->delete();
@@ -195,7 +195,7 @@ describe('the states', function () {
         $tasks = progTasks($this->head, progStream('Primary 5'), Subject::where('name', 'Science')->sole());
         progFill($this->head, $tasks, $pupil);
 
-        expect($count())->toBe($small)->and($small)->toBeLessThanOrEqual(15);
+        expect($count())->toBe($small)->and($small)->toBeLessThanOrEqual(18);
     });
 });
 
@@ -216,7 +216,7 @@ describe('the page', function () {
 
         $page = Livewire::actingAs($this->head)->test(Progress::class)
             ->assertSeeHtml('data-test="submitted-count">1<')
-            ->assertSee('Primary')->assertSee('Assessed with comments only.');
+            ->assertSee('Primary')->assertSeeHtml('data-test="level-kg"');
 
         $page->set('teacher', $teacherStaffId)
             ->assertSee('Primary 4A')

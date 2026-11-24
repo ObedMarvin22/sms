@@ -13,7 +13,8 @@ use Illuminate\Validation\ValidationException;
 
 /**
  * Submits a complete mark sheet, which locks it. Complete means every part of the scheme has a
- * task and every student still in the class has a mark, A or X in every box. The subject's
+ * task and every student still in the class has a mark, A or X in every box. On a comments-only
+ * (early-years) sheet, every child still in the class has a comment. The subject's
  * teacher or a head may submit; submitting again after an unlock locks it again.
  */
 class SubmitSheet
@@ -32,7 +33,9 @@ class SubmitSheet
                 throw ValidationException::withMessages(['sheet' => 'These marks are already submitted.']);
             }
 
-            $problems = SheetLock::problems($this->build->handle($term, $stream, $subject));
+            $problems = TaskRules::isCommentsOnly($stream, $term->academic_year_id)
+                ? CommentRules::problems($term, $stream, $subject)
+                : SheetLock::problems($this->build->handle($term, $stream, $subject));
             if ($problems !== []) {
                 throw ValidationException::withMessages(['sheet' => $problems]);
             }

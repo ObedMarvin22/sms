@@ -20,7 +20,7 @@
         SheetProgress::Reopened => __('Open'),
     };
     $describe = fn ($cell) => $cell->subject->name.', '.$cell->stream->full_name.': '.$cell->progress->label()
-        .($cell->progress === SheetProgress::InProgress ? ' ('.$cell->filled.' of '.$cell->expected.' boxes)' : '')
+        .($cell->progress === SheetProgress::InProgress ? ' ('.$cell->filled.' of '.$cell->expected.' done)' : '')
         .'. '.($cell->teacher ? __('Teacher: :name', ['name' => $cell->teacher]) : __('No teacher assigned'));
 @endphp
 
@@ -111,7 +111,12 @@
             @php($shown++)
 
             <section class="flex flex-col gap-3" wire:key="level-{{ $l['level']->value }}" data-test="level-{{ $l['level']->value }}">
-                <flux:heading size="lg">{{ $l['level']->label() }}</flux:heading>
+                <div class="flex items-baseline gap-2">
+                    <flux:heading size="lg">{{ $l['level']->label() }}</flux:heading>
+                    @if ($l['commentsOnly'])
+                        <flux:text size="sm">{{ __('comments') }}</flux:text>
+                    @endif
+                </div>
 
                 @if ($l['note'])
                     <flux:text>{{ __($l['note']) }}</flux:text>
@@ -137,7 +142,7 @@
                                             @php($cell = $overview->cell($stream->id, $subject->id))
                                             <td class="border-b border-zinc-100 px-1 py-1 text-center dark:border-zinc-800">
                                                 @if ($cell)
-                                                    <a href="{{ route('assessment.marks', [$stream, $subject]) }}" wire:navigate
+                                                    <a href="{{ route($l['commentsOnly'] ? 'assessment.comments' : 'assessment.marks', [$stream, $subject]) }}" wire:navigate
                                                         title="{{ $describe($cell) }}" aria-label="{{ $describe($cell) }}"
                                                         @class([
                                                             $look[$cell->progress->value],
@@ -169,7 +174,7 @@
                                 <ul class="divide-y divide-zinc-100 dark:divide-zinc-800">
                                     @foreach ($cells as $cell)
                                         <li>
-                                            <a href="{{ route('assessment.marks', [$cell->stream, $cell->subject]) }}" wire:navigate class="flex items-center gap-3 px-4 py-2.5">
+                                            <a href="{{ route($l['commentsOnly'] ? 'assessment.comments' : 'assessment.marks', [$cell->stream, $cell->subject]) }}" wire:navigate class="flex items-center gap-3 px-4 py-2.5">
                                                 <div class="min-w-0 flex-1">
                                                     <div class="truncate text-sm font-medium text-zinc-900 dark:text-white">{{ $cell->subject->name }}</div>
                                                     <div @class(['truncate text-xs', 'text-zinc-500 dark:text-zinc-400' => $cell->teacher, 'text-red-600 dark:text-red-400' => ! $cell->teacher])>{{ $cell->teacher ?? __('No teacher assigned') }}</div>
@@ -194,7 +199,7 @@
         @endif
 
         <flux:text size="sm" class="max-w-5xl">
-            {{ __('– not started (no tasks yet), a percentage in progress, Ready when every box is filled, ✓ submitted, Open when the head has unlocked it. A red dot means no teacher is assigned. Click a box to open the sheet.') }}
+            {{ __('– not started (no tasks or comments yet), a percentage in progress, Ready when every box is filled, ✓ submitted, Open when the head has unlocked it. A red dot means no teacher is assigned. Click a box to open the sheet.') }}
         </flux:text>
     @endif
 </div>

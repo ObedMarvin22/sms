@@ -300,8 +300,9 @@ describe('the screens', function () {
         $kg = taskStream('KG 1');
         $numeracy = taskSubject('Numeracy');
 
+        // Comments-only levels have no tasks: the page sends you to the comments instead.
         Livewire::actingAs($this->head)->test(ClassTasks::class, ['stream' => $kg, 'subject' => $numeracy])
-            ->assertSee('KG is assessed with comments only');
+            ->assertRedirect(route('assessment.comments', [$kg, $numeracy]));
 
         $jhs = AssessmentScheme::with('components')->where('level', SchoolLevel::Jhs)->sole();
         $jhs->components->each->delete();

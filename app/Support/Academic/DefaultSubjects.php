@@ -21,6 +21,8 @@ final class DefaultSubjects
         'Creative Arts and Design' => 'CAD', 'Religious and Moral Education' => 'RME',
         'Physical Education' => 'PE', 'Physical and Health Education' => 'PHE', 'Computing' => 'COMP',
         'Career Technology' => 'CT', 'French' => 'FRE', 'Language and Literacy' => 'LIT', 'Numeracy' => 'NUM',
+        'Personal, Social and Emotional Development' => 'PSED', 'Communication and Language' => 'CL',
+        'Early Numeracy' => 'ENUM', 'Physical Development' => 'PD', 'Creative Play' => 'CP',
         'Biology' => 'BIO', 'Chemistry' => 'CHEM', 'Physics' => 'PHY', 'Elective Mathematics' => 'EMATH',
         'Business Management' => 'BM', 'Financial Accounting' => 'FA', 'Cost Accounting' => 'COST',
         'Economics' => 'ECON', 'Geography' => 'GEOG', 'Government' => 'GOVT', 'History' => 'HIST',
@@ -46,7 +48,11 @@ final class DefaultSubjects
     public static function for(SchoolLevel $level): array
     {
         return match ($level) {
-            SchoolLevel::Creche, SchoolLevel::Nursery => [],
+            // Early-years learning areas (Obed, 2026-11-24): assessed with comments, not marks.
+            SchoolLevel::Creche, SchoolLevel::Nursery => [
+                'Personal, Social and Emotional Development', 'Communication and Language', 'Early Numeracy',
+                'Physical Development', 'Creative Play',
+            ],
             SchoolLevel::Kg => ['Language and Literacy', 'Numeracy', 'Creative Arts', 'Our World Our People', 'Physical Education'],
             SchoolLevel::Primary => [
                 'English Language', 'Mathematics', 'Science', 'Our World Our People', 'Ghanaian Language',

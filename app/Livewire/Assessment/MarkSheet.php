@@ -51,6 +51,12 @@ class MarkSheet extends Component
         $this->streamId = $stream->id;
         $this->subjectId = $subject->id;
 
+        if (TaskRules::isCommentsOnly($stream, $term->academic_year_id)) {
+            $this->redirectRoute('assessment.comments', [$stream, $subject], navigate: true);
+
+            return;
+        }
+
         // Every cell gets a key, even when empty: an empty PHP array reaches the browser as a JSON
         // list ([]), on which "cells.t5-s10" cannot be set, so nothing would sync.
         foreach ($this->sheet->rows as $row) {

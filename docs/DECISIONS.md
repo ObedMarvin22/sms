@@ -1307,3 +1307,20 @@ alternatives considered. The "Fixed decisions" in `CLAUDE.md` are not repeated h
   state chips in the summary filter too. Past terms can be picked.
 - Levels with comments only, or with no assessment set up, show a short note instead of a grid.
 - No reminders yet (no staff notifications); the head follows up in person.
+
+## 2026-11-24 — Early-years comments (Sprint 5 step 6)
+
+- **Comments only (Obed).** A written comment per child, learning area and term, up to 300
+  characters; no rating scale. Considered and declined for now: NaCCA's five proficiency words
+  (Highly proficient … Emerging) with an optional comment.
+- **Learning areas are the class's subjects**, so class subjects, teaching assignments, sheets,
+  submit and lock are all reused. Creche and Nursery get default areas (Personal, Social and
+  Emotional Development; Communication and Language; Early Numeracy; Physical Development;
+  Creative Play); KG keeps its five. All editable like any subject.
+- **The class teacher writes every area** of a comments-only class without a teaching assignment
+  for each (`TaskRules::canManage`), as well as any teacher assigned the area and heads.
+- **Complete** means every child still in the class has a comment; the same submit, lock and
+  unlock as mark sheets, and the same logging rules.
+- The Tasks and Marks pages send comments-only classes to the Comments page; Marks and Progress
+  list early-years sheets too, with the class teacher shown as the teacher.
+- Comment bank (ready-made phrases): later.

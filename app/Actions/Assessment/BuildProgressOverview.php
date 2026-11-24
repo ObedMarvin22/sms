@@ -7,11 +7,13 @@ use App\Enums\SchoolLevel;
 use App\Enums\SheetProgress;
 use App\Enums\SheetStatus;
 use App\Enums\SubjectType;
+use App\Models\AssessmentComment;
 use App\Models\AssessmentScheme;
 use App\Models\AssessmentScore;
 use App\Models\AssessmentSheet;
 use App\Models\AssessmentTask;
 use App\Models\ClassSubject;
+use App\Models\ClassTeacherAssignment;
 use App\Models\Enrolment;
 use App\Models\ProgrammeSubject;
 use App\Models\Stream;
@@ -26,8 +28,9 @@ use App\Support\Assessment\ProgressOverview;
  *
  * A fixed number of queries whatever the school's size: boxes filled are counted per class,
  * subject and student in one grouped query, instead of building each sheet. "Ready" uses the
- * same rules as SheetLock::problems(): a task in every part and a mark, A or X for every student
- * still in the class (an SHS elective: students whose programme takes it).
+ * same rules as submitting: a task in every part and a mark, A or X for every student still in
+ * the class (an SHS elective: students whose programme takes it); on an early-years sheet, a
+ * comment for every child still in the class.
  */
 class BuildProgressOverview
 {
@@ -86,18 +89,26 @@ class BuildProgressOverview
             $filled["{$row->stream_id}-{$row->subject_id}"][(int) $row->student_id] = (int) $row->n;
         }
 
+        // Early years: comments written, per class, subject and child; and each class teacher,
+        // who writes them when nobody is assigned the area.
+        $commented = [];
+        foreach (AssessmentComment::where('term_id', $term->id)->toBase()->get(['stream_id', 'subject_id', 'student_id']) as $row) {
+            $commented["{$row->stream_id}-{$row->subject_id}"][(int) $row->student_id] = true;
+        }
+        $classTeachers = ClassTeacherAssignment::with('staff')->where('academic_year_id', $term->academic_year_id)->get()->keyBy('stream_id');
+
         $levels = [];
         $cellsByStream = [];
         foreach ($streams->groupBy(fn (Stream $s) => $s->schoolClass->level->value) as $levelValue => $levelStreams) {
             $level = SchoolLevel::from((string) $levelValue);
             $scheme = $schemes->get($level->value);
-            $commentsOnly = $scheme === null || $scheme->mode === AssessmentMode::Descriptive;
+            $commentsOnly = $scheme?->mode === AssessmentMode::Descriptive;
             $levelSubjectIds = [];
 
             foreach ($levelStreams as $stream) {
                 $taken = $subjectIdsByClass->get($stream->school_class_id, []);
                 $levelSubjectIds = [...$levelSubjectIds, ...$taken];
-                if ($commentsOnly) {
+                if ($scheme === null) {
                     continue;
                 }
 
@@ -113,24 +124,35 @@ class BuildProgressOverview
                         $students = array_filter($students, fn (?int $programme) => in_array($programme, $electiveProgrammes[$subject->id], true));
                     }
 
-                    $tasks = $taskCounts[$key] ?? 0;
-                    $expected = $tasks * count($students);
-                    $done = 0;
-                    foreach (array_keys($students) as $studentId) {
-                        $done += min($tasks, $filled[$key][$studentId] ?? 0);
+                    if ($commentsOnly) {
+                        // One comment per child still in the class.
+                        $expected = count($students);
+                        $done = count(array_intersect_key($students, $commented[$key] ?? []));
+                        $started = $done > 0;
+                        $complete = $students !== [] && $done === $expected;
+                    } else {
+                        // One box per task per student, and a task in every part.
+                        $tasks = $taskCounts[$key] ?? 0;
+                        $expected = $tasks * count($students);
+                        $done = 0;
+                        foreach (array_keys($students) as $studentId) {
+                            $done += min($tasks, $filled[$key][$studentId] ?? 0);
+                        }
+                        $started = $tasks > 0;
+                        $complete = $scheme->components->every(fn ($part) => isset($partsCovered[$key][$part->id]))
+                            && $students !== [] && $done === $expected;
                     }
-                    $allParts = $scheme->components->every(fn ($part) => isset($partsCovered[$key][$part->id]));
 
                     $progress = match (true) {
                         $records->get($key)?->status === SheetStatus::Submitted => SheetProgress::Submitted,
                         $records->get($key)?->status === SheetStatus::Reopened => SheetProgress::Reopened,
-                        $tasks === 0 => SheetProgress::NotStarted,
-                        $allParts && $students !== [] && $done === $expected => SheetProgress::Ready,
+                        ! $started => SheetProgress::NotStarted,
+                        $complete => SheetProgress::Ready,
                         default => SheetProgress::InProgress,
                     };
 
-                    $assignment = $teachers->get($key);
-                    $cellsByStream[$stream->id][] = new ProgressCell($stream, $subject, $progress, $assignment?->staff->full_name, $assignment?->staff_id, $done, $expected);
+                    $teacher = $teachers->get($key)->staff ?? ($commentsOnly ? $classTeachers->get($stream->id)?->staff : null);
+                    $cellsByStream[$stream->id][] = new ProgressCell($stream, $subject, $progress, $teacher?->full_name, $teacher?->id, $done, $expected);
                 }
             }
 
@@ -138,12 +160,9 @@ class BuildProgressOverview
                 'level' => $level,
                 'streams' => array_values($levelStreams->all()),
                 'subjects' => array_values($subjects->only(array_unique($levelSubjectIds))->sortBy('name')->all()),
-                // Why a level has no sheets: comments only, or no assessment set up for the year.
-                'note' => match (true) {
-                    $scheme === null => 'Assessment is not set up for this level yet.',
-                    $commentsOnly => 'Assessed with comments only.',
-                    default => null,
-                },
+                // Why a level has no sheets: no assessment set up for the year.
+                'note' => $scheme === null ? 'Assessment is not set up for this level yet.' : null,
+                'commentsOnly' => $commentsOnly,
             ];
         }
 

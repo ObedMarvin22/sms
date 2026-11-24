@@ -4,6 +4,7 @@ use App\Models\AcademicYear;
 use App\Models\AdmissionSequence;
 use App\Models\Announcement;
 use App\Models\AnnouncementStream;
+use App\Models\AssessmentComment;
 use App\Models\AssessmentComponent;
 use App\Models\AssessmentScheme;
 use App\Models\AssessmentScore;
@@ -114,6 +115,7 @@ dataset('school-owned models', [
     'AssessmentTask' => [fn (School $school): Model => AssessmentTask::factory()->create(['school_id' => $school->id])],
     'AssessmentScore' => [fn (School $school): Model => AssessmentScore::factory()->create(['school_id' => $school->id])],
     'AssessmentSheet' => [fn (School $school): Model => AssessmentSheet::factory()->create(['school_id' => $school->id])],
+    'AssessmentComment' => [fn (School $school): Model => AssessmentComment::factory()->create(['school_id' => $school->id])],
 ]);
 
 beforeEach(function () {

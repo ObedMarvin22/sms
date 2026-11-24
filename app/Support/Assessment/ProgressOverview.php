@@ -14,7 +14,7 @@ final readonly class ProgressOverview
 {
     /**
      * @param  array<int, list<ProgressCell>>  $cellsByStream  keyed by stream id
-     * @param  list<array{level: SchoolLevel, streams: list<Stream>, subjects: list<Subject>, note: string|null}>  $levels
+     * @param  list<array{level: SchoolLevel, streams: list<Stream>, subjects: list<Subject>, note: string|null, commentsOnly: bool}>  $levels
      */
     public function __construct(
         public array $levels,

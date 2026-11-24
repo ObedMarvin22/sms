@@ -3,7 +3,7 @@
      host Livewire component, so wire: calls go to it (ManagesSheetLock). --}}
 @props([
     'stream', 'subject', 'term', 'canManage', 'active',
-    'record' => null, 'canUnlock' => false, 'problems' => [],
+    'record' => null, 'canUnlock' => false, 'problems' => [], 'commentsOnly' => false,
 ])
 
 @php($locked = $record?->isLocked() ?? false)
@@ -17,7 +17,7 @@
                 <flux:text>{{ $term->name }}, {{ $term->starts_on->format('j M') }} to {{ $term->ends_on->format('j M Y') }}</flux:text>
             </div>
             <nav class="flex rounded-lg bg-zinc-100 p-0.5 text-sm dark:bg-zinc-800" aria-label="{{ __('Sheet') }}">
-                @foreach (['assessment.tasks' => __('Tasks'), 'assessment.marks' => __('Marks')] as $route => $label)
+                @foreach ($commentsOnly ? ['assessment.comments' => __('Comments')] : ['assessment.tasks' => __('Tasks'), 'assessment.marks' => __('Marks')] as $route => $label)
                     <a href="{{ route($route, [$stream, $subject]) }}" wire:navigate
                         @if ($active === $route) aria-current="page" @endif
                         @class([
@@ -45,7 +45,7 @@
                     @if ($locked)
                         <div class="font-medium text-zinc-900 dark:text-white">{{ __('Submitted and locked') }}</div>
                         <div class="text-zinc-600 dark:text-zinc-300">
-                            {{ __('By :name on :when. Marks and tasks cannot change unless the head unlocks them.', ['name' => $record->submitter->name ?? __('a former user'), 'when' => $record->submitted_at?->format('j M, H:i')]) }}
+                            {{ __($commentsOnly ? 'By :name on :when. Comments cannot change unless the head unlocks them.' : 'By :name on :when. Marks and tasks cannot change unless the head unlocks them.', ['name' => $record->submitter->name ?? __('a former user'), 'when' => $record->submitted_at?->format('j M, H:i')]) }}
                         </div>
                     @elseif ($record)
                         <div class="font-medium text-zinc-900 dark:text-white">{{ __('Unlocked for corrections') }}</div>
@@ -55,7 +55,11 @@
                     @else
                         <div class="font-medium text-zinc-900 dark:text-white">{{ __('Not submitted yet') }}</div>
                         <div class="text-zinc-600 dark:text-zinc-300">
-                            {{ $problems === [] ? __('Every box is filled. Submit to lock the marks for the report card.') : __('Submit when every student has a mark, A or X in every box.') }}
+                            @if ($commentsOnly)
+                                {{ $problems === [] ? __('Every child has a comment. Submit to lock them for the report card.') : __('Submit when every child has a comment.') }}
+                            @else
+                                {{ $problems === [] ? __('Every box is filled. Submit to lock the marks for the report card.') : __('Submit when every student has a mark, A or X in every box.') }}
+                            @endif
                         </div>
                     @endif
                 </div>
