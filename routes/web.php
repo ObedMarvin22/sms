@@ -17,6 +17,7 @@ use App\Livewire\Announcements\Index as AnnouncementsIndex;
 use App\Livewire\Assessment\ClassTasks as AssessmentClassTasks;
 use App\Livewire\Assessment\MarkSheet as AssessmentMarkSheet;
 use App\Livewire\Assessment\MyClasses as AssessmentMyClasses;
+use App\Livewire\Assessment\Progress as AssessmentProgress;
 use App\Livewire\Assessment\Schemes as AssessmentSchemes;
 use App\Livewire\Attendance\Register as AttendanceRegister;
 use App\Livewire\Attendance\Today as AttendanceToday;
@@ -147,6 +148,8 @@ Route::domain('{school}.'.config('app.base_domain'))
             // may open is decided by TaskRules.
             Route::middleware(['can:enter-grades', 'school.ready'])->group(function () {
                 Route::livewire('assessment', AssessmentMyClasses::class)->name('assessment.index');
+                Route::livewire('assessment/progress', AssessmentProgress::class)
+                    ->middleware('can:'.PermissionKey::GradesApprove->value)->name('assessment.progress');
                 Route::livewire('assessment/{stream}/{subject}', AssessmentClassTasks::class)->name('assessment.tasks');
                 Route::livewire('assessment/{stream}/{subject}/marks', AssessmentMarkSheet::class)->name('assessment.marks');
             });
